@@ -1,7 +1,11 @@
+<script setup>
+import SmartBinForm from '@/components/SmartBinForm.vue';
+</script>
+
 <template>
   <div>
-    <h1 class="text-4xl text-center mt-10 font-bold underline text-green-300 nunito-sans">
-      Super Admin Add Bin
-    </h1>
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Adding SmartBin</h2>
+
+    <SmartBinForm />
   </div>
 </template>
