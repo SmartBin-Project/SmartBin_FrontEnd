@@ -1,48 +1,80 @@
-<script setup lang="ts">
-import { RouterView, useRouter } from 'vue-router'
-import LoadingComponent from './components/layout/LoadingComponent.vue'
-import Navigation from './components/layout/Navigation.vue'
-import Footer from './components/layout/Footer.vue'
-import { ref } from 'vue'
-import LoadingComponent from './components/layout/LoadingComponent.vue'
-
-const isLoading = ref(true)
-const searchQuery = ref('') // 1. Added the bridge variable
-const router = useRouter()
-
-// Handle the search event from Navigation.vue
-const handleSearch = (query: string) => {
-  searchQuery.value = query
-}
-
-router.beforeEach((to, from, next) => {
-  isLoading.value = true
-  next()
-})
-
-router.afterEach(() => {
-  // Artificial delay if you want the loader to feel smoother
-  setTimeout(() => {
-    isLoading.value = false
-  }, 300)
-})
-</script>
-
 <template>
-  <LoadingComponent v-if="isLoading" />
+  <div id="app-container" class="flex h-screen bg-gray-100 font-sans">
+    <LoadingComponent v-if="isLoading" />
 
-  <RouterView v-slot="{ Component }">
-    <Transition name="fade" mode="out-in">
-      <component :is="Component" />
-    </Transition>
-  </RouterView>
+    <!-- Admin Layout -->
+    <template v-if="authStore.getUser?.role === 'ADMIN' || authStore.getUser?.role === 'SUPERADMIN'">
+      <Sidebar />
+      <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <div class="flex-1">
+          <RouterView v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" :key="route.path" />
+            </transition>
+          </RouterView>
+        </div>
+      </main>
+    </template>
+
+    <!-- Public Layout -->
+    <template v-else>
+      <div class="flex-1 flex flex-col h-screen">
+        <Navigation v-if="!$route.meta.hideNav" @search="handleSearch" />
+        <main class="flex-1">
+          <RouterView v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" :key="route.path" :search-text="searchQuery" />
+            </transition>
+          </RouterView>
+        </main>
+        <Footer v-if="!$route.meta.hideFooter" />
+      </div>
+    </template>
+  </div>
 </template>
 
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { RouterView, useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+
+import Footer from '@/components/layout/Footer.vue';
+
+import LoadingComponent from '@/components/layout/LoadingComponent.vue';
+import Navigation from '@/components/layout/Navigation.vue';
+import Sidebar from '@/components/Sidebar.vue';
+
+const authStore = useAuthStore();
+const router = useRouter();
+const route = useRoute();
+
+const searchQuery = ref('');
+const isLoading = ref(false);
+
+const isMapPage = computed(() => route.path === '/');
+const isAuthPage = computed(() => {
+  return route.path.startsWith('/auth');
+});
+
+const handleSearch = (query: string) => {
+  searchQuery.value = query;
+};
+
+router.beforeEach(() => {
+  isLoading.value = true;
+});
+
+router.afterEach(() => {
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 300);
+});
+</script>
+
 <style>
-/* Simple Fade Transition */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 }
 
 .fade-enter-from,

@@ -21,7 +21,8 @@ const router = createRouter({
       name: 'home',
       component: () => import('../views/User/HomePage.vue'),
       // --- ADD THIS LINE ---
-      props: true 
+      props: true ,
+      meta: { hideFooter: true}
     },
     {
       path: '/aboutus',
@@ -88,22 +89,22 @@ const router = createRouter({
 
     // auth routes
     {
-      path: '/signup',
-      name: 'signup',
-      component: () => import('../views/Auth/SignupPage.vue'),
-      meta: { requiresAuth: false },
+      path: '/signin',
+      name: 'Signin',
+      component: () => import('../views/Auth/SigninPage.vue'),
+      meta: { hideNav: true, hideFooter: true, requiresAuth: false }
     },
     {
-      path: '/signin',
-      name: 'signin',
-      component: () => import('../views/Auth/SigninPage.vue'),
-      meta: { requiresAuth: false },
+      path: '/signup',
+      name: 'Signup',
+      component: () => import('../views/Auth/SignupPage.vue'),
+      meta: { hideNav: true, hideFooter: true, requiresAuth: false }
     },
     {
       path: '/forgot',
-      name: 'forgot',
+      name: 'Forgot',
       component: () => import('../views/Auth/ForgotPage.vue'),
-      meta: { requiresAuth: false },
+      meta: { hideNav: true, hideFooter: true, requiresAuth: false }
     },
     // admin views
   ],
@@ -112,6 +113,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   const requiresAuth = to.meta.requiresAuth
+
   const requiredRoles = to.meta.roles as string[] | undefined
 
   authStore.loadUserFromStorage()

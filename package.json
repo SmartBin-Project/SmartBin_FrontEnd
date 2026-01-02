@@ -24,7 +24,6 @@
     "leaflet-routing-machine": "^3.2.12",
     "mapbox-gl": "^3.17.0",
     "apexcharts": "^5.3.6",
-    "axios": "^1.13.2",
     "chart.js": "^4.5.1",
     "lucide-vue-next": "^0.562.0",
     "pinia": "^3.0.4",
