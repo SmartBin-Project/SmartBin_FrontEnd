@@ -18,6 +18,8 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: () => import('../views/User/HomePage.vue'),
+      // --- ADD THIS LINE ---
+      props: true 
     },
     {
       path: '/aboutus',
