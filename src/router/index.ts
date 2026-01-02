@@ -81,6 +81,8 @@ const router = createRouter({
       name: 'forgot',
       component: () => import('../views/Auth/ForgotPage.vue'),
     },
+    // admin views
+
   ],
 })
 
