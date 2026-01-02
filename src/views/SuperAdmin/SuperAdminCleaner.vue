@@ -1,10 +1,9 @@
 <script setup>
 import SuperAdminLayout from '@/components/layout/SuperAdminLayout.vue'
-import SmartBinForm from '@/components/SmartBinForm.vue'
 </script>
 
 <template>
-  <SuperAdminLayout title="Add SmartBin">
-    <SmartBinForm />
+  <SuperAdminLayout title="Cleaner">
+    <div>Cleaner CRUD Component</div>
   </SuperAdminLayout>
 </template>

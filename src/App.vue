@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import { RouterView, useRouter } from 'vue-router'
 import { ref } from 'vue'
-
-// Import your existing components
 import LoadingComponent from './components/layout/LoadingComponent.vue'
-
-// Import the SmartBin Layout components
-import Sidebar from './components/Sidebar.vue'
-import Header from './components/Header.vue'
 
 const isLoading = ref(true)
 const router = useRouter()
@@ -23,24 +17,13 @@ router.afterEach(() => {
 </script>
 
 <template>
-  <div class="flex bg-[#F3F4F6] min-h-screen font-sans">
-    
-    <Sidebar />
+  <LoadingComponent v-if="isLoading" />
 
-    <main class="flex-1 ml-64 p-8 relative">
-      
-      <Header />
-
-      <LoadingComponent v-if="isLoading" />
-
-      <RouterView v-slot="{ Component }">
-        <Transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </Transition>
-      </RouterView>
-      
-    </main>
-  </div>
+  <RouterView v-slot="{ Component }">
+    <Transition name="fade" mode="out-in">
+      <component :is="Component" />
+    </Transition>
+  </RouterView>
 </template>
 
 <style>
