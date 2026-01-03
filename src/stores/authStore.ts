@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import * as authService from '@/services/authService'
 import type { Admin } from '@/types/admin'
 
-
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: JSON.parse(localStorage.getItem('user') || 'null') as Admin | null,
@@ -20,7 +19,7 @@ export const useAuthStore = defineStore('auth', {
     },
     getUser(): Admin | null {
       return this.user
-    }
+    },
   },
 
   actions: {

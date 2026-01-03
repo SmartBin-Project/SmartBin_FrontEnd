@@ -61,7 +61,7 @@ const getInitials = (username: string | undefined) => {
         </div>
         <div
           v-else
-          class="w-7 md:w-9 h-7 md:h-9 rounded-full border-2 border-white shadow-sm shrink-0 bg-blue-500 flex items-center justify-center text-white font-bold text-xs md:text-sm"
+          class="w-7 md:w-9 h-7 md:h-9 rounded-full border-2 border-white shadow-sm shrink-0 bg-green-500 flex items-center justify-center text-white font-bold text-xs md:text-sm"
         >
           {{ getInitials(authStore.user?.username) }}
         </div>

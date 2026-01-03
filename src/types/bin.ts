@@ -6,5 +6,5 @@ export interface Bin {
     lng: number
   }
   fillLevel: number
-  status: 'empty' | 'half-full' | 'full'
+  status: 'EMPTY' | 'HALF' | 'FULL'
 }
