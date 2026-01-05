@@ -1,4 +1,5 @@
 export interface Bin {
+  _id: string
   binCode: string
   area: string
   location: {

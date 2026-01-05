@@ -1,3 +1,210 @@
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import { getAllBins } from '@/services/binService'
+import type { Bin } from '@/types/bin'
+
+// Receive Search Text from Parent
+const props = defineProps<{
+  searchText: string
+}>()
+
+// ==========================================
+// 🛠️ BACKEND & DATA
+// ==========================================
+const bins = ref<Bin[]>([])
+const isLoading = ref(true)
+
+// FILTER ENGINE: Connects Search Bar to the UI
+const filteredBins = computed(() => {
+  const query = props.searchText.toLowerCase().trim()
+  if (!query) return bins.value
+  return bins.value.filter(
+    (bin) => bin.binCode.toLowerCase().includes(query),
+    // bin.address.toLowerCase().includes(query)
+  )
+})
+
+// AUTO-ZOOM: Glide map to first result when typing
+watch(
+  () => props.searchText,
+  (newVal) => {
+    if (newVal && filteredBins.value.length > 0) {
+      const firstMatch = filteredBins.value[0]
+      leafletMap.value?.leafletObject.flyTo(
+        [firstMatch?.location.lat, firstMatch?.location.lng],
+        17,
+      )
+    }
+  },
+)
+
+const fetchBins = async () => {
+  isLoading.value = true
+  bins.value = await getAllBins()
+  isLoading.value = false
+}
+
+// ==========================================
+// 📍 MAP & NAVIGATION LOGIC
+// ==========================================
+const zoom = ref(15)
+const mapCenter = ref<[number, number]>([11.5564, 104.9282])
+const leafletMap = ref<any>(null)
+const activeBinId = ref<number | null>(null)
+const selectedBin = ref<Bin | null>(null)
+const userLocation = ref<[number, number] | null>(null)
+const distanceRemaining = ref('0 m')
+const isFollowingUser = ref(true)
+const showArrival = ref(false)
+const navigationColor = ref('#10b981')
+let routingControl: any = null
+let watchId: number | null = null
+let backendInterval: any = null
+
+const trackUserLocation = () => {
+  if (!navigator.geolocation) {
+    console.error('Geolocation is not supported by your browser.')
+    return
+  }
+
+  const handleLocationError = (error: GeolocationPositionError) => {
+    let message = 'Error getting your location: '
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        message += 'You denied the request for Geolocation.'
+        break
+      case error.POSITION_UNAVAILABLE:
+        message += 'Location information is unavailable.'
+        break
+      case error.TIMEOUT:
+        message += 'The request to get user location timed out.'
+        break
+      default:
+        message += 'An unknown error occurred.'
+        break
+    }
+    console.error(message, error)
+  }
+
+  if (watchId) navigator.geolocation.clearWatch(watchId)
+
+  watchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords
+      const newLocation: [number, number] = [latitude, longitude]
+      const isFirstUpdate = userLocation.value === null
+      userLocation.value = newLocation
+
+      if (isFollowingUser.value && !activeBinId.value) {
+        if (isFirstUpdate) {
+          leafletMap.value?.leafletObject.flyTo([latitude, longitude], zoom.value)
+        } else {
+          mapCenter.value = [latitude, longitude]
+        }
+      }
+
+      if (activeBinId.value) {
+        const bin = bins.value.find((b) => b._id === activeBinId.value)
+        if (bin) {
+          const dist = L.latLng(latitude, longitude).distanceTo(
+            L.latLng(bin.location.lat, bin.location.lng),
+          )
+          distanceRemaining.value = Math.round(dist) + ' m'
+          if (dist < 15) handleArrival()
+        }
+      }
+    },
+    handleLocationError,
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+  )
+}
+
+// const startNavigationToBin = (bin: Bin) => {
+//   if (!userLocation.value) {
+//     alert(
+//       'Could not get your current location. Please ensure you have enabled location services for this site in your browser settings and try again.',
+//     )
+//     console.warn('Still trying to find your location. Please wait a moment and try again.')
+//     trackUserLocation() // Re-trigger location tracking
+//     return
+//   }
+
+//   activeBinId.value = bin._id
+//   isFollowingUser.value = true
+//   navigationColor.value = bin.fillLevel > 80 ? '#ef4444' : '#10b981'
+
+//   import('leaflet-routing-machine').then(() => {
+//     const map = leafletMap.value.leafletObject
+//     if (routingControl) map.removeControl(routingControl)
+//     routingControl = (L as any).Routing.control({
+//       waypoints: [L.latLng(userLocation.value!), L.latLng(bin.location.lat, bin.location.lng)],
+//       createMarker: () => null,
+//       show: false,
+//       lineOptions: { styles: [{ color: navigationColor.value, weight: 10, opacity: 0.7 }] },
+//     }).addTo(map)
+//   })
+// }
+
+const stopNavigation = () => {
+  activeBinId.value = null
+  if (routingControl) {
+    leafletMap.value.leafletObject.removeControl(routingControl)
+    routingControl = null
+  }
+}
+
+const handleArrival = () => {
+  showArrival.value = true
+  stopNavigation()
+}
+
+onMounted(async () => {
+  trackUserLocation()
+  if (!document.getElementById('routing-css')) {
+    const link = document.createElement('link')
+    link.id = 'routing-css'
+    link.rel = 'stylesheet'
+    link.href = 'https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css'
+    document.head.appendChild(link)
+  }
+  await fetchBins()
+  backendInterval = setInterval(fetchBins, 30000)
+})
+
+onUnmounted(() => {
+  if (watchId) navigator.geolocation.clearWatch(watchId)
+  if (backendInterval) clearInterval(backendInterval)
+})
+
+// ==========================================
+// 🎨 CUSTOM ICONS
+// ==========================================
+const userIcon = L.divIcon({
+  className: 'user-marker-container',
+  html: '<div class="user-pulse"></div><div class="user-dot"></div>',
+  iconSize: [20, 20],
+})
+
+const createBinIcon = (bin: Bin) => {
+  const color = bin.fillLevel > 80 ? '#ef4444' : '#10b981'
+  return L.divIcon({
+    html: `<div style="border: 3px solid ${color};" class="bg-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-xl">
+            <svg class="w-5 h-5" style="color: ${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          </div>`,
+    className: 'custom-bin-icon',
+    iconSize: [40, 40],
+  })
+}
+
+const handleBinClick = (bin: Bin) => {
+  selectedBin.value = bin
+  isFollowingUser.value = false
+  leafletMap.value?.leafletObject.flyTo([bin.location.lat, bin.location.lng], 18)
+}
+</script>
 <template>
   <div
     class="relative w-full h-[calc(100vh-70px)] bg-[#f1f5f9] overflow-hidden font-sans text-left"
@@ -105,7 +312,7 @@
       />
     </l-map>
 
-    <div
+    <!-- <div
       v-show="!activeBinId"
       class="absolute bottom-8 left-0 w-fit z-1000 px-4 overflow-x-auto no-scrollbar"
     >
@@ -114,7 +321,7 @@
           v-for="bin in filteredBins"
           :key="bin._id"
           @click="handleBinClick(bin)"
-          class="min-w-70 bg-white/90 backdrop-blur-xl rounded-4xl p-4 shadow-lg border border-white group transition-all duration-300 hover:-translate-y-1"
+          class="min-w-[280px] bg-white/90 backdrop-blur-xl rounded-4xl p-4 shadow-lg border border-white group transition-all duration-300 hover:-translate-y-1"
         >
           <div class="flex justify-between items-start mb-4">
             <div
@@ -144,7 +351,7 @@
           <div class="mb-4">
             <h3 class="text-xl font-bold text-gray-900">{{ bin.binCode }}</h3>
             <p class="text-gray-500 text-xs uppercase font-semibold tracking-tight">
-              {{ bin.area }}
+              {{ bin.address }}
             </p>
           </div>
           <div class="space-y-2 mb-5">
@@ -190,226 +397,9 @@
           >".
         </p>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import { getAllBinsPublic } from '@/services/binService'
-import type { Bin } from '@/types/bin'
-
-// Receive Search Text from Parent
-const props = defineProps<{
-  searchText: string
-}>()
-
-// ==========================================
-// 🛠️ BACKEND & DATA
-// ==========================================
-const bins = ref<Bin[]>([])
-const isLoading = ref(true)
-
-// FILTER ENGINE: Connects Search Bar to the UI
-const filteredBins = computed(() => {
-  const query = props.searchText.toLowerCase().trim()
-  if (!query) return bins.value
-  return bins.value.filter(
-    (bin) => bin.binCode.toLowerCase().includes(query),
-    // bin.address.toLowerCase().includes(query)
-  )
-})
-
-// AUTO-ZOOM: Glide map to first result when typing
-watch(
-  () => props.searchText,
-  (newVal) => {
-    if (newVal && filteredBins.value.length > 0) {
-      const firstMatch = filteredBins.value[0]
-      leafletMap.value?.leafletObject.flyTo(
-        [firstMatch?.location.lat, firstMatch?.location.lng],
-        17,
-      )
-    }
-  },
-)
-
-const fetchBins = async () => {
-  isLoading.value = true
-  const response = await getAllBinsPublic()
-  bins.value = response
-  console.log('📍 All bins fetched:', bins.value)
-  if (bins.value.length > 0) {
-    console.log('🗂️ First bin area:', bins.value[0].area)
-    console.log(
-      '🗂️ All bin areas:',
-      bins.value.map((b: Bin) => ({ code: b.binCode, area: b.area })),
-    )
-  }
-  isLoading.value = false
-}
-
-// ==========================================
-// 📍 MAP & NAVIGATION LOGIC
-// ==========================================
-const zoom = ref(15)
-const mapCenter = ref<[number, number]>([11.5564, 104.9282])
-const leafletMap = ref<any>(null)
-const activeBinId = ref<number | null>(null)
-const selectedBin = ref<Bin | null>(null)
-const userLocation = ref<[number, number] | null>(null)
-const distanceRemaining = ref('0 m')
-const isFollowingUser = ref(true)
-const showArrival = ref(false)
-const navigationColor = ref('#10b981')
-let routingControl: any = null
-let watchId: number | null = null
-let backendInterval: any = null
-
-const trackUserLocation = () => {
-  if (!navigator.geolocation) {
-    console.error('Geolocation is not supported by your browser.')
-    return
-  }
-
-  const handleLocationError = (error: GeolocationPositionError) => {
-    let message = 'Error getting your location: '
-    switch (error.code) {
-      case error.PERMISSION_DENIED:
-        message += 'You denied the request for Geolocation.'
-        break
-      case error.POSITION_UNAVAILABLE:
-        message += 'Location information is unavailable.'
-        break
-      case error.TIMEOUT:
-        message += 'The request to get user location timed out.'
-        break
-      default:
-        message += 'An unknown error occurred.'
-        break
-    }
-    console.error(message, error)
-  }
-
-  if (watchId) navigator.geolocation.clearWatch(watchId)
-
-  watchId = navigator.geolocation.watchPosition(
-    (pos) => {
-      const { latitude, longitude } = pos.coords
-      const newLocation: [number, number] = [latitude, longitude]
-      const isFirstUpdate = userLocation.value === null
-      userLocation.value = newLocation
-
-      if (isFollowingUser.value && !activeBinId.value) {
-        if (isFirstUpdate) {
-          leafletMap.value?.leafletObject.flyTo([latitude, longitude], zoom.value)
-        } else {
-          mapCenter.value = [latitude, longitude]
-        }
-      }
-
-      if (activeBinId.value) {
-        const bin = bins.value.find((b) => b._id === activeBinId.value)
-        if (bin) {
-          const dist = L.latLng(latitude, longitude).distanceTo(
-            L.latLng(bin.location.lat, bin.location.lng),
-          )
-          distanceRemaining.value = Math.round(dist) + ' m'
-          if (dist < 15) handleArrival()
-        }
-      }
-    },
-    handleLocationError,
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
-  )
-}
-
-const startNavigationToBin = (bin: Bin) => {
-  if (!userLocation.value) {
-    alert(
-      'Could not get your current location. Please ensure you have enabled location services for this site in your browser settings and try again.',
-    )
-    console.warn('Still trying to find your location. Please wait a moment and try again.')
-    trackUserLocation() // Re-trigger location tracking
-    return
-  }
-
-  activeBinId.value = bin._id
-  isFollowingUser.value = true
-  navigationColor.value = bin.fillLevel > 80 ? '#ef4444' : '#10b981'
-
-  import('leaflet-routing-machine').then(() => {
-    const map = leafletMap.value.leafletObject
-    if (routingControl) map.removeControl(routingControl)
-    routingControl = (L as any).Routing.control({
-      waypoints: [L.latLng(userLocation.value!), L.latLng(bin.location.lat, bin.location.lng)],
-      createMarker: () => null,
-      show: false,
-      lineOptions: { styles: [{ color: navigationColor.value, weight: 10, opacity: 0.7 }] },
-    }).addTo(map)
-  })
-}
-
-const stopNavigation = () => {
-  activeBinId.value = null
-  if (routingControl) {
-    leafletMap.value.leafletObject.removeControl(routingControl)
-    routingControl = null
-  }
-}
-
-const handleArrival = () => {
-  showArrival.value = true
-  stopNavigation()
-}
-
-onMounted(async () => {
-  trackUserLocation()
-  if (!document.getElementById('routing-css')) {
-    const link = document.createElement('link')
-    link.id = 'routing-css'
-    link.rel = 'stylesheet'
-    link.href = 'https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css'
-    document.head.appendChild(link)
-  }
-  await fetchBins()
-  backendInterval = setInterval(fetchBins, 30000)
-})
-
-onUnmounted(() => {
-  if (watchId) navigator.geolocation.clearWatch(watchId)
-  if (backendInterval) clearInterval(backendInterval)
-})
-
-// ==========================================
-// 🎨 CUSTOM ICONS
-// ==========================================
-const userIcon = L.divIcon({
-  className: 'user-marker-container',
-  html: '<div class="user-pulse"></div><div class="user-dot"></div>',
-  iconSize: [20, 20],
-})
-
-const createBinIcon = (bin: Bin) => {
-  const color = bin.fillLevel > 80 ? '#ef4444' : '#10b981'
-  return L.divIcon({
-    html: `<div style="border: 3px solid ${color};" class="bg-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-xl">
-            <svg class="w-5 h-5" style="color: ${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-          </div>`,
-    className: 'custom-bin-icon',
-    iconSize: [40, 40],
-  })
-}
-
-const handleBinClick = (bin: Bin) => {
-  selectedBin.value = bin
-  isFollowingUser.value = false
-  leafletMap.value?.leafletObject.flyTo([bin.location.lat, bin.location.lng], 18)
-}
-</script>
 
 <style>
 .no-scrollbar::-webkit-scrollbar {

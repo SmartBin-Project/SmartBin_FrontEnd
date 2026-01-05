@@ -16,8 +16,41 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-export const getAllBins = async () => {
+// Response interceptor to ensure area field is preserved
+api.interceptors.response.use((response) => {
+  console.log('🔍 Response Interceptor - Raw data:', response.data)
+  if (Array.isArray(response.data)) {
+    console.log('🔍 Is array, first item:', response.data[0])
+    console.log('🔍 First item has area?:', response.data[0]?.area)
+  }
+  return response
+})
+
+// for public bins, no auth needed
+export const getAllBinsPublic = async () => {
   const response = await api.get('/bins/public')
+  console.log('🔍 Full response object:', response)
+  console.log('🔍 response.data type:', typeof response.data)
+  console.log('🔍 response.data:', response.data)
+
+  // Handle different response formats
+  let binsData = response.data
+  if (binsData && typeof binsData === 'object' && 'data' in binsData) {
+    console.log('⚠️ Response wrapped in data property, unwrapping...')
+    binsData = binsData.data
+  }
+
+  if (Array.isArray(binsData)) {
+    console.log('✅ Is array, length:', binsData.length)
+    console.log('✅ First item:', JSON.stringify(binsData[0], null, 2))
+  }
+
+  return binsData
+}
+
+// for private bins, auth needed
+export const getAllBins = async () => {
+  const response = await api.get('/bins')
   return response.data
 }
 
@@ -26,12 +59,12 @@ export const createBin = async (bin: Bin) => {
   return response.data
 }
 
-export const deleteBin = async (binCode: string) => {
-  const response = await api.delete(`/bins/delete/${binCode}`)
+export const deleteBin = async (id: string) => {
+  const response = await api.delete(`/bins/${id}`)
   return response.data
 }
 
-export const updateBin = async (bin: Bin) => {
-  const response = await api.put(`/bins/update/${bin.binCode}`, bin)
+export const updateBin = async (id: string, bin: Partial<Bin>) => {
+  const response = await api.patch(`/bins/${id}`, bin)
   return response.data
 }
