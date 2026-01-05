@@ -1,8 +1,134 @@
-<script setup>
+<script setup lang="ts">
 import StatCard from '@/components/StatCard.vue'
 import TrashGraph from '@/components/TrashGraph.vue'
 import SuperAdminLayout from '@/components/layout/SuperAdminLayout.vue'
+import { useBinStore } from '@/stores/binStore'
+import { useSuperAdminStore } from '@/stores/superAdminStore'
 import { Users, Box, BarChart2, Clock, ChevronRight, ChevronLeft } from 'lucide-vue-next'
+import { computed, onMounted } from 'vue'
+
+const superAdminStore = useSuperAdminStore();
+const binStore = useBinStore();
+onMounted(() => {
+  superAdminStore.fetchAdmins();
+  superAdminStore.fetchCleaners();
+  binStore.fetchBins();
+})
+
+const bins = computed(() => binStore.bins);
+
+const totalFullCount = computed(() => {
+  return bins.value.reduce((total, bin) => total + (bin.fullCount || 0), 0);
+});
+
+
+// 1. Bin Status Pie Chart
+const binStatusData = computed(() => {
+  const statusCounts = bins.value.reduce((acc, bin) => {
+    acc[bin.status] = (acc[bin.status] || 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+
+  return {
+    series: Object.values(statusCounts),
+    chartOptions: {
+      chart: { type: 'pie' },
+      labels: Object.keys(statusCounts),
+      colors: ['#ef4444', '#f97316', '#22c55e'], // FULL, FILLING, EMPTY
+      legend: { position: 'bottom' }
+    }
+  }
+})
+
+// 2. Busiest Bins Bar Chart
+const busiestBinsData = computed(() => {
+  const sortedBins = [...bins.value].sort((a, b) => b.fullCount - a.fullCount).slice(0, 5)
+
+  return {
+    series: [{ name: 'Times Full', data: sortedBins.map(b => b.fullCount) }],
+    chartOptions: {
+      chart: { type: 'bar' },
+      xaxis: {
+        categories: sortedBins.map(b => b.binCode)
+      },
+      colors: ['#34a853'],
+      plotOptions: {
+        bar: {
+          horizontal: true,
+        }
+      },
+      tooltip: {
+        y: {
+          formatter: (val: number) => `${val} times`
+        }
+      }
+    }
+  }
+})
+
+// 3. Fill Level Histogram
+const fillLevelHistogramData = computed(() => {
+    const brackets = {
+        '0-20%': 0,
+        '21-40%': 0,
+        '41-60%': 0,
+        '61-80%': 0,
+        '81-100%': 0,
+    };
+
+    bins.value.forEach(bin => {
+        if (bin.fillLevel <= 20) brackets['0-20%']++;
+        else if (bin.fillLevel <= 40) brackets['21-40%']++;
+        else if (bin.fillLevel <= 60) brackets['41-60%']++;
+        else if (bin.fillLevel <= 80) brackets['61-80%']++;
+        else brackets['81-100%']++;
+    });
+
+    return {
+        series: [{ name: 'Number of Bins', data: Object.values(brackets) }],
+        chartOptions: {
+            chart: { type: 'bar' },
+            xaxis: {
+                categories: Object.keys(brackets),
+            },
+            colors: ['#68a357'],
+             plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    horizontal: false,
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+        }
+    };
+});
+
+
+// 4. Fill Level Trend (Line Chart) - Mock data for trend
+const fillLevelTrendData = computed(() => {
+  return {
+    series: [{
+      name: 'Avg. Fill Level',
+      data: [20, 30, 25, 45, 40, 50, 45, 60, 55, 70, 60, 65].reverse() // Mock trend
+    }],
+    chartOptions: {
+      chart: { type: 'line', zoom: { enabled: false } },
+      stroke: { curve: 'smooth' },
+      colors: ['#4CAF50'],
+      xaxis: {
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].reverse()
+      },
+       tooltip: {
+        y: {
+          formatter: (val: number) => `${val}%`
+        }
+      }
+    }
+  }
+})
+
 </script>
 
 <template>
@@ -10,7 +136,7 @@ import { Users, Box, BarChart2, Clock, ChevronRight, ChevronLeft } from 'lucide-
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <StatCard
         title="Total Customer"
-        value="40,689"
+        :value="superAdminStore.getAdmins?.length || 0"
         :icon="Users"
         iconBg="bg-purple-100 text-purple-600"
         trend="8.5%"
@@ -18,23 +144,23 @@ import { Users, Box, BarChart2, Clock, ChevronRight, ChevronLeft } from 'lucide-
       />
       <StatCard
         title="Total Bin"
-        value="10,293"
+        :value="binStore.getBins?.length || 0"
         :icon="Box"
         iconBg="bg-yellow-100 text-yellow-500"
         trend="1.3%"
         :isPositive="true"
       />
       <StatCard
-        title="Total Trash"
-        value="89,000"
+        title="Total Fill Count"
+        :value="totalFullCount"
         :icon="BarChart2"
         iconBg="bg-green-100 text-green-500"
         trend="4.3%"
         :isPositive="false"
       />
       <StatCard
-        title="Total Pending"
-        value="2,040"
+        title="Total Cleaners"
+        :value="superAdminStore.getCleaners?.length || 0"
         :icon="Clock"
         iconBg="bg-orange-100 text-orange-500"
         trend="1.8%"
@@ -42,94 +168,36 @@ import { Users, Box, BarChart2, Clock, ChevronRight, ChevronLeft } from 'lucide-
       />
     </div>
 
-    <div class="mb-8">
-      <TrashGraph />
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-5">
+      <TrashGraph 
+        type="pie"
+        title="Bin Status Overview"
+        :series="binStatusData.series"
+        :chart-options="binStatusData.chartOptions"
+      />
+      <TrashGraph 
+        type="bar"
+        title="Fill Level Distribution"
+        :series="fillLevelHistogramData.series"
+        :chart-options="fillLevelHistogramData.chartOptions"
+      />
     </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 class="font-bold text-lg mb-4 text-gray-800">Customers</h3>
-        <div class="flex justify-center items-center h-48 relative">
-          <div
-            class="w-32 h-32 rounded-full border-12 border-gray-100 border-t-green-500 border-r-green-500 transform rotate-45 transition-all hover:scale-105"
-          ></div>
-        </div>
-        <div class="flex justify-between mt-4 px-4">
-          <div>
-            <p class="text-xl font-bold text-gray-800">34,249</p>
-            <div class="flex items-center text-xs text-gray-500 mt-1">
-              <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
-              New
-            </div>
-          </div>
-          <div>
-            <p class="text-xl font-bold text-gray-800">1420</p>
-            <div class="flex items-center text-xs text-gray-500 mt-1">
-              <div class="w-2 h-2 rounded-full bg-gray-200 mr-2"></div>
-              Repeated
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 class="font-bold text-lg mb-4 text-gray-800">Trash Analysis</h3>
-        <div class="h-48 flex items-end justify-between px-2 gap-2 relative">
-          <div class="absolute bottom-8 left-0 right-0 h-1 bg-gray-100"></div>
-          <div class="absolute bottom-16 left-0 right-0 h-1 bg-gray-100"></div>
-
-          <div class="w-full h-full relative overflow-hidden">
-            <svg
-              viewBox="0 0 100 50"
-              class="w-full h-full overflow-visible"
-              preserveAspectRatio="none"
-            >
-              <path
-                d="M0,50 C20,40 40,10 60,30 S80,20 100,0"
-                fill="none"
-                stroke="#4CAF50"
-                stroke-width="2"
-              />
-              <path
-                d="M0,50 C20,45 40,20 60,40 S80,30 100,10"
-                fill="none"
-                stroke="#3B82F6"
-                stroke-width="2"
-              />
-            </svg>
-          </div>
-        </div>
-        <div class="flex justify-between text-xs text-gray-400 mt-2 px-2 font-medium">
-          <span>2015</span><span>2016</span><span>2017</span><span>2018</span><span>2019</span>
-        </div>
-      </div>
-
-      <div
-        class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center relative flex flex-col items-center"
-      >
-        <div class="w-full flex justify-between items-center mb-6">
-          <h3 class="font-bold text-lg text-gray-800">Featured Product</h3>
-        </div>
-
-        <button
-          class="absolute left-4 top-1/2 -translate-y-1/2 bg-gray-50 p-1.5 rounded-full hover:bg-gray-200 transition-colors text-gray-600"
-        >
-          <ChevronLeft :size="18" />
-        </button>
-        <button
-          class="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-50 p-1.5 rounded-full hover:bg-gray-200 transition-colors text-gray-600"
-        >
-          <ChevronRight :size="18" />
-        </button>
-
-        <div class="mb-6 mt-4">
-          <div class="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
-            <Box class="text-blue-500 w-12 h-12" />
-          </div>
-        </div>
-        <h4 class="font-bold text-gray-800 text-lg">Smart Bin</h4>
-        <p class="text-blue-500 font-bold mt-1">$89.00</p>
-      </div>
+    <div class="grid grid-cols-1 gap-8 mb-5">
+       <TrashGraph 
+        type="bar"
+        title="Top 5 Busiest Bins"
+        :series="busiestBinsData.series"
+        :chart-options="busiestBinsData.chartOptions"
+      />
+    </div>
+     <div class="grid grid-cols-1 gap-8">
+       <TrashGraph 
+        type="line"
+        title="Fill Level Trend"
+        :series="fillLevelTrendData.series"
+        :chart-options="fillLevelTrendData.chartOptions"
+      />
     </div>
   </SuperAdminLayout>
 </template>

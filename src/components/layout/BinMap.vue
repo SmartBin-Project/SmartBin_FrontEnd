@@ -86,7 +86,7 @@ import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet"
 import L from 'leaflet'
 import "leaflet/dist/leaflet.css"
 import { getAllBins } from '@/services/binService';
-import type { Bin } from '@/types/Bin';
+import type { Bin } from '@/types/bin';
 
 // Receive Search Text from Parent
 const props = defineProps<{
@@ -140,53 +140,21 @@ let watchId: number | null = null
 let backendInterval: any = null;
 
 const trackUserLocation = () => {
-  if (!navigator.geolocation) {
-    alert("Geolocation is not supported by your browser.");
-    return;
-  }
+  if (!navigator.geolocation) return;
+  watchId = navigator.geolocation.watchPosition((pos) => {
+    const { latitude, longitude } = pos.coords;
+    userLocation.value = [latitude, longitude];
+    if (isFollowingUser.value && !activeBinId.value) mapCenter.value = [latitude, longitude];
 
-  const handleLocationError = (error: GeolocationPositionError) => {
-    let message = "Error getting your location: ";
-    switch (error.code) {
-      case error.PERMISSION_DENIED:
-        message += "You denied the request for Geolocation.";
-        break;
-      case error.POSITION_UNAVAILABLE:
-        message += "Location information is unavailable.";
-        break;
-      case error.TIMEOUT:
-        message += "The request to get user location timed out.";
-        break;
-      default:
-        message += "An unknown error occurred.";
-        break;
+    if (activeBinId.value) {
+      const bin = bins.value.find(b => b._id === activeBinId.value);
+      if (bin) {
+        const dist = L.latLng(latitude, longitude).distanceTo(L.latLng(bin.location.lat, bin.location.lng));
+        distanceRemaining.value = Math.round(dist) + ' m';
+        if (dist < 15) handleArrival();
+      }
     }
-    alert(message);
-    console.error(message, error);
-  };
-
-  if (watchId) navigator.geolocation.clearWatch(watchId);
-
-  watchId = navigator.geolocation.watchPosition(
-    (pos) => {
-      const { latitude, longitude } = pos.coords;
-      userLocation.value = [latitude, longitude];
-      if (isFollowingUser.value && !activeBinId.value) {
-        mapCenter.value = [latitude, longitude];
-      }
-
-      if (activeBinId.value) {
-        const bin = bins.value.find(b => b.id === activeBinId.value);
-        if (bin) {
-          const dist = L.latLng(latitude, longitude).distanceTo(L.latLng(bin.lat, bin.lng));
-          distanceRemaining.value = Math.round(dist) + ' m';
-          if (dist < 15) handleArrival();
-        }
-      }
-    }, 
-    handleLocationError, 
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-  );
+  }, null, { enableHighAccuracy: true });
 };
 
 const startNavigationToBin = (bin: Bin) => {

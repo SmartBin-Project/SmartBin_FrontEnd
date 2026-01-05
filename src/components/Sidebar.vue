@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import {
   LayoutDashboard,
   MapPin,
@@ -50,7 +50,7 @@ const menuItems = [
 ]
 
 // Compute active state based on current route
-const isMenuItemActive = (url) => {
+const isMenuItemActive = (url: any) => {
   return route.path === url
 }
 </script>

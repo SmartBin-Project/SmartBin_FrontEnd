@@ -1,10 +1,13 @@
+interface Location {
+  lat: number;
+  lng: number;
+}
+
 export interface Bin {
-  binCode: string
-  area: string
-  location: {
-    lat: number
-    lng: number
-  }
-  fillLevel: number
-  status: 'empty' | 'half-full' | 'full'
+  _id: number;
+  binCode: string;
+  location: Location;
+  fillLevel: number;
+  status: string;
+  fullCount: number;
 }
