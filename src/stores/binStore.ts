@@ -49,14 +49,14 @@ export const useBinStore = defineStore('binStore', {
         this.loading = false
       }
     },
-    async updateBin(bin: Bin) {
+    async updateBin(id: string, bin: Partial<Bin>) {
       try {
         this.loading = true
         this.error = null
-        const response = await binService.updateBin(bin)
-        const index = this.bins.findIndex((b) => b.binCode === bin.binCode)
+        const response = await binService.updateBin(id, bin)
+        const index = this.bins.findIndex((b) => b._id === id)
         if (index !== -1) {
-          this.bins[index] = response
+          this.bins[index] = { ...this.bins[index], ...response.data }
         }
         return response
       } catch (err) {
@@ -66,12 +66,12 @@ export const useBinStore = defineStore('binStore', {
         this.loading = false
       }
     },
-    async deleteBin(binCode: string) {
+    async deleteBin(id: string) {
       try {
         this.loading = true
         this.error = null
-        await binService.deleteBin(binCode)
-        this.bins = this.bins.filter((b) => b.binCode !== binCode)
+        await binService.deleteBin(id)
+        this.bins = this.bins.filter((b) => b._id !== id)
       } catch (err) {
         this.error = err instanceof Error ? err.message : 'Failed to delete bin'
         throw err

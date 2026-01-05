@@ -127,20 +127,20 @@ const addBin = async () => {
             />
           </div>
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">Lng</label>
-            <input
-              v-model="formData.location.lng"
-              type="text"
-              placeholder="Longitude (e.g., 10.5)"
-              class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm font-bold text-gray-800 outline-none focus:border-green-500 focus:bg-white transition-colors"
-            />
-          </div>
-          <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">Lat</label>
             <input
               v-model="formData.location.lat"
               type="text"
               placeholder="Latitude (e.g., 10.5)"
+              class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm font-bold text-gray-800 outline-none focus:border-green-500 focus:bg-white transition-colors"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Lng</label>
+            <input
+              v-model="formData.location.lng"
+              type="text"
+              placeholder="Longitude (e.g., 10.5)"
               class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm font-bold text-gray-800 outline-none focus:border-green-500 focus:bg-white transition-colors"
             />
           </div>
