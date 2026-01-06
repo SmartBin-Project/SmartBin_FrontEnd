@@ -34,41 +34,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { RouterView, useRouter, useRoute } from 'vue-router';
-import { useAuthStore } from '@/stores/authStore';
+import { ref, computed } from 'vue'
+import { RouterView, useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
-import Footer from '@/components/layout/Footer.vue';
+import Footer from '@/components/layout/Footer.vue'
 
-import LoadingComponent from '@/components/layout/LoadingComponent.vue';
-import Navigation from '@/components/layout/Navigation.vue';
-import Sidebar from '@/components/Sidebar.vue';
+import LoadingComponent from '@/components/layout/LoadingComponent.vue'
+import Navigation from '@/components/layout/Navigation.vue'
 
-const authStore = useAuthStore();
-const router = useRouter();
-const route = useRoute();
+const authStore = useAuthStore()
+const router = useRouter()
+const route = useRoute()
 
-const searchQuery = ref('');
-const isLoading = ref(false);
+const searchQuery = ref('')
+const isLoading = ref(false)
 
-const isMapPage = computed(() => route.path === '/');
+const isMapPage = computed(() => route.path === '/')
 const isAuthPage = computed(() => {
-  return route.path.startsWith('/auth');
-});
+  return route.path.startsWith('/auth')
+})
 
 const handleSearch = (query: string) => {
-  searchQuery.value = query;
-};
+  searchQuery.value = query
+}
 
 router.beforeEach(() => {
-  isLoading.value = true;
-});
+  isLoading.value = true
+})
 
 router.afterEach(() => {
   setTimeout(() => {
-    isLoading.value = false;
-  }, 300);
-});
+    isLoading.value = false
+  }, 300)
+})
 </script>
 
 <style>

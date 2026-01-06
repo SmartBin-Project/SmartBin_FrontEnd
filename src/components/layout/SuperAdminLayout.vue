@@ -43,7 +43,7 @@ const sidebarOpen = ref(false)
       </header>
 
       <!-- Page Content -->
-      <main class="flex-1 overflow-y-auto bg-gray-50 p-3 md:p-6 lg:p-8">
+      <main class="flex-1 justify-between overflow-y-auto bg-gray-50 p-3 md:p-6 lg:p-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ title }}</h2>
         <slot />
       </main>

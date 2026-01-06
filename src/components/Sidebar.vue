@@ -61,10 +61,20 @@ const isMenuItemActive = (url: any) => {
   >
     <div>
       <div class="h-24 flex items-center px-8">
-        <div class="bg-green-600 p-1.5 rounded-lg mr-3">
+        <!-- <div class="bg-green-600 p-1.5 rounded-lg mr-3">
           <Trash class="text-white w-6 h-6" />
         </div>
-        <h1 class="text-2xl font-bold text-gray-800">SmartBin</h1>
+        <h1 class="text-2xl font-bold text-gray-800">SmartBin</h1> -->
+        <router-link
+          to="/"
+          class="flex items-center w-[130px] md:w-40 shrink-0 transition-all hover:opacity-80 active:scale-95"
+        >
+          <img
+            src="/Users/macbookpro/Developer/Competition/FullStackSmartBin/smart_bin/src/assets/images/SmartBin.png"
+            alt="logo"
+            class="w-full drop-shadow-sm"
+          />
+        </router-link>
       </div>
 
       <nav class="mt-4 px-4 space-y-2">
