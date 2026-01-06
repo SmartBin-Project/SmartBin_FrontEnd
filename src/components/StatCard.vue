@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { ArrowUpRight, ArrowDownRight } from 'lucide-vue-next';
 
 defineProps({
   title: String,
-  value: String,
+  value: Number,
   icon: Object,
   iconBg: String,
   trend: String,

@@ -1,55 +1,50 @@
-<script setup>
-import VueApexCharts from 'vue3-apexcharts';
+<script setup lang="ts">
+import VueApexCharts from 'vue3-apexcharts'
+import type { PropType } from 'vue'
 
-const series = [{
-  name: 'Total Trash',
-  data: [20, 30, 25, 45, 40, 50, 45, 60, 55, 70, 60, 65]
-}];
+type ApexChartType =
+  | 'area'
+  | 'line'
+  | 'bar'
+  | 'histogram'
+  | 'pie'
+  | 'donut'
+  | 'radialBar'
+  | 'rangeBar'
+  | 'scatter'
+  | 'bubble'
+  | 'heatmap'
+  | 'candlestick'
+  | 'radar'
+  | 'polarArea'
 
-const chartOptions = {
-  chart: {
-    type: 'area',
-    toolbar: { show: false },
-    fontFamily: 'inherit',
-    zoom: { enabled: false }
+const props = defineProps({
+  series: {
+    type: Array as PropType<any[]>,
+    required: true
   },
-  colors: ['#4CAF50'],
-  fill: {
-    type: 'gradient',
-    gradient: {
-      shadeIntensity: 1,
-      opacityFrom: 0.7,
-      opacityTo: 0.1,
-      stops: [0, 90, 100]
-    }
+  chartOptions: {
+    type: Object as PropType<Record<string, any>>,
+    required: true
   },
-  dataLabels: { enabled: false },
-  stroke: { curve: 'smooth', width: 3 },
-  xaxis: {
-    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    axisBorder: { show: false },
-    axisTicks: { show: false },
-    labels: { style: { colors: '#9CA3AF' } }
+  title: {
+    type: String,
+    default: 'Chart'
   },
-  yaxis: { show: false },
-  grid: { show: true, borderColor: '#f3f4f6', strokeDashArray: 4 },
-  tooltip: {
-    theme: 'light',
-    y: { formatter: (val) => `${val} Tons` }
+  type: {
+    type: String as PropType<ApexChartType>,
+    default: 'area'
   }
-};
+})
 </script>
 
 <template>
   <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-gray-800">Trash graph</h2>
-      <button class="text-xs font-medium text-gray-500 border border-gray-200 rounded-lg px-3 py-1.5 flex items-center hover:bg-gray-50">
-        October <span class="ml-2 text-[10px]">▼</span>
-      </button>
+      <h2 class="text-xl font-bold text-gray-800">{{ props.title }}</h2>
     </div>
     <div class="h-72">
-      <VueApexCharts type="area" height="100%" :options="chartOptions" :series="series" />
+      <VueApexCharts :type="props.type" height="100%" :options="props.chartOptions" :series="props.series" />
     </div>
   </div>
 </template>

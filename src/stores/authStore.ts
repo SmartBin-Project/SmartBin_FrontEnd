@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import * as authService from '@/services/authService'
-import type { Admin } from '@/types/admin'
+import type { SuperAdmin } from '@/types/superadmin'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user') || 'null') as Admin | null,
+    user: JSON.parse(localStorage.getItem('user') || 'null') as SuperAdmin | null,
     accessToken: localStorage.getItem('access_token') || null,
     loading: false,
     error: null as string | null,
@@ -17,7 +17,7 @@ export const useAuthStore = defineStore('auth', {
     getAccessToken(): string | null {
       return this.accessToken
     },
-    getUser(): Admin | null {
+    getUser(): SuperAdmin | null {
       return this.user
     },
   },

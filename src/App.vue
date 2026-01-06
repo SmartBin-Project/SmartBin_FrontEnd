@@ -3,9 +3,8 @@
     <LoadingComponent v-if="isLoading" />
 
     <!-- Admin Layout -->
-    <template
-      v-if="authStore.getUser?.role === 'ADMIN' || authStore.getUser?.role === 'SUPERADMIN'"
-    >
+    <template v-if="authStore.getUser?.role === 'ADMIN' || authStore.getUser?.role === 'SUPERADMIN'">
+
       <main class="flex-1 flex flex-col h-screen overflow-y-auto">
         <div class="flex-1">
           <RouterView v-slot="{ Component }">
