@@ -4,9 +4,11 @@ interface Location {
 }
 
 export interface Bin {
-  _id: number
+  _id: string
   binCode: string
   location: Location
+  area: string
   fillLevel: number
-  status: string
+  status: 'EMPTY' | 'HALF' | 'FULL'
+  fullCount: number
 }

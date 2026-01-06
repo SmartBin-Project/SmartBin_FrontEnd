@@ -54,7 +54,7 @@ export const useBinStore = defineStore('binStore', {
         this.loading = true
         this.error = null
         const response = await binService.updateBin(id, bin)
-        const index = this.bins.findIndex((b) => b._id === id)
+        const index = this.bins.findIndex((b: Bin) => b._id === id)
         if (index !== -1) {
           this.bins[index] = { ...this.bins[index], ...response.data }
         }

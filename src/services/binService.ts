@@ -29,23 +29,20 @@ api.interceptors.response.use((response) => {
 // for public bins, no auth needed
 export const getAllBinsPublic = async () => {
   const response = await api.get('/bins/public')
-  console.log('🔍 Full response object:', response)
-  console.log('🔍 response.data type:', typeof response.data)
-  console.log('🔍 response.data:', response.data)
 
   // Handle different response formats
-  let binsData = response.data
-  if (binsData && typeof binsData === 'object' && 'data' in binsData) {
-    console.log('⚠️ Response wrapped in data property, unwrapping...')
-    binsData = binsData.data
-  }
+  // let binsData = response.data
+  // if (binsData && typeof binsData === 'object' && 'data' in binsData) {
+  //   console.log('⚠️ Response wrapped in data property, unwrapping...')
+  //   binsData = binsData.data
+  // }
 
-  if (Array.isArray(binsData)) {
-    console.log('✅ Is array, length:', binsData.length)
-    console.log('✅ First item:', JSON.stringify(binsData[0], null, 2))
-  }
+  // if (Array.isArray(binsData)) {
+  //   console.log('✅ Is array, length:', binsData.length)
+  //   console.log('✅ First item:', JSON.stringify(binsData[0], null, 2))
+  // }
 
-  return binsData
+  return response.data
 }
 
 // for private bins, auth needed
