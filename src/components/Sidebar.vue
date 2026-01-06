@@ -69,11 +69,11 @@ const isMenuItemActive = (url: any) => {
           to="/"
           class="flex items-center w-[130px] md:w-40 shrink-0 transition-all hover:opacity-80 active:scale-95"
         >
-          <img
+          <!-- <img
             src="/Users/macbookpro/Developer/Competition/FullStackSmartBin/smart_bin/src/assets/images/SmartBin.png"
             alt="logo"
             class="w-full drop-shadow-sm"
-          />
+          /> -->
         </router-link>
       </div>
 

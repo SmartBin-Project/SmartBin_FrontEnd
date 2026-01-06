@@ -81,6 +81,7 @@ onMounted(() => {
           :area="bin.area"
           :fillLevel="bin.fillLevel"
           :statusColor="bin.fillLevel > 75 ? 'red' : 'green'"
+          :status="bin.status"
           :selected="selectedBin && selectedBin._id === bin._id"
           @click="selectBin(bin)"
           class="cursor-pointer"

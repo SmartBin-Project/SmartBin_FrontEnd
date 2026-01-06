@@ -141,11 +141,11 @@
               {{ bin.fillLevel > 80 ? 'Urgent' : 'Available' }}
             </span>
           </div>
-          <div class="mb-4">
-            <h3 class="text-xl font-bold text-gray-900">{{ bin.binCode }}</h3>
-            <p class="text-gray-500 text-xs uppercase font-semibold tracking-tight">
+          <div class="mb-4 w-[250px]">
+            <h3 class="text-lg font-bold text-gray-900 truncate">
               {{ bin.area }}
-            </p>
+            </h3>
+            <p class="text-gray-500 text-xs uppercase font-semibold tracking-tight">{{ bin.binCode }}</p>
           </div>
           <div class="space-y-2 mb-5">
             <div
@@ -201,6 +201,8 @@ import L from 'leaflet'
 import "leaflet/dist/leaflet.css"
 import { getAllBins } from '@/services/binService';
 import type { Bin } from '@/types/bin';
+import { useBinStore } from '@/stores/binStore';
+import { storeToRefs } from 'pinia';
 
 // Receive Search Text from Parent
 const props = defineProps<{
@@ -210,7 +212,9 @@ const props = defineProps<{
 // ==========================================
 // 🛠️ BACKEND & DATA
 // ==========================================
-const bins = ref<Bin[]>([])
+const binStore = useBinStore();
+
+const { bins } = storeToRefs(binStore);
 const isLoading = ref(true)
 
 // FILTER ENGINE: Connects Search Bar to the UI
@@ -237,20 +241,20 @@ watch(
   },
 )
 
-const fetchBins = async () => {
-  isLoading.value = true
-  const response = await getAllBinsPublic()
-  bins.value = response
-  console.log('📍 All bins fetched:', bins.value)
-  if (bins.value.length > 0) {
-    console.log('🗂️ First bin area:', bins.value[0].area)
-    console.log(
-      '🗂️ All bin areas:',
-      bins.value.map((b: Bin) => ({ code: b.binCode, area: b.area })),
-    )
-  }
-  isLoading.value = false
-}
+// const fetchBins = async () => {
+//   isLoading.value = true
+//   const response = await getAllBinsPublic()
+//   bins.value = response
+//   console.log('📍 All bins fetched:', bins.value)
+//   if (bins.value.length > 0) {
+//     console.log('🗂️ First bin area:', bins.value[0].area)
+//     console.log(
+//       '🗂️ All bin areas:',
+//       bins.value.map((b: Bin) => ({ code: b.binCode, area: b.area })),
+//     )
+//   }
+//   isLoading.value = false
+// }
 
 // ==========================================
 // 📍 MAP & NAVIGATION LOGIC
@@ -326,6 +330,7 @@ const handleArrival = () => {
   stopNavigation()
 }
 
+
 onMounted(async () => {
   trackUserLocation()
   if (!document.getElementById('routing-css')) {
@@ -335,8 +340,8 @@ onMounted(async () => {
     link.href = 'https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css'
     document.head.appendChild(link)
   }
-  await fetchBins()
-  backendInterval = setInterval(fetchBins, 30000)
+  binStore.getAllBinsPublic();
+  backendInterval = setInterval(() => binStore.getAllBinsPublic(), 30000)
 })
 
 onUnmounted(() => {

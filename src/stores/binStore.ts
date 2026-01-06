@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { Bin } from '@/types/bin'
 import * as binService from '@/services/binService'
+
 export const useBinStore = defineStore('binStore', {
   state: () => ({
     bins: [] as Bin[],
@@ -17,6 +18,22 @@ export const useBinStore = defineStore('binStore', {
     },
   },
   actions: {
+    async getAllBinsPublic() {
+      try {
+        this.loading = true
+        this.error = null
+        const response = await binService.getAllBinsPublic()
+        this.bins = response
+        return response
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : 'Failed to fetch bins'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+
     async getAllBins() {
       try {
         this.loading = true

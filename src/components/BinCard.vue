@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import { Trash2, MapPin } from 'lucide-vue-next'
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   binCode: String,
   area: String,
   fillLevel: Number,
-  statusColor: String,
   selected: Boolean,
+  status: String
+})
+
+const statusColor = computed(() => {
+  if (props.fillLevel === undefined) return 'gray'
+  if (props.fillLevel > 80) return 'red'
+  if (props.fillLevel > 50) return 'yellow'
+  return 'green'
 })
 </script>
 
@@ -33,11 +42,13 @@ defineProps({
       <div class="flex justify-between items-center text-sm">
         <span class="font-bold text-gray-700">Fill Level</span>
         <span
-          :class="`px-3 py-1 rounded-full text-xs font-bold ${
-            fillLevel && fillLevel < 50
-              ? 'bg-green-100 text-green-600'
-              : 'bg-yellow-100 text-yellow-600'
-          }`"
+          class="px-3 py-1 rounded-full text-xs font-bold"
+          :class="{
+            'bg-green-100 text-green-600': statusColor === 'green',
+            'bg-yellow-100 text-yellow-600': statusColor === 'yellow',
+            'bg-red-100 text-red-600': statusColor === 'red',
+            'bg-gray-100 text-gray-600': statusColor === 'gray'
+          }"
         >
           {{ fillLevel }}%
         </span>
@@ -45,9 +56,25 @@ defineProps({
 
       <div class="flex justify-between items-center text-sm">
         <span class="font-bold text-gray-700">Status</span>
-        <div class="flex items-center text-green-600 font-medium text-xs">
-          <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-          Available
+        <div
+          class="flex items-center font-medium text-xs"
+          :class="{
+            'text-green-600': statusColor === 'green',
+            'text-yellow-600': statusColor === 'yellow',
+            'text-red-600': statusColor === 'red',
+            'text-gray-600': statusColor === 'gray'
+          }"
+        >
+          <div
+            class="w-2 h-2 rounded-full mr-2"
+            :class="{
+              'bg-green-500': statusColor === 'green',
+              'bg-yellow-500': statusColor === 'yellow',
+              'bg-red-500': statusColor === 'red',
+              'bg-gray-500': statusColor === 'gray'
+            }"
+          ></div>
+          {{ status }}
         </div>
       </div>
     </div>
