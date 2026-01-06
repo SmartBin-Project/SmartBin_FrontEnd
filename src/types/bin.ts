@@ -1,13 +1,12 @@
 interface Location {
-  lat: number;
-  lng: number;
+  lat: number
+  lng: number
 }
 
 export interface Bin {
-  _id: number;
-  binCode: string;
-  location: Location;
-  fillLevel: number;
-  status: string;
-  fullCount: number;
+  _id: number
+  binCode: string
+  location: Location
+  fillLevel: number
+  status: string
 }
