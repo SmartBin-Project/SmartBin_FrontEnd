@@ -42,7 +42,7 @@ const getInitials = (username: string | undefined) => {
 
     <!-- Right Section - Icons & Profile -->
     <div class="flex items-center gap-2 md:gap-4 shrink-0">
-      <div
+      <!-- <div
         class="relative cursor-pointer hover:bg-white p-1.5 md:p-2 rounded-full transition-colors hidden sm:block"
       >
         <Bell class="text-blue-500 w-5 md:w-6 h-5 md:h-6" />
@@ -50,7 +50,7 @@ const getInitials = (username: string | undefined) => {
           class="absolute top-1 right-2 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-[#F3F4F6]"
           >5</span
         >
-      </div>
+      </div> -->
 
       <a href="/superadmin/account" class="flex items-center gap-1.5 md:gap-3 cursor-pointer">
         <div

@@ -4,22 +4,24 @@ import TrashGraph from '@/components/TrashGraph.vue'
 import SuperAdminLayout from '@/components/layout/SuperAdminLayout.vue'
 import { useBinStore } from '@/stores/binStore'
 import { useSuperAdminStore } from '@/stores/superAdminStore'
+import { useCleanerStore } from '@/stores/cleanerStore'
 import { Users, Box, BarChart2, Clock, ChevronRight, ChevronLeft } from 'lucide-vue-next'
 import { computed, onMounted } from 'vue'
 
 const superAdminStore = useSuperAdminStore()
+const cleanerStore = useCleanerStore()
 const binStore = useBinStore()
 
 const bins = computed(() => binStore.allBins)
-console.log('Bins:', bins.value)
 const totalFullCount = computed(() => {
   return bins.value.reduce((total, bin) => total + (bin.fullCount || 0), 0)
 })
-console.log('Total Full Count:', totalFullCount.value)
 
 onMounted(() => {
   superAdminStore.fetchAdmins()
   superAdminStore.fetchCleaners()
+  cleanerStore.fetchCleaners()
+  console.log('Cleaners:', cleanerStore.cleaners)
   binStore.getAllBins()
 })
 
@@ -218,7 +220,7 @@ const fillLevelTrendData = computed(() => {
       />
       <StatCard
         title="Total Cleaners"
-        :value="superAdminStore.getCleaners?.length || 0"
+        :value="cleanerStore.getCleaners?.length || 0"
         :icon="Clock"
         iconBg="bg-orange-100 text-orange-500"
         trend="1.8%"

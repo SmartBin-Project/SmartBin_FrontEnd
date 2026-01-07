@@ -33,7 +33,6 @@ export const useBinStore = defineStore('binStore', {
       }
     },
 
-
     async getAllBins() {
       try {
         this.loading = true
@@ -53,7 +52,6 @@ export const useBinStore = defineStore('binStore', {
         this.loading = true
         this.error = null
         const response = await binService.createBin(bin)
-        // response contains { message, data: bin } from the controller
         const binData = response.data || response
         this.bins.push(binData)
         return binData

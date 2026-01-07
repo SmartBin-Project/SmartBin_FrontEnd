@@ -8,7 +8,7 @@ const api = axios.create({
 
 // Add token to headers
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token')
+  const token = sessionStorage.getItem('access_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -19,8 +19,8 @@ export const login = async (email: string, password: string) => {
   try {
     const response = await api.post('/auth/login', { email, password })
     const { access_token, user } = response.data
-    localStorage.setItem('access_token', access_token)
-    localStorage.setItem('user', JSON.stringify(user))
+    sessionStorage.setItem('access_token', access_token)
+    sessionStorage.setItem('user', JSON.stringify(user))
     return response.data
   } catch (err) {
     throw err
@@ -73,27 +73,27 @@ export const verifyOtp = async (email: string, otp: string, password: string) =>
 export const logout = async () => {
   try {
     const response = await api.post('/auth/logout')
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('user')
+    sessionStorage.removeItem('access_token')
+    sessionStorage.removeItem('user')
     return response.data
   } catch (err) {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('user')
+    sessionStorage.removeItem('access_token')
+    sessionStorage.removeItem('user')
     throw err
   }
 }
 
 export const getCurrentUser = () => {
-  const user = localStorage.getItem('user')
+  const user = sessionStorage.getItem('user')
   return user ? JSON.parse(user) : null
 }
 
 export const getAccessToken = () => {
-  return localStorage.getItem('access_token')
+  return sessionStorage.getItem('access_token')
 }
 
 export const isAuthenticated = (): boolean => {
-  return !!localStorage.getItem('access_token')
+  return !!sessionStorage.getItem('access_token')
 }
 
 export const getUserProfile = async () => {
