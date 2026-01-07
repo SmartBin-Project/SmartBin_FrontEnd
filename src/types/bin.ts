@@ -11,4 +11,5 @@ export interface Bin {
   fillLevel: number
   status: 'EMPTY' | 'HALF' | 'FULL'
   fullCount: number
+  pictureBins: string[]
 }

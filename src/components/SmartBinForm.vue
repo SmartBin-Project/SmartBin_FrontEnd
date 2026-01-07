@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useBinStore } from '@/stores/binStore'
+import ImageUploader from '@/components/ImageUploader.vue'
 
 const binStore = useBinStore()
+const imageUploader = ref<{ uploadedImages: string[] }>()
 
 const formData = ref({
   binCode: '',
@@ -18,21 +20,6 @@ const formData = ref({
 const submitError = ref('')
 const isSubmitting = ref(false)
 
-// Toast notification
-const toastMessage = ref('')
-const toastType = ref<'success' | 'error'>('success')
-const showToast = ref(false)
-
-const showToastNotification = (message: string, type: 'success' | 'error' = 'success') => {
-  toastMessage.value = message
-  toastType.value = type
-  showToast.value = true
-
-  setTimeout(() => {
-    showToast.value = false
-  }, 3000)
-}
-
 const addBin = async () => {
   try {
     submitError.value = ''
@@ -40,12 +27,10 @@ const addBin = async () => {
 
     if (!formData.value.binCode.trim()) {
       submitError.value = 'Bin Code is required'
-      showToastNotification('Bin Code is required', 'error')
       return
     }
     if (!formData.value.area.trim()) {
       submitError.value = 'Area is required'
-      showToastNotification('Area is required', 'error')
       return
     }
 
@@ -54,11 +39,10 @@ const addBin = async () => {
 
     if (isNaN(lat) || isNaN(lng)) {
       submitError.value = 'Please enter valid numbers for latitude and longitude'
-      showToastNotification('Please enter valid numbers for latitude and longitude', 'error')
       return
     }
 
-    // Only send required fields: binCode, area, location
+    // Send bin data with optional images
     const binDataToSend = {
       binCode: formData.value.binCode,
       area: formData.value.area,
@@ -66,11 +50,10 @@ const addBin = async () => {
         lat: lat,
         lng: lng,
       },
+      pictureBins: imageUploader.value?.uploadedImages || [],
     }
 
     await binStore.createBin(binDataToSend as any)
-
-    showToastNotification(`Bin ${formData.value.binCode} created successfully!`, 'success')
 
     // Reset form after successful submission
     formData.value = {
@@ -80,9 +63,13 @@ const addBin = async () => {
       fillLevel: 0,
       status: 'EMPTY',
     }
+    // Reset images
+    if (imageUploader.value) {
+      imageUploader.value.uploadedImages = []
+    }
   } catch (error) {
     submitError.value = binStore.error || 'Failed to create bin'
-    showToastNotification(binStore.error || 'Failed to create bin', 'error')
+    console.error(binStore.error || 'Failed to create bin')
   } finally {
     isSubmitting.value = false
   }
@@ -90,22 +77,9 @@ const addBin = async () => {
 </script>
 
 <template>
-  <div>
-    <!-- Toast Notification -->
-    <transition name="slide">
-      <div
-        v-if="showToast"
-        :class="[
-          'fixed top-4 right-4 px-6 py-4 rounded-lg text-white font-semibold shadow-lg z-50',
-          toastType === 'success' ? 'bg-green-500' : 'bg-red-500',
-        ]"
-      >
-        {{ toastMessage }}
-      </div>
-    </transition>
-
-    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-      <div class="space-y-6">
+  <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+    <div class="flex flex-col lg:flex-row gap-12">
+      <div class="flex-1 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">Bin ID</label>
@@ -166,35 +140,19 @@ const addBin = async () => {
               <option value="FULL">Full</option>
             </select>
           </div>
-        </div>
+          <div class="w-full lg:w-80 flex flex-col gap-6">
+            <ImageUploader ref="imageUploader" />
 
-        <div class="flex justify-end mt-8">
-          <button
-            @click="addBin"
-            :disabled="isSubmitting"
-            class="bg-green-600 hover:bg-green-700 text-white font-bold px-10 py-3 rounded-xl transition-colors shadow-sm shadow-green-200"
-          >
-            Save Changes
-          </button>
+            <button
+              @click="addBin"
+              :disabled="isSubmitting"
+              class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 rounded-xl transition-colors mt-auto shadow-sm shadow-green-200"
+            >
+              {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.slide-enter-active,
-.slide-leave-active {
-  transition: all 0.3s ease;
-}
-
-.slide-enter-from {
-  transform: translateX(400px);
-  opacity: 0;
-}
-
-.slide-leave-to {
-  transform: translateX(400px);
-  opacity: 0;
-}
-</style>

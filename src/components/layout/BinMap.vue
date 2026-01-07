@@ -145,7 +145,9 @@
             <h3 class="text-lg font-bold text-gray-900 truncate">
               {{ bin.area }}
             </h3>
-            <p class="text-gray-500 text-xs uppercase font-semibold tracking-tight">{{ bin.binCode }}</p>
+            <p class="text-gray-500 text-xs uppercase font-semibold tracking-tight">
+              {{ bin.binCode }}
+            </p>
           </div>
           <div class="space-y-2 mb-5">
             <div
@@ -198,11 +200,11 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
-import "leaflet/dist/leaflet.css"
-import { getAllBins } from '@/services/binService';
-import type { Bin } from '@/types/bin';
-import { useBinStore } from '@/stores/binStore';
-import { storeToRefs } from 'pinia';
+import 'leaflet/dist/leaflet.css'
+import { getAllBins } from '@/services/binService'
+import type { Bin } from '@/types/bin'
+import { useBinStore } from '@/stores/binStore'
+import { storeToRefs } from 'pinia'
 
 // Receive Search Text from Parent
 const props = defineProps<{
@@ -212,9 +214,9 @@ const props = defineProps<{
 // ==========================================
 // 🛠️ BACKEND & DATA
 // ==========================================
-const binStore = useBinStore();
+const binStore = useBinStore()
 
-const { bins } = storeToRefs(binStore);
+const { bins } = storeToRefs(binStore)
 const isLoading = ref(true)
 
 // FILTER ENGINE: Connects Search Bar to the UI
@@ -274,22 +276,28 @@ let watchId: number | null = null
 let backendInterval: any = null
 
 const trackUserLocation = () => {
-  if (!navigator.geolocation) return;
-  watchId = navigator.geolocation.watchPosition((pos) => {
-    const { latitude, longitude } = pos.coords;
-    userLocation.value = [latitude, longitude];
-    if (isFollowingUser.value && !activeBinId.value) mapCenter.value = [latitude, longitude];
+  if (!navigator.geolocation) return
+  watchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords
+      userLocation.value = [latitude, longitude]
+      if (isFollowingUser.value && !activeBinId.value) mapCenter.value = [latitude, longitude]
 
-    if (activeBinId.value) {
-      const bin = bins.value.find(b => b._id === activeBinId.value);
-      if (bin) {
-        const dist = L.latLng(latitude, longitude).distanceTo(L.latLng(bin.location.lat, bin.location.lng));
-        distanceRemaining.value = Math.round(dist) + ' m';
-        if (dist < 15) handleArrival();
+      if (activeBinId.value) {
+        const bin = bins.value.find((b) => b._id === activeBinId.value)
+        if (bin) {
+          const dist = L.latLng(latitude, longitude).distanceTo(
+            L.latLng(bin.location.lat, bin.location.lng),
+          )
+          distanceRemaining.value = Math.round(dist) + ' m'
+          if (dist < 15) handleArrival()
+        }
       }
-    }
-  }, null, { enableHighAccuracy: true });
-};
+    },
+    null,
+    { enableHighAccuracy: true },
+  )
+}
 
 const startNavigationToBin = (bin: Bin) => {
   if (!userLocation.value) {
@@ -330,7 +338,6 @@ const handleArrival = () => {
   stopNavigation()
 }
 
-
 onMounted(async () => {
   trackUserLocation()
   if (!document.getElementById('routing-css')) {
@@ -340,7 +347,7 @@ onMounted(async () => {
     link.href = 'https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css'
     document.head.appendChild(link)
   }
-  binStore.getAllBinsPublic();
+  binStore.getAllBinsPublic()
   backendInterval = setInterval(() => binStore.getAllBinsPublic(), 30000)
 })
 
