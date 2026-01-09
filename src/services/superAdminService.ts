@@ -1,4 +1,5 @@
 import axios from 'axios'
+import type { Admin, UpdateAdminData } from '@/types/admin'
 
 const API_URL = import.meta.env.VITE_API_URL + '/superadmin'
 const api = axios.create({
@@ -21,7 +22,16 @@ export const getAllAdmins = async () => {
   return response.data
 }
 
+export const updateAdmin = async (id: string, data: UpdateAdminData): Promise<Admin> => {
+  const response = await api.patch(`/update-admin/${id}`, data)
+  return response.data
+}
+
+export const deleteAdmin = async (id: string): Promise<void> => {
+  await api.delete(`/delete-admin/${id}`)
+}
+
 export const getAllCleaners = async () => {
-  const response = await api.get('/superadmin/cleaners')
+  const response = await api.get('/cleaners')
   return response.data
 }

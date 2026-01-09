@@ -10,7 +10,13 @@ defineProps({
   },
 })
 
+const emit = defineEmits(['search'])
+
 const sidebarOpen = ref(false)
+
+const handleSearch = (query: string) => {
+  emit('search', query)
+}
 </script>
 
 <template>
@@ -39,7 +45,7 @@ const sidebarOpen = ref(false)
     <div class="flex-1 flex flex-col">
       <!-- Header -->
       <header class="w-full bg-gray-50 border-b border-gray-100 px-3 md:px-6 lg:px-8 py-3 md:py-4">
-        <Header :sidebarOpen="sidebarOpen" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
+        <Header :sidebarOpen="sidebarOpen" @toggle-sidebar="sidebarOpen = !sidebarOpen" @search="handleSearch" />
       </header>
 
       <!-- Page Content -->
@@ -50,6 +56,21 @@ const sidebarOpen = ref(false)
     </div>
   </div>
 </template>
+
+<style scoped>
+.sidebar-enter-active,
+.sidebar-leave-active {
+  transition: all 0.3s ease;
+}
+
+.sidebar-enter-from {
+  opacity: 0;
+}
+
+.sidebar-leave-to {
+  opacity: 0;
+}
+</style>
 
 <style scoped>
 .sidebar-enter-active,

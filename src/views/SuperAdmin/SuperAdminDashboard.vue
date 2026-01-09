@@ -6,13 +6,61 @@ import { useBinStore } from '@/stores/binStore'
 import { useSuperAdminStore } from '@/stores/superAdminStore'
 import { useCleanerStore } from '@/stores/cleanerStore'
 import { Users, Box, BarChart2, Clock, ChevronRight, ChevronLeft } from 'lucide-vue-next'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const superAdminStore = useSuperAdminStore()
 const cleanerStore = useCleanerStore()
 const binStore = useBinStore()
 
-const bins = computed(() => binStore.allBins)
+// Search functionality
+const searchQuery = ref('')
+
+const handleSearch = (query: string) => {
+  searchQuery.value = query.toLowerCase()
+}
+
+// Filtered data based on search
+const filteredBins = computed(() => {
+  if (!searchQuery.value) return binStore.allBins
+  return binStore.allBins.filter((bin) => {
+    const query = searchQuery.value
+    return (
+      bin.binCode?.toLowerCase().includes(query) ||
+      bin.binName?.toLowerCase().includes(query) ||
+      bin.area?.toLowerCase().includes(query)
+    )
+  })
+})
+
+const filteredCleaners = computed(() => {
+  if (!searchQuery.value) return cleanerStore.getCleaners || []
+  return (cleanerStore.getCleaners || []).filter((cleaner) => {
+    const query = searchQuery.value
+    const fullName = `${cleaner.firstName} ${cleaner.lastName}`.toLowerCase()
+    return (
+      fullName.includes(query) ||
+      cleaner.telegramChatId?.toLowerCase().includes(query) ||
+      cleaner.area?.toLowerCase().includes(query)
+    )
+  })
+})
+
+const filteredAdmins = computed(() => {
+  if (!searchQuery.value) return superAdminStore.getAdmins || []
+  return (superAdminStore.getAdmins || []).filter((admin) => {
+    const query = searchQuery.value
+    const fullName = `${admin.firstName || ''} ${admin.lastName || ''}`.toLowerCase()
+    return (
+      admin.username?.toLowerCase().includes(query) ||
+      admin.email?.toLowerCase().includes(query) ||
+      fullName.includes(query) ||
+      admin.area?.toLowerCase().includes(query) ||
+      admin.phone?.toLowerCase().includes(query)
+    )
+  })
+})
+
+const bins = computed(() => filteredBins.value)
 const totalFullCount = computed(() => {
   return bins.value.reduce((total, bin) => total + (bin.fullCount || 0), 0)
 })
@@ -192,11 +240,95 @@ const fillLevelTrendData = computed(() => {
 </script>
 
 <template>
-  <SuperAdminLayout title="Dashboard">
+  <SuperAdminLayout title="Dashboard" @search="handleSearch">
+    <!-- Search Results Section -->
+    <div v-if="searchQuery" class="mb-8">
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h3 class="text-lg font-semibold mb-4">
+          Search Results for "{{ searchQuery }}"
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Bins Results -->
+          <div class="border rounded-lg p-4">
+            <h4 class="font-medium text-gray-700 mb-3 flex items-center">
+              <Box class="w-5 h-5 mr-2 text-yellow-500" />
+              Bins ({{ filteredBins.length }})
+            </h4>
+            <div v-if="filteredBins.length === 0" class="text-sm text-gray-500">
+              No bins match your search
+            </div>
+            <div v-else class="space-y-2 max-h-60 overflow-y-auto">
+              <div
+                v-for="bin in filteredBins.slice(0, 10)"
+                :key="bin._id"
+                class="text-sm p-2 bg-gray-50 rounded hover:bg-gray-100"
+              >
+                <div class="font-medium">{{ bin.binName }}</div>
+                <div class="text-gray-600 text-xs">{{ bin.binCode }} - {{ bin.area }}</div>
+              </div>
+              <div v-if="filteredBins.length > 10" class="text-xs text-gray-500 pt-1">
+                +{{ filteredBins.length - 10 }} more
+              </div>
+            </div>
+          </div>
+
+          <!-- Cleaners Results -->
+          <div class="border rounded-lg p-4">
+            <h4 class="font-medium text-gray-700 mb-3 flex items-center">
+              <Clock class="w-5 h-5 mr-2 text-orange-500" />
+              Cleaners ({{ filteredCleaners.length }})
+            </h4>
+            <div v-if="filteredCleaners.length === 0" class="text-sm text-gray-500">
+              No cleaners match your search
+            </div>
+            <div v-else class="space-y-2 max-h-60 overflow-y-auto">
+              <div
+                v-for="cleaner in filteredCleaners.slice(0, 10)"
+                :key="cleaner._id"
+                class="text-sm p-2 bg-gray-50 rounded hover:bg-gray-100"
+              >
+                <div class="font-medium">{{ cleaner.firstName }} {{ cleaner.lastName }}</div>
+                <div class="text-gray-600 text-xs">{{ cleaner.area }}</div>
+              </div>
+              <div v-if="filteredCleaners.length > 10" class="text-xs text-gray-500 pt-1">
+                +{{ filteredCleaners.length - 10 }} more
+              </div>
+            </div>
+          </div>
+
+          <!-- Admins Results -->
+          <div class="border rounded-lg p-4">
+            <h4 class="font-medium text-gray-700 mb-3 flex items-center">
+              <Users class="w-5 h-5 mr-2 text-purple-600" />
+              Admins ({{ filteredAdmins.length }})
+            </h4>
+            <div v-if="filteredAdmins.length === 0" class="text-sm text-gray-500">
+              No admins match your search
+            </div>
+            <div v-else class="space-y-2 max-h-60 overflow-y-auto">
+              <div
+                v-for="admin in filteredAdmins.slice(0, 10)"
+                :key="admin._id"
+                class="text-sm p-2 bg-gray-50 rounded hover:bg-gray-100"
+              >
+                <div class="font-medium">{{ admin.username }}</div>
+                <div class="text-gray-600 text-xs">{{ admin.email }} - {{ admin.area }}</div>
+              </div>
+              <div v-if="filteredAdmins.length > 10" class="text-xs text-gray-500 pt-1">
+                +{{ filteredAdmins.length - 10 }} more
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <StatCard
         title="Total Customer"
-        :value="superAdminStore.getAdmins?.length || 0"
+        :value="filteredAdmins.length"
         :icon="Users"
         iconBg="bg-purple-100 text-purple-600"
         trend="8.5%"
@@ -204,7 +336,7 @@ const fillLevelTrendData = computed(() => {
       />
       <StatCard
         title="Total Bin"
-        :value="binStore.allBins?.length || 0"
+        :value="filteredBins.length"
         :icon="Box"
         iconBg="bg-yellow-100 text-yellow-500"
         trend="1.3%"
@@ -220,7 +352,7 @@ const fillLevelTrendData = computed(() => {
       />
       <StatCard
         title="Total Cleaners"
-        :value="cleanerStore.getCleaners?.length || 0"
+        :value="filteredCleaners.length"
         :icon="Clock"
         iconBg="bg-orange-100 text-orange-500"
         trend="1.8%"

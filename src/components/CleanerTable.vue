@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCleanerStore } from '@/stores/cleanerStore'
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import type { Cleaner } from '@/types/cleaner'
 import { Edit, Trash, Trash2 } from 'lucide-vue-next'
@@ -15,16 +15,43 @@ const uploadedImages = ref<string[]>([])
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-const totalPages = computed(() => Math.ceil(cleaners.value.length / itemsPerPage))
+const props = defineProps({
+  searchQuery: {
+    type: String,
+    default: ''
+  }
+})
+
+const filteredCleaners = computed(() => {
+  const query = props.searchQuery.toLowerCase()
+  
+  if (!query.trim()) {
+    return cleaners.value
+  }
+  
+  return cleaners.value.filter(cleaner => {
+    return (
+      cleaner.name.toLowerCase().includes(query) ||
+      cleaner.telegramChatId.toLowerCase().includes(query) ||
+      cleaner.area.toLowerCase().includes(query)
+    )
+  })
+})
+
+const totalPages = computed(() => Math.ceil(filteredCleaners.value.length / itemsPerPage))
 
 const paginatedCleaners = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
   const end = start + itemsPerPage
-  return cleaners.value.slice(start, end)
+  return filteredCleaners.value.slice(start, end)
 })
 
 onMounted(() => {
   cleanerStore.fetchCleaners()
+})
+
+watch(() => props.searchQuery, () => {
+  currentPage.value = 1
 })
 
 const goToPage = (page: number) => {
@@ -99,7 +126,18 @@ const deleteCleaner = async (cleaner: Cleaner) => {
 
 <template>
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    <table class="w-full text-left border-collapse">
+    <!-- Empty State -->
+    <div v-if="!cleaners.length" class="p-8 text-center text-gray-600">
+      No cleaners found
+    </div>
+
+    <!-- No Search Results -->
+    <div v-else-if="!filteredCleaners.length" class="p-8 text-center text-gray-600">
+      No cleaners match your search
+    </div>
+
+    <!-- Table -->
+    <table v-else class="w-full text-left border-collapse">
       <thead>
         <tr class="text-xs font-bold text-gray-400 uppercase border-b border-gray-100">
           <th class="px-6 py-4">Name</th>
@@ -131,10 +169,10 @@ const deleteCleaner = async (cleaner: Cleaner) => {
     </table>
 
     <!-- Pagination -->
-    <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+    <div v-if="filteredCleaners.length > 0" class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
       <div class="text-sm text-gray-600">
         Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
-        {{ Math.min(currentPage * itemsPerPage, cleaners.length) }} of {{ cleaners.length }}
+        {{ Math.min(currentPage * itemsPerPage, filteredCleaners.length) }} of {{ filteredCleaners.length }}
       </div>
 
       <div class="flex items-center gap-2">
