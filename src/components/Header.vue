@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import { Search, Bell, Menu } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/authStore'
+import { ref } from 'vue'
+
 const authStore = useAuthStore()
+const searchQuery = ref('')
+
 defineProps({
   sidebarOpen: Boolean,
 })
 
-const emit = defineEmits(['toggle-sidebar'])
+const emit = defineEmits(['toggle-sidebar', 'search'])
+
+const handleSearch = (query: string) => {
+  searchQuery.value = query
+  emit('search', query)
+}
 
 const getInitials = (username: string | undefined) => {
   if (!username) return 'U'
@@ -17,6 +26,7 @@ const getInitials = (username: string | undefined) => {
     .toUpperCase()
 }
 </script>
+
 
 <template>
   <div class="flex items-center justify-between w-full gap-2 md:gap-6">
@@ -35,6 +45,8 @@ const getInitials = (username: string | undefined) => {
       <Search class="text-blue-500 w-5 md:w-5 h-5 md:h-5 mr-3 md:mr-3 shrink-0" />
       <input
         type="text"
+        v-model="searchQuery"
+        @input="handleSearch(searchQuery)"
         placeholder="Search anything..."
         class="bg-transparent outline-none w-full text-sm md:text-sm text-gray-600 placeholder-gray-400"
       />

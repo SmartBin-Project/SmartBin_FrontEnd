@@ -1,11 +1,11 @@
-import { getAllAdmins, getAllCleaners } from '@/services/superAdminService'
-import type { Admin } from '@/types/admin'
+import { getAllAdmins, getAllCleaners, updateAdmin, deleteAdmin } from '@/services/superAdminService'
+import type { Admin, UpdateAdminData } from '@/types/admin'
 import type { Cleaner } from '@/types/cleaner'
 import { defineStore } from 'pinia'
 
 export const useSuperAdminStore = defineStore('superAdmin', {
   state: () => ({
-    admin: [] as Admin[],
+    admins: [] as Admin[],
     cleaners: [] as Cleaner[],
     loading: false,
     error: null as string | null,
@@ -13,7 +13,7 @@ export const useSuperAdminStore = defineStore('superAdmin', {
 
   getters: {
     getAdmins(): Admin[] {
-      return this.admin
+      return this.admins
     },
 
     getCleaners(): Cleaner[] {
@@ -27,9 +27,41 @@ export const useSuperAdminStore = defineStore('superAdmin', {
       this.error = null
       try {
         const response = await getAllAdmins()
-        this.admin = response
+        this.admins = response
       } catch (err: any) {
         this.error = err.message || 'Failed to fetch admins'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async updateAdmin(id: string, data: UpdateAdminData) {
+      this.loading = true
+      this.error = null
+      try {
+        const updatedAdmin = await updateAdmin(id, data)
+        const index = this.admins.findIndex(admin => admin._id === id)
+        if (index !== -1) {
+          this.admins[index] = updatedAdmin
+        }
+        return updatedAdmin
+      } catch (err: any) {
+        this.error = err.message || 'Failed to update admin'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async deleteAdmin(id: string) {
+      this.loading = true
+      this.error = null
+      try {
+        await deleteAdmin(id)
+        this.admins = this.admins.filter(admin => admin._id !== id)
+      } catch (err: any) {
+        this.error = err.message || 'Failed to delete admin'
         throw err
       } finally {
         this.loading = false

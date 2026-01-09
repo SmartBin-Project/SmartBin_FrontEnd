@@ -3,7 +3,7 @@ import SuperAdminLayout from '@/components/layout/SuperAdminLayout.vue'
 import BinCard from '@/components/BinCard.vue'
 import SuperAdminBinLocation from '@/components/ui/SuperAdmin/SuperAdminBinLocation.vue'
 import { useBinStore } from '@/stores/binStore'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import UpdateBinModal from '@/components/UpdateBinModal.vue'
 import type { Bin } from '@/types/bin'
@@ -13,6 +13,27 @@ const binStore = useBinStore()
 const { bins } = storeToRefs(binStore)
 const selectedBin = ref<any>(null)
 const isUpdateModalVisible = ref(false)
+
+const handleSearch = (query: string) => {
+  searchText.value = query
+}
+
+const filteredBins = computed(() => {
+  const query = searchText.value.toLowerCase()
+  
+  if (!query.trim()) {
+    return bins.value
+  }
+  
+  return bins.value.filter(bin => {
+    return (
+      bin.binCode.toLowerCase().includes(query) ||
+      (bin.binName && bin.binName.toLowerCase().includes(query)) ||
+      bin.location.toLowerCase().includes(query) ||
+      (bin.area && bin.area.toLowerCase().includes(query))
+    )
+  })
+})
 
 const handleUpdateBin = async (id: string, bin: Partial<Bin>) => {
   await binStore.updateBin(id, bin)
@@ -54,7 +75,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <SuperAdminLayout title="Bin Locations">
+  <SuperAdminLayout title="Bin Locations" @search="handleSearch">
     <div>
       <div
         class="w-full h-125 rounded-xl mb-8 flex items-center justify-center relative overflow-hidden"
@@ -74,8 +95,11 @@ onMounted(() => {
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-if="!filteredBins.length" class="col-span-full p-8 text-center text-gray-600">
+          No bins match your search
+        </div>
         <BinCard
-          v-for="bin in bins"
+          v-for="bin in filteredBins"
           :key="bin._id"
           :binCode="bin.binCode"
           :area="bin.area"
