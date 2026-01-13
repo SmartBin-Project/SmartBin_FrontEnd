@@ -1,14 +1,14 @@
 <template>
   <nav
-    class="sticky top-0 z-[2001] bg-white/70 backdrop-blur-xl border-b border-white/20 px-4 md:px-8 py-4 transition-all duration-300"
+    class="sticky top-0 z-2001 bg-white/70 backdrop-blur-xl border-b border-white/20 px-4 md:px-8 py-4 transition-all duration-300"
   >
     <div class="max-w-screen-2xl mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-6 lg:space-x-12">
         <router-link
           to="/"
-          class="flex items-center w-[130px] md:w-[160px] shrink-0 transition-all hover:opacity-80 active:scale-95"
+          class="flex items-center w-[130px] md:w-40 shrink-0 transition-all hover:opacity-80 active:scale-95"
         >
-          <img src="../../assets/images/SmartBin.png" alt="logo" class="w-full drop-shadow-sm" />
+          <img :src="Logo" alt="logo" class="w-full drop-shadow-sm" />
         </router-link>
 
         <div class="hidden md:flex items-center space-x-2 font-semibold text-gray-500">
@@ -113,11 +113,12 @@
   </nav>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 const isMenuOpen = ref(false)
 const searchQuery = ref('')
-const searchInput = ref(null)
+const searchInput = ref<HTMLInputElement | null>(null)
+import Logo from '@/assets/images/logo.png'
 const emit = defineEmits(['search'])
 
 const handleClear = () => {
@@ -126,7 +127,7 @@ const handleClear = () => {
   searchInput.value?.focus()
 }
 
-const handleKeyDown = (e) => {
+const handleKeyDown = (e: KeyboardEvent) => {
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
     e.preventDefault()
     searchInput.value?.focus()

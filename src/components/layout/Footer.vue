@@ -5,15 +5,15 @@
         
         <div class="space-y-6">
           <div class="flex items-center space-x-2">
-            <img src="@/assets/images/SmartBin.png" alt="SmartBin" class="h-10" />
+            <img :src="Logo" alt="SmartBin" class="h-10" />
           </div>
           <p class="text-[#2c4c23] font-semibold leading-relaxed">
             Empowering Cambodians to create cleaner communities through smart waste management, 
             education, and collective action. Together, we can build a sustainable future.
           </p>
           <div class="flex space-x-4 pt-4">
-            <a v-for="i in 3" :key="i" href="#" class="w-10 h-10 border-2 border-white/40 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition-all">
-              <span class="font-black">X</span>
+            <a v-for="(link, index) in socialLinks" :key="index" :href="link.url" class="w-10 h-10 border-2 border-white/40 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition-all">
+              <component :is="link.icon" class="w-6 h-6" />
             </a>
           </div>
         </div>
@@ -31,15 +31,15 @@
           <h4 class="text-gray-900 font-black text-xl mb-8">Contact Us</h4>
           <ul class="space-y-6 text-[#2c4c23] font-bold">
             <li class="flex items-center space-x-4">
-              <span class="w-6">📧</span>
+              <span class="w-6"><mail/> </span>
               <span>info@greenprofitcambodia.org</span>
             </li>
             <li class="flex items-center space-x-4">
-              <span class="w-6">📞</span>
+              <span class="w-6"><phone/> </span>
               <span>+855 12 345 678</span>
             </li>
             <li class="flex items-center space-x-4">
-              <span class="w-6">📍</span>
+              <span class="w-6"><map-pinned/> </span>
               <span>Phnom Penh, Cambodia</span>
             </li>
           </ul>
@@ -54,3 +54,17 @@
     </div>
   </footer>
 </template>
+
+<script setup lang="ts">
+
+import Logo from '@/assets/images/logo.png'
+import { Facebook, Instagram, Mail, MapPinned, Phone, Twitter } from 'lucide-vue-next';
+import { computed } from 'vue';
+
+const socialLinks = computed(() => [
+  { icon: Facebook, url: '#' },
+  { icon: Instagram, url: '#' },
+  { icon: Twitter, url: '#' },
+])
+
+</script>

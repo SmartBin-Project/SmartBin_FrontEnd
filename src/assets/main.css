@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+
+@import "primeicons/primeicons.css";
 .nunito-san {
   font-family: 'Nunito Sans', sans-serif;
 }

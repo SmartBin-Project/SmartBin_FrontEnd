@@ -2,6 +2,11 @@
   <div
     class="relative w-full h-[calc(100vh-70px)] bg-[#f1f5f9] overflow-hidden font-sans text-left"
   >
+    <BinDetailPanel
+      :bin="selectedBin"
+      @close="selectedBin = null"
+      @navigate="handleNavigateFromPanel"
+    />
     <transition name="slide-down">
       <div
         v-if="activeBinId"
@@ -107,23 +112,23 @@
 
     <div
       v-show="!activeBinId"
-      class="absolute bottom-8 left-0 w-fit z-1000 px-4 overflow-x-auto no-scrollbar"
+      class="absolute bottom-8 left-0 w-full z-1000 px-4 overflow-x-auto no-scrollbar"
     >
-      <div v-if="filteredBins.length > 0" class="flex space-x-4 pb-4">
+      <div v-if="filteredBins.length > 0" class="flex space-x-3 pb-4">
         <div
           v-for="bin in filteredBins"
           :key="bin._id"
           @click="handleBinClick(bin)"
-          class="min-w-70 bg-white/90 backdrop-blur-xl rounded-4xl p-4 shadow-lg border border-white group transition-all duration-300 hover:-translate-y-1"
+          class="min-w-60 backdrop-blur-sm rounded-3xl p-3 shadow-lg border border-white group transition-all duration-300 hover:-translate-y-1"
         >
-          <div class="flex justify-between items-start mb-4">
+          <div class="flex justify-between items-start mb-3">
             <div
               :class="
                 bin.fillLevel > 80 ? 'bg-red-500 shadow-red-200' : 'bg-green-500 shadow-green-200'
               "
-              class="p-3 rounded-xl text-white shadow-md"
+              class="p-2.5 rounded-lg text-white shadow-md"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -136,29 +141,29 @@
               :class="
                 bin.fillLevel > 80 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
               "
-              class="px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider"
+              class="px-2.5 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider"
             >
               {{ bin.fillLevel > 80 ? 'Urgent' : 'Available' }}
             </span>
           </div>
-          <div class="mb-4 w-[250px]">
-            <h3 class="text-lg font-bold text-gray-900 truncate">
+          <div class="mb-3 w-[220px]">
+            <h3 class="text-base font-bold text-gray-900 truncate">
               {{ bin.area }}
             </h3>
-            <p class="text-gray-500 text-xs uppercase font-semibold tracking-tight">
+            <p class="text-gray-500 text-[11px] uppercase font-semibold tracking-tight">
               {{ bin.binCode }}
             </p>
           </div>
-          <div class="space-y-2 mb-5">
+          <div class="space-y-1.5 mb-4">
             <div
-              class="flex justify-between text-[10px] font-bold uppercase text-gray-500 tracking-wider"
+              class="flex justify-between text-[9px] font-bold uppercase text-gray-500 tracking-wider"
             >
               <span>Load</span>
               <span :class="bin.fillLevel > 80 ? 'text-red-500' : 'text-gray-800'"
                 >{{ bin.fillLevel }}%</span
               >
             </div>
-            <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+            <div class="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
               <div
                 class="h-full transition-all duration-1000"
                 :style="{
@@ -170,7 +175,7 @@
           </div>
           <button
             @click.stop="startNavigationToBin(bin)"
-            class="w-full bg-gray-900 text-white py-3 rounded-2xl text-[11px] font-bold uppercase tracking-widest shadow-md active:scale-95 transition-all"
+            class="w-full bg-gray-900 text-white py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-md active:scale-95 transition-all"
           >
             Directions
           </button>
@@ -184,7 +189,7 @@
         <div
           class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-3xl"
         >
-          🔎
+        <search class="w-8 h-8 text-gray-400" />
         </div>
         <h3 class="text-xl font-bold text-gray-900 mb-1">No Results</h3>
         <p class="text-gray-500 text-center text-sm font-medium">
@@ -205,6 +210,8 @@ import { getAllBins } from '@/services/binService'
 import type { Bin } from '@/types/bin'
 import { useBinStore } from '@/stores/binStore'
 import { storeToRefs } from 'pinia'
+import { Search } from 'lucide-vue-next'
+import BinDetailPanel from './BinDetailPanel.vue'
 
 // Receive Search Text from Parent
 const props = defineProps<{
@@ -224,11 +231,11 @@ const filteredBins = computed(() => {
   const query = props.searchText.toLowerCase().trim()
   if (!query) return bins.value
   return bins.value.filter(
-    (bin) => bin.binCode.toLowerCase().includes(query),
+    (bin) => bin.area.toLowerCase().includes(query),
     // bin.address.toLowerCase().includes(query)
   )
 })
-
+console.log(filteredBins)
 // AUTO-ZOOM: Glide map to first result when typing
 watch(
   () => props.searchText,
@@ -331,6 +338,13 @@ const stopNavigation = () => {
     leafletMap.value.leafletObject.removeControl(routingControl)
     routingControl = null
   }
+}
+
+const handleNavigateFromPanel = (bin: Bin) => {
+  selectedBin.value = null // Close the panel
+  setTimeout(() => {
+    startNavigationToBin(bin)
+  }, 300) // Delay to allow panel to close
 }
 
 const handleArrival = () => {
