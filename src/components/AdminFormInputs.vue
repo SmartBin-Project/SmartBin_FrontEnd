@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { CreateAdminData } from '@/types/admin'
+import ImageUploader from './ImageUploader.vue'
 
 const formData = ref<CreateAdminData>({
   username: '',
@@ -14,6 +15,8 @@ const formData = ref<CreateAdminData>({
   dateOfBirth: '',
   address: '',
 })
+
+const imageUploader = ref<{ uploadedImages: string[] }>()
 
 const emit = defineEmits<{
   submit: [data: CreateAdminData]
@@ -37,6 +40,9 @@ const resetForm = () => {
     dateOfBirth: '',
     address: '',
   }
+  if (imageUploader.value) {
+    imageUploader.value.uploadedImages = []
+  }
 }
 
 const getFormData = () => {
@@ -52,7 +58,7 @@ defineExpose({ handleSubmit, getFormData, resetForm })
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- Username -->
       <div>
-        <label class="block text-sm font-bold text-gray-700 mb-2">Username *</label>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Username</label>
         <input
           v-model="formData.username"
           type="text"
@@ -64,7 +70,7 @@ defineExpose({ handleSubmit, getFormData, resetForm })
 
       <!-- Email -->
       <div>
-        <label class="block text-sm font-bold text-gray-700 mb-2">Email *</label>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
         <input
           v-model="formData.email"
           type="email"
@@ -76,7 +82,7 @@ defineExpose({ handleSubmit, getFormData, resetForm })
 
       <!-- Password -->
       <div>
-        <label class="block text-sm font-bold text-gray-700 mb-2">Password *</label>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Password</label>
         <input
           v-model="formData.password"
           type="password"
@@ -88,7 +94,7 @@ defineExpose({ handleSubmit, getFormData, resetForm })
 
       <!-- Area -->
       <div>
-        <label class="block text-sm font-bold text-gray-700 mb-2">Area *</label>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Area </label>
         <input
           v-model="formData.area"
           type="text"
@@ -169,6 +175,10 @@ defineExpose({ handleSubmit, getFormData, resetForm })
             placeholder="Enter address"
             class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-green-500 focus:bg-white transition-colors"
           />
+        </div>
+        <div class="md:col-span-2 lg:col-span-1">
+          <label class="block text-sm font-bold text-gray-700 mb-2">Profile Picture</label>
+          <ImageUploader ref="imageUploader" />
         </div>
       </div>
     </div>

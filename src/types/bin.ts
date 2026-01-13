@@ -1,4 +1,5 @@
 interface Location {
+  includes: any
   lat: number
   lng: number
 }
@@ -12,4 +13,5 @@ export interface Bin {
   status: 'EMPTY' | 'HALF' | 'FULL'
   fullCount: number
   pictureBins: string[]
+  addressBin: string
 }

@@ -3,33 +3,42 @@ import { useCleanerStore } from '@/stores/cleanerStore'
 import { onMounted, ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import type { Cleaner } from '@/types/cleaner'
-import { Edit, Trash, Trash2 } from 'lucide-vue-next'
+import { Edit, Trash2 } from 'lucide-vue-next'
+import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal.vue'
+import SuccessAlert from '@/components/ui/SuccessAlert.vue'
+import UpdateCleanerModal from '@/components/UpdateCleanerModal.vue'
 
 const cleanerStore = useCleanerStore()
 const { cleaners } = storeToRefs(cleanerStore)
 
 const showUpdateModal = ref(false)
+const showDeleteModal = ref(false)
+const showSuccessAlert = ref(false)
 const selectedCleaner = ref<Cleaner | null>(null)
+const cleanerToDelete = ref<Cleaner | null>(null)
 const formData = ref<Partial<Cleaner>>({})
 const uploadedImages = ref<string[]>([])
 const currentPage = ref(1)
 const itemsPerPage = 10
+const isDeleting = ref(false)
+const isUpdating = ref(false)
+const successMessage = ref('')
 
 const props = defineProps({
   searchQuery: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 const filteredCleaners = computed(() => {
   const query = props.searchQuery.toLowerCase()
-  
+
   if (!query.trim()) {
     return cleaners.value
   }
-  
-  return cleaners.value.filter(cleaner => {
+
+  return cleaners.value.filter((cleaner) => {
     return (
       cleaner.name.toLowerCase().includes(query) ||
       cleaner.telegramChatId.toLowerCase().includes(query) ||
@@ -48,11 +57,15 @@ const paginatedCleaners = computed(() => {
 
 onMounted(() => {
   cleanerStore.fetchCleaners()
+  console.log('Cleaners fetched:', cleaners.value)
 })
 
-watch(() => props.searchQuery, () => {
-  currentPage.value = 1
-})
+watch(
+  () => props.searchQuery,
+  () => {
+    currentPage.value = 1
+  },
+)
 
 const goToPage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
@@ -74,64 +87,53 @@ const closeUpdateModal = () => {
   uploadedImages.value = []
 }
 
-const handleImageUpload = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  if (input.files) {
-    const files = Array.from(input.files)
-    files.forEach((file) => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          uploadedImages.value.push(e.target.result as string)
-        }
-      }
-      reader.readAsDataURL(file)
-    })
+const handleUpdateCleaner = async (id: string, cleaner: Partial<Cleaner>) => {
+  isUpdating.value = true
+  try {
+    await cleanerStore.updateCleaner(cleaner as Cleaner, id)
+    successMessage.value = `Cleaner "${cleaner.name}" has been updated successfully!`
+    showSuccessAlert.value = true
+    closeUpdateModal()
+  } catch (error: any) {
+    console.error(error.message || 'Failed to update cleaner')
+  } finally {
+    isUpdating.value = false
   }
 }
 
-const removeImage = (index: number) => {
-  uploadedImages.value.splice(index, 1)
+const closeSuccessAlert = () => {
+  showSuccessAlert.value = false
 }
 
-const submitUpdate = async () => {
-  if (selectedCleaner.value?._id) {
-    try {
-      const updateData = {
-        name: formData.value.name,
-        telegramChatId: formData.value.telegramChatId,
-        area: formData.value.area,
-        pictureCleaner: uploadedImages.value,
-      }
-      await cleanerStore.updateCleaner(updateData as Cleaner, selectedCleaner.value._id)
-      closeUpdateModal()
-    } catch (error: any) {
-      console.error(error.message || 'Failed to update cleaner')
-    }
-  }
+const openDeleteModal = (cleaner: Cleaner) => {
+  cleanerToDelete.value = cleaner
+  showDeleteModal.value = true
 }
 
-const deleteCleaner = async (cleaner: Cleaner) => {
-  if (confirm(`Are you sure you want to delete ${cleaner.name}?`)) {
+const confirmDelete = async () => {
+  if (cleanerToDelete.value?._id) {
+    isDeleting.value = true
     try {
-      if (cleaner._id) {
-        await cleanerStore.deleteCleaner(cleaner._id)
-      }
+      await cleanerStore.deleteCleaner(cleanerToDelete.value._id)
+      showDeleteModal.value = false
+      cleanerToDelete.value = null
     } catch (error: any) {
       console.error(error.message || 'Failed to delete cleaner')
+    } finally {
+      isDeleting.value = false
     }
   }
+}
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false
+  cleanerToDelete.value = null
 }
 </script>
 
 <template>
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    <!-- Empty State -->
-    <div v-if="!cleaners.length" class="p-8 text-center text-gray-600">
-      No cleaners found
-    </div>
-
-    <!-- No Search Results -->
+    <div v-if="!cleaners.length" class="p-8 text-center text-gray-600">No cleaners found</div>
     <div v-else-if="!filteredCleaners.length" class="p-8 text-center text-gray-600">
       No cleaners match your search
     </div>
@@ -140,9 +142,12 @@ const deleteCleaner = async (cleaner: Cleaner) => {
     <table v-else class="w-full text-left border-collapse">
       <thead>
         <tr class="text-xs font-bold text-gray-400 uppercase border-b border-gray-100">
+          <th class="px-6 py-4">ID</th>
           <th class="px-6 py-4">Name</th>
           <th class="px-6 py-4">Telegram ID</th>
           <th class="px-6 py-4">Area</th>
+          <th class="px-6 py-4 text-center">Accept Count</th>
+          <th class="px-6 py-4 text-center">Reject Count</th>
           <th class="px-6 py-4 text-center">Options</th>
         </tr>
       </thead>
@@ -153,14 +158,17 @@ const deleteCleaner = async (cleaner: Cleaner) => {
           v-for="cleaner in paginatedCleaners"
           :key="cleaner._id"
         >
+          <td class="px-6 py-4">{{ cleaner._id }}</td>
           <td class="px-6 py-4">{{ cleaner.name }}</td>
           <td class="px-6 py-4">{{ cleaner.telegramChatId }}</td>
           <td class="px-6 py-4">{{ cleaner.area }}</td>
+          <td class="px-6 py-4 text-center">{{ cleaner.acceptCount }}</td>
+          <td class="px-6 py-4 text-center">{{ cleaner.rejectCount }}</td>
           <td class="px-6 py-4 text-center">
             <button @click="openUpdateModal(cleaner)">
-              <Edit class="inline-block w-5 h-5 mr-1" />
+              <Edit class="inline-block w-5 h-5 mr-1 text-blsue-600" />
             </button>
-            <button @click="deleteCleaner(cleaner)">
+            <button @click="openDeleteModal(cleaner)">
               <Trash2 class="inline-block w-5 h-5 text-red-600" />
             </button>
           </td>
@@ -169,10 +177,14 @@ const deleteCleaner = async (cleaner: Cleaner) => {
     </table>
 
     <!-- Pagination -->
-    <div v-if="filteredCleaners.length > 0" class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+    <div
+      v-if="filteredCleaners.length > 0"
+      class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50"
+    >
       <div class="text-sm text-gray-600">
         Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
-        {{ Math.min(currentPage * itemsPerPage, filteredCleaners.length) }} of {{ filteredCleaners.length }}
+        {{ Math.min(currentPage * itemsPerPage, filteredCleaners.length) }} of
+        {{ filteredCleaners.length }}
       </div>
 
       <div class="flex items-center gap-2">
@@ -211,100 +223,32 @@ const deleteCleaner = async (cleaner: Cleaner) => {
     </div>
 
     <!-- Update Modal -->
-    <div
-      v-if="showUpdateModal"
-      class="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
-    >
-      <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800">Update Cleaner</h2>
-        <form @submit.prevent="submitUpdate">
-          <div class="mb-4">
-            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-            <input
-              type="text"
-              id="name"
-              v-model="formData.name"
-              class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-            />
-          </div>
-          <div class="mb-4">
-            <label for="telegramChatId" class="block text-sm font-medium text-gray-700"
-              >Telegram Chat ID</label
-            >
-            <input
-              type="text"
-              id="telegramChatId"
-              v-model="formData.telegramChatId"
-              class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-            />
-          </div>
-          <div class="mb-6">
-            <label for="area" class="block text-sm font-medium text-gray-700">Area</label>
-            <input
-              type="text"
-              id="area"
-              v-model="formData.area"
-              class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-            />
-          </div>
+    <UpdateCleanerModal
+      :visible="showUpdateModal"
+      :cleaner="selectedCleaner"
+      @close="closeUpdateModal"
+      @update="handleUpdateCleaner"
+    />
 
-          <!-- Image Upload Section -->
-          <div class="mb-6">
-            <label for="images" class="block text-sm font-medium text-gray-700 mb-2"
-              >Pictures</label
-            >
-            <div
-              class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-green-500 transition-colors"
-            >
-              <input
-                type="file"
-                id="images"
-                multiple
-                accept="image/*"
-                @change="handleImageUpload"
-                class="hidden"
-              />
-              <label for="images" class="cursor-pointer">
-                <p class="text-sm text-gray-600">Click to upload images</p>
-              </label>
-            </div>
+    <!-- Delete Confirmation Modal -->
+    <ConfirmDeleteModal
+      :visible="showDeleteModal"
+      title="Delete Cleaner"
+      :message="`Are you sure you want to delete ${cleanerToDelete?.name}? This action cannot be undone.`"
+      confirm-text="Delete"
+      cancel-text="Cancel"
+      :is-loading="isDeleting"
+      @confirm="confirmDelete"
+      @cancel="closeDeleteModal"
+    />
 
-            <!-- Uploaded Images Preview -->
-            <div v-if="uploadedImages.length > 0" class="mt-4 grid grid-cols-3 gap-2">
-              <div v-for="(image, index) in uploadedImages" :key="index" class="relative group">
-                <img
-                  :src="image"
-                  :alt="`Image ${index + 1}`"
-                  class="w-full h-24 object-cover rounded-lg border border-gray-200"
-                />
-                <button
-                  type="button"
-                  @click="removeImage(index)"
-                  class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity"
-                >
-                  <span class="text-white text-lg font-bold">×</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex gap-3">
-            <button
-              type="submit"
-              class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
-            >
-              Update
-            </button>
-            <button
-              type="button"
-              @click="closeUpdateModal"
-              class="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400 transition-colors font-medium"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <!-- Success Alert -->
+    <SuccessAlert
+      :visible="showSuccessAlert"
+      title="Cleaner Updated Successfully!"
+      :message="successMessage"
+      action-text="Close"
+      @close="closeSuccessAlert"
+    />
   </div>
 </template>

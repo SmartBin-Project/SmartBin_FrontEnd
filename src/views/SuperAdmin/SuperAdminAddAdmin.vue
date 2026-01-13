@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import SuperAdminLayout from '@/components/layout/SuperAdminLayout.vue'
 import AdminFormInputs from '@/components/AdminFormInputs.vue'
+import SuccessAlert from '@/components/ui/SuccessAlert.vue'
 import { useAdminStore } from '@/stores/adminStore'
 import { ref } from 'vue'
 
@@ -9,6 +10,7 @@ const formRef = ref<InstanceType<typeof AdminFormInputs>>()
 const isLoading = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
+const showSuccess = ref(false)
 
 const handleSubmit = async () => {
   isLoading.value = true
@@ -58,16 +60,14 @@ const handleSubmit = async () => {
     // Create admin
     await adminStore.createAdmin(formData)
     successMessage.value = 'Admin created successfully!'
+    showSuccess.value = true
 
     // Reset form
     if (formRef.value) {
       formRef.value.resetForm()
     }
 
-    // Clear success message after 3 seconds
-    setTimeout(() => {
-      successMessage.value = ''
-    }, 3000)
+    // SuccessAlert will be closed by user action
   } catch (error: any) {
     errorMessage.value = error.response?.data?.message || error.message || 'Failed to create admin'
     console.error('Error creating admin:', error)
@@ -88,14 +88,6 @@ const handleSubmit = async () => {
         {{ errorMessage }}
       </div>
 
-      <!-- Success Message -->
-      <div
-        v-if="successMessage"
-        class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm"
-      >
-        {{ successMessage }}
-      </div>
-
       <div class="flex flex-col gap-8">
         <!-- Form -->
         <div class="flex-1">
@@ -113,6 +105,14 @@ const handleSubmit = async () => {
           </button>
         </div>
       </div>
+
+      <!-- Success Alert -->
+      <SuccessAlert
+        :visible="showSuccess"
+        :message="successMessage"
+        actionText="Done"
+        @close="showSuccess = false"
+      />
     </div>
   </SuperAdminLayout>
 </template>
