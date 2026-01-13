@@ -2,6 +2,7 @@
 import SuperAdminLayout from '@/components/layout/SuperAdminLayout.vue'
 import CleanerFormInputs from '@/components/CleanerFormInputs.vue'
 import ImageUploader from '@/components/ImageUploader.vue'
+import SuccessAlert from '@/components/ui/SuccessAlert.vue'
 import { useCleanerStore } from '@/stores/cleanerStore'
 import { ref } from 'vue'
 
@@ -9,6 +10,8 @@ const cleanerStore = useCleanerStore()
 const formRef = ref<InstanceType<typeof CleanerFormInputs>>()
 const imageUploaderRef = ref<InstanceType<typeof ImageUploader>>()
 const isLoading = ref(false)
+const showSuccessAlert = ref(false)
+const successMessage = ref('')
 
 const handleSubmit = async () => {
   isLoading.value = true
@@ -39,6 +42,10 @@ const handleSubmit = async () => {
 
     await cleanerStore.createCleaner(cleanerData as any)
 
+    // Show success alert
+    successMessage.value = `Cleaner "${formData.name}" has been added successfully!`
+    showSuccessAlert.value = true
+
     // Reset form
     formRef.value.getFormData().name = ''
     formRef.value.getFormData().telegramChatId = ''
@@ -51,6 +58,10 @@ const handleSubmit = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+const closeSuccessAlert = () => {
+  showSuccessAlert.value = false
 }
 </script>
 
@@ -75,5 +86,14 @@ const handleSubmit = async () => {
         </div>
       </div>
     </div>
+
+    <!-- Success Alert -->
+    <SuccessAlert
+      :visible="showSuccessAlert"
+      title="Cleaner Added Successfully!"
+      :message="successMessage"
+      action-text="Close"
+      @close="closeSuccessAlert"
+    />
   </SuperAdminLayout>
 </template>

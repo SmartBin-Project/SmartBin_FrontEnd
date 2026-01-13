@@ -1,51 +1,46 @@
-import axios from 'axios';
-import type{ Admin, CreateAdminData, UpdateAdminData } from '@/types/admin';
+import axios from 'axios'
+import type { Admin, CreateAdminData, UpdateAdminData } from '@/types/admin'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL
 
 const adminAPI = axios.create({
-  baseURL: `${API_BASE_URL}/admins`,
+  baseURL: `${API_BASE_URL}`,
   headers: {
     'Content-Type': 'application/json',
   },
-});
+})
 
 // Add token to requests
 adminAPI.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('access_token');
+  const token = sessionStorage.getItem('access_token')
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`
   }
-  return config;
-});
+  return config
+})
 
 export const adminService = {
-  // Create a new admin
   async createAdmin(data: CreateAdminData): Promise<Admin> {
-    const response = await adminAPI.post('/', data);
-    return response.data.data;
+    const response = await adminAPI.post('/', data)
+    return response.data
   },
 
-  // Get all admins
   async getAllAdmins(): Promise<Admin[]> {
-    const response = await adminAPI.get('/');
-    return response.data.data;
+    const response = await adminAPI.get('/superadmin/admins')
+    return response.data
   },
 
-  // Get a single admin by ID
   async getAdminById(id: string): Promise<Admin> {
-    const response = await adminAPI.get(`/${id}`);
-    return response.data.data;
+    const response = await adminAPI.get(`/${id}`)
+    return response.data
   },
 
-  // Update an admin
-  async updateAdmin(id: string, data: UpdateAdminData): Promise<Admin> {
-    const response = await adminAPI.patch(`/${id}`, data);
-    return response.data.data;
+  async updateAdmin(id: string, admin: UpdateAdminData) {
+    const response = await adminAPI.patch(`/superadmin/update-admin/${id}`, admin)
+    return response.data
   },
 
-  // Delete an admin
   async deleteAdmin(id: string): Promise<void> {
-    await adminAPI.delete(`/${id}`);
+    await adminAPI.delete(`/superadmin/delete-admin/${id}`)
   },
-};
+}

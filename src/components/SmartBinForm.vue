@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useBinStore } from '@/stores/binStore'
 import ImageUploader from '@/components/ImageUploader.vue'
+import SuccessAlert from '@/components/ui/SuccessAlert.vue'
 
 const binStore = useBinStore()
 const imageUploader = ref<{ uploadedImages: string[] }>()
@@ -15,10 +16,13 @@ const formData = ref({
   },
   fillLevel: 0,
   status: 'EMPTY' as 'EMPTY' | 'HALF' | 'FULL',
+  addressBin: '',
 })
 
 const submitError = ref('')
 const isSubmitting = ref(false)
+const showSuccessAlert = ref(false)
+const successMessage = ref('')
 
 const addBin = async () => {
   try {
@@ -50,10 +54,17 @@ const addBin = async () => {
         lat: lat,
         lng: lng,
       },
+      fillLevel: formData.value.fillLevel,
+      status: formData.value.status,
+      addressBin: formData.value.addressBin,
       pictureBins: imageUploader.value?.uploadedImages || [],
     }
 
     await binStore.createBin(binDataToSend as any)
+
+    // Show success alert
+    successMessage.value = `SmartBin "${formData.value.binCode}" has been created successfully!`
+    showSuccessAlert.value = true
 
     // Reset form after successful submission
     formData.value = {
@@ -62,6 +73,7 @@ const addBin = async () => {
       location: { lat: '', lng: '' },
       fillLevel: 0,
       status: 'EMPTY',
+      addressBin: '',
     }
     // Reset images
     if (imageUploader.value) {
@@ -73,6 +85,10 @@ const addBin = async () => {
   } finally {
     isSubmitting.value = false
   }
+}
+
+const closeSuccessAlert = () => {
+  showSuccessAlert.value = false
 }
 </script>
 
@@ -87,7 +103,7 @@ const addBin = async () => {
               v-model="formData.binCode"
               type="text"
               placeholder="Bin ID"
-              class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-green-500 focus:bg-white transition-colors"
+              class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm font-bold text-gray-800 outline-none focus:border-green-500 focus:bg-white transition-colors"
             />
           </div>
 
@@ -101,7 +117,7 @@ const addBin = async () => {
             />
           </div>
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">Lat</label>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Latitude</label>
             <input
               v-model="formData.location.lat"
               type="text"
@@ -110,7 +126,7 @@ const addBin = async () => {
             />
           </div>
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">Lng</label>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Longitude</label>
             <input
               v-model="formData.location.lng"
               type="text"
@@ -140,19 +156,43 @@ const addBin = async () => {
               <option value="FULL">Full</option>
             </select>
           </div>
-          <div class="w-full lg:w-80 flex flex-col gap-6">
-            <ImageUploader ref="imageUploader" />
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">Address</label>
+          <input
+            v-model="formData.addressBin"
+            type="text"
+            placeholder="Address"
+            class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm font-bold text-gray-800 outline-none focus:border-green-500 focus:bg-white transition-colors"
+          />
+        </div>
+        <div class="w-full lg:w-80 flex flex-col gap-6">
+          <ImageUploader ref="imageUploader" />
 
-            <button
-              @click="addBin"
-              :disabled="isSubmitting"
-              class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 rounded-xl transition-colors mt-auto shadow-sm shadow-green-200"
-            >
-              {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
-            </button>
-          </div>
+          <button
+            @click="addBin"
+            :disabled="isSubmitting"
+            class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 rounded-xl transition-colors mt-auto shadow-sm shadow-green-200"
+          >
+            {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+          </button>
         </div>
       </div>
     </div>
+
+    <div
+      v-if="submitError"
+      class="mt-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg"
+    >
+      {{ submitError }}
+    </div>
+
+    <SuccessAlert
+      :visible="showSuccessAlert"
+      title="SmartBin Created Successfully!"
+      :message="successMessage"
+      action-text="Close"
+      @close="closeSuccessAlert"
+    />
   </div>
 </template>

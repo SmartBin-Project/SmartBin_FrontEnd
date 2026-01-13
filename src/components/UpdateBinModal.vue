@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { Bin } from '@/types/bin'
+import ImageUploader from './ImageUploader.vue'
 
 const props = defineProps<{
   bin: Bin | null
@@ -8,7 +9,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['close', 'update'])
-
+const imageUploader = ref<InstanceType<typeof ImageUploader> | null>(null)
 const formData = ref<Partial<Bin>>({})
 
 watch(
@@ -16,6 +17,9 @@ watch(
   (newBin) => {
     if (newBin) {
       formData.value = { ...newBin }
+      if (imageUploader.value) {
+        imageUploader.value.uploadedImages = newBin.pictureBins || []
+      }
     }
   },
   { immediate: true },
@@ -27,7 +31,11 @@ const closeModal = () => {
 
 const submitUpdate = () => {
   if (props.bin) {
-    emit('update', props.bin._id, formData.value)
+    const updateData = {
+      ...formData.value,
+      pictureBins: imageUploader.value?.uploadedImages || [],
+    }
+    emit('update', props.bin._id, updateData)
   }
 }
 </script>
@@ -84,6 +92,20 @@ const submitUpdate = () => {
             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
         </div>
+        <div class="mb-6" v-if="formData.location">
+          <label for="addressBin" class="block text-sm font-medium text-gray-700">Address</label>
+          <input
+            type="text"
+            id="addressBin"
+            v-model="formData.addressBin"
+            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <ImageUploader ref="imageUploader" />
+        </div>
+
         <div class="flex justify-end gap-4">
           <button
             type="button"

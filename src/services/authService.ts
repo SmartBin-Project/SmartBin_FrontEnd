@@ -6,7 +6,6 @@ const api = axios.create({
   baseURL: API_URL,
 })
 
-// Add token to headers
 api.interceptors.request.use((config) => {
   const token = sessionStorage.getItem('access_token')
   if (token) {
