@@ -20,8 +20,8 @@ adminAPI.interceptors.request.use((config) => {
 })
 
 export const adminService = {
-  async createAdmin(data: CreateAdminData): Promise<Admin> {
-    const response = await adminAPI.post('/', data)
+  async createAdmin(data: Admin) {
+    const response = await adminAPI.post('/superadmin/create-admin', data)
     return response.data
   },
 

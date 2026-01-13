@@ -19,6 +19,7 @@ export interface CreateAdminData {
   username: string
   email: string
   password: string
+  role: string
   area: string
   firstName?: string
   lastName?: string
