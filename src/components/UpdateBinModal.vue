@@ -2,7 +2,9 @@
 import { ref, watch } from 'vue'
 import type { Bin } from '@/types/bin'
 import ImageUploader from './ImageUploader.vue'
+import { useI18n } from 'vue-i18n'; // 1. Import i18n
 
+const { t } = useI18n(); // 2. Init hook
 const props = defineProps<{
   bin: Bin | null
   visible: boolean
@@ -10,13 +12,46 @@ const props = defineProps<{
 
 const emit = defineEmits(['close', 'update'])
 const imageUploader = ref<InstanceType<typeof ImageUploader> | null>(null)
-const formData = ref<Partial<Bin>>({})
+
+// 3. Create a specific form state (don't reuse Partial<Bin> directly to avoid type conflicts)
+const formState = ref({
+  binCode: '',
+  area: '',        // String for input
+  fillLevel: 0,
+  location: { lat: 0, lng: 0 },
+  addressBin: '',  // String for input
+  status: ''
+})
 
 watch(
   () => props.bin,
   (newBin) => {
     if (newBin) {
-      formData.value = { ...newBin }
+      // 4. DATA EXTRACTION: Extract 'en' string from the object
+      let areaStr = '';
+      if (typeof newBin.area === 'object' && newBin.area !== null) {
+        areaStr = newBin.area.en || ''; 
+      } else if (typeof newBin.area === 'string') {
+        areaStr = newBin.area;
+      }
+
+      let addressStr = '';
+      if (typeof newBin.addressBin === 'object' && newBin.addressBin !== null) {
+        addressStr = newBin.addressBin.en || '';
+      } else if (typeof newBin.addressBin === 'string') {
+        addressStr = newBin.addressBin;
+      }
+
+      // Populate form
+      formState.value = {
+        binCode: newBin.binCode,
+        area: areaStr, 
+        fillLevel: newBin.fillLevel,
+        location: { ...newBin.location },
+        addressBin: addressStr,
+        status: newBin.status
+      }
+
       if (imageUploader.value) {
         imageUploader.value.uploadedImages = newBin.pictureBins || []
       }
@@ -31,10 +66,19 @@ const closeModal = () => {
 
 const submitUpdate = () => {
   if (props.bin) {
+    // 5. DATA PREPARATION: Wrap strings back into objects
     const updateData = {
-      ...formData.value,
+      binCode: formState.value.binCode,
+      location: formState.value.location,
+      fillLevel: formState.value.fillLevel,
+      status: formState.value.status,
       pictureBins: imageUploader.value?.uploadedImages || [],
+      
+      // CRITICAL: Send as Object { en: ... } so backend auto-translates
+      area: { en: formState.value.area },
+      addressBin: { en: formState.value.addressBin }
     }
+    
     emit('update', props.bin._id, updateData)
   }
 }
@@ -46,58 +90,57 @@ const submitUpdate = () => {
       <h2 class="text-2xl font-bold mb-6 text-gray-800">Update Bin</h2>
       <form @submit.prevent="submitUpdate">
         <div class="mb-4">
-          <label for="binCode" class="block text-sm font-medium text-gray-700">Bin Code</label>
+          <label class="block text-sm font-medium text-gray-700">{{ t('ui.bin_id') }}</label>
           <input
             type="text"
-            id="binCode"
-            v-model="formData.binCode"
+            v-model="formState.binCode"
             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
         </div>
+        
         <div class="mb-4">
-          <label for="area" class="block text-sm font-medium text-gray-700">Area</label>
+          <label class="block text-sm font-medium text-gray-700">{{ t('ui.area') }}</label>
           <input
             type="text"
-            id="area"
-            v-model="formData.area"
+            v-model="formState.area"
             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
         </div>
+
         <div class="mb-4">
-          <label for="fillLevel" class="block text-sm font-medium text-gray-700">Fill Level</label>
+          <label class="block text-sm font-medium text-gray-700">{{ t('ui.fill_level') }}</label>
           <input
             type="number"
-            id="fillLevel"
-            v-model="formData.fillLevel"
+            v-model="formState.fillLevel"
             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
         </div>
-        <div class="mb-4" v-if="formData.location">
-          <label for="lat" class="block text-sm font-medium text-gray-700">Latitude</label>
+
+        <div class="mb-4" v-if="formState.location">
+          <label class="block text-sm font-medium text-gray-700">{{ t('ui.latitude') }}</label>
           <input
             type="number"
             step="any"
-            id="lat"
-            v-model="formData.location.lat"
+            v-model="formState.location.lat"
             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
         </div>
-        <div class="mb-6" v-if="formData.location">
-          <label for="lng" class="block text-sm font-medium text-gray-700">Longitude</label>
+        
+        <div class="mb-6" v-if="formState.location">
+          <label class="block text-sm font-medium text-gray-700">{{ t('ui.longitude') }}</label>
           <input
             type="number"
             step="any"
-            id="lng"
-            v-model="formData.location.lng"
+            v-model="formState.location.lng"
             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
         </div>
-        <div class="mb-6" v-if="formData.location">
-          <label for="addressBin" class="block text-sm font-medium text-gray-700">Address</label>
+
+        <div class="mb-6" v-if="formState.location">
+          <label class="block text-sm font-medium text-gray-700">{{ t('ui.address') }}</label>
           <input
             type="text"
-            id="addressBin"
-            v-model="formData.addressBin"
+            v-model="formState.addressBin"
             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
         </div>
@@ -112,13 +155,13 @@ const submitUpdate = () => {
             @click="closeModal"
             class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
           >
-            Cancel
+            {{ t('ui.cancel') }}
           </button>
           <button
             type="submit"
             class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
-            Update
+            {{ t('ui.save_changes') }}
           </button>
         </div>
       </form>

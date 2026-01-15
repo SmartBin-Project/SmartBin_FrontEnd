@@ -9,11 +9,13 @@ import { onMounted, ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import UpdateBinModal from '@/components/UpdateBinModal.vue'
 import type { Bin } from '@/types/bin'
+import { useI18n } from 'vue-i18n' // Import i18n
 
+const { t } = useI18n()
 const searchText = ref('')
 const binStore = useBinStore()
 const { bins } = storeToRefs(binStore)
-const selectedBin = ref<any>(null)
+const selectedBin = ref<Bin | null>(null) // Fixed type
 const isUpdateModalVisible = ref(false)
 const showDeleteModal = ref(false)
 const showSuccessAlert = ref(false)
@@ -25,21 +27,31 @@ const handleSearch = (query: string) => {
   searchText.value = query
 }
 
+// 🛠️ FIX: Updated Search Logic for Bilingual Data
 const filteredBins = computed(() => {
-  const query = searchText.value.toLowerCase()
+  const query = searchText.value.toLowerCase().trim()
 
-  if (!query.trim()) {
-    return bins.value
-  }
+  if (!query) return bins.value
 
   return bins.value.filter((bin) => {
-    return (
+    // Check Status & BinCode
+    const basicMatch =
       bin.binCode.toLowerCase().includes(query) ||
-      bin.fillLevel.toString().includes(query) ||
       bin.status.toLowerCase().includes(query) ||
-      bin.location.includes(query) ||
-      (bin.area && bin.area.toLowerCase().includes(query))
-    )
+      bin.fillLevel.toString().includes(query)
+
+    // Check Area (Handle Object vs String)
+    let areaMatch = false
+    if (typeof bin.area === 'object' && bin.area !== null) {
+      areaMatch =
+        bin.area.en?.toLowerCase().includes(query) || 
+        bin.area.kh?.toLowerCase().includes(query) || 
+        false
+    } else if (typeof bin.area === 'string') {
+      areaMatch = (bin.area as string).toLowerCase().includes(query)
+    }
+
+    return basicMatch || areaMatch
   })
 })
 
@@ -53,8 +65,8 @@ const handleUpdateBin = async (id: string, bin: Partial<Bin>) => {
     successMessage.value = `SmartBin "${bin.binCode}" has been updated successfully!`
     showSuccessAlert.value = true
     isUpdateModalVisible.value = false
-    selectedBin.value = null // Deselect after update
-    await binStore.getAllBins() // Refresh the list
+    selectedBin.value = null 
+    await binStore.getAllBins() 
   } catch (error: any) {
     console.error(error.message || 'Failed to update bin')
   }
@@ -105,15 +117,11 @@ const openUpdateModal = () => {
 
 const selectBin = (bin: Bin) => {
   if (selectedBin.value && selectedBin.value._id === bin._id) {
-    selectedBin.value = null // Deselect if clicking the same card
+    selectedBin.value = null 
   } else {
     selectedBin.value = bin
   }
 }
-
-onMounted(() => {
-  binStore.getAllBins()
-})
 </script>
 
 <template>
@@ -124,36 +132,35 @@ onMounted(() => {
       >
         <SuperAdminBinLocation :search-text="searchText" />
       </div>
+      
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-gray-800">SmartBin List:</h3>
+        <h3 class="text-xl font-bold text-gray-800">{{ t('ui.bins') }} List:</h3>
         <div class="flex gap-4">
           <button @click="openUpdateModal" class="px-8 py-2 bg-green-600 text-white rounded-lg">
-            Update
+             Update
           </button>
           <button @click="deleteSelectedBin" class="px-8 py-2 bg-red-600 text-white rounded-lg">
-            Delete
+             Delete
           </button>
         </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-if="!filteredBins.length" class="col-span-full p-8 text-center text-gray-600">
-          No bins match your search
+          {{ t('ui.search_results') }} "{{ searchText }}" - No results
         </div>
+        
         <BinCard
           v-for="bin in filteredBins"
           :key="bin._id"
-          :binCode="bin.binCode"
-          :area="bin.area"
-          :fillLevel="bin.fillLevel"
-          :statusColor="bin.fillLevel > 75 ? 'red' : 'green'"
-          :status="bin.status"
-          :selected="selectedBin && selectedBin._id === bin._id"
+          :bin="bin"
+          :class="{ 'ring-2 ring-green-500 border-green-500': selectedBin && selectedBin._id === bin._id }"
           @click="selectBin(bin)"
           class="cursor-pointer"
         />
       </div>
     </div>
+
     <UpdateBinModal
       :visible="isUpdateModalVisible"
       :bin="selectedBin"
@@ -161,11 +168,10 @@ onMounted(() => {
       @update="handleUpdateBin"
     />
 
-    <!-- Delete Confirmation Modal -->
     <ConfirmDeleteModal
       :visible="showDeleteModal"
       title="Delete SmartBin"
-      :message="`Are you sure you want to delete bin ${binToDelete?.binCode}? This action cannot be undone.`"
+      :message="`Are you sure you want to delete bin ${binToDelete?.binCode}?`"
       confirm-text="Delete"
       cancel-text="Cancel"
       :is-loading="isDeleting"
@@ -173,10 +179,9 @@ onMounted(() => {
       @cancel="closeDeleteModal"
     />
 
-    <!-- Success Alert -->
     <SuccessAlert
       :visible="showSuccessAlert"
-      title="SmartBin Updated Successfully!"
+      title="Success"
       :message="successMessage"
       action-text="Close"
       @close="closeSuccessAlert"

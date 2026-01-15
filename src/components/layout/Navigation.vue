@@ -16,19 +16,19 @@
             to="/"
             active-class="text-[#68a357] bg-[#68a357]/5"
             class="px-5 py-2 rounded-xl transition-all hover:bg-gray-100/50"
-            >Map</router-link
+            >{{ t('ui.nav_map') }}</router-link
           >
           <router-link
             to="/service"
             active-class="text-[#68a357] bg-[#68a357]/5"
             class="px-5 py-2 rounded-xl transition-all hover:bg-gray-100/50"
-            >Service</router-link
+            >{{ t('ui.nav_service') }}</router-link
           >
           <router-link
             to="/aboutus"
             active-class="text-[#68a357] bg-[#68a357]/5"
             class="px-5 py-2 rounded-xl transition-all hover:bg-gray-100/50"
-            >About Us</router-link
+            >{{ t('ui.nav_about') }}</router-link
           >
         </div>
       </div>
@@ -56,7 +56,7 @@
             v-model="searchQuery"
             @input="$emit('search', searchQuery)"
             type="text"
-            placeholder="Search zones or bins..."
+            :placeholder="t('ui.search_placeholder')"
             class="w-full py-3 pl-12 pr-12 bg-gray-100/50 border border-transparent rounded-2xl text-sm font-medium transition-all focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#68a357]/15 focus:border-[#68a357] placeholder:text-gray-400 shadow-sm"
           />
 
@@ -83,6 +83,8 @@
           </div>
         </div>
 
+        <language-switcher/>
+        
         <button
           @click="isMenuOpen = !isMenuOpen"
           class="md:hidden p-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 transition-all"
@@ -115,10 +117,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'; // Import i18n
+import Logo from '@/assets/images/logo.png'
+import LanguageSwitcher from '../ui/LanguageSwitcher.vue'
+
+const { t } = useI18n(); // Initialize hook
 const isMenuOpen = ref(false)
 const searchQuery = ref('')
 const searchInput = ref<HTMLInputElement | null>(null)
-import Logo from '@/assets/images/logo.png'
 const emit = defineEmits(['search'])
 
 const handleClear = () => {
