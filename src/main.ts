@@ -16,6 +16,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerIconRetina from 'leaflet/dist/images/marker-icon-2x.png'
 // @ts-ignore
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
+import i18n from './i18n'
 
 let DefaultIcon = L.icon({
   iconUrl: markerIcon,
@@ -32,4 +33,6 @@ L.Marker.prototype.options.icon = DefaultIcon
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
+
+app.use(i18n)
 app.mount('#app')

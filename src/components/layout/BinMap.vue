@@ -7,6 +7,7 @@
       @close="selectedBin = null"
       @navigate="handleNavigateFromPanel"
     />
+    
     <transition name="slide-down">
       <div
         v-if="activeBinId"
@@ -33,7 +34,7 @@
               <p
                 class="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] leading-none mb-1"
               >
-                {{ navigationColor === '#ef4444' ? 'Urgent Collection' : 'Live Tracking' }}
+                {{ navigationColor === '#ef4444' ? t('ui.urgent_collection') : t('ui.live_tracking') }}
               </p>
               <p class="text-2xl font-black text-gray-900 tabular-nums leading-none">
                 {{ distanceRemaining }}
@@ -77,13 +78,13 @@
               />
             </svg>
           </div>
-          <h2 class="text-3xl font-black text-gray-900 mb-2">Arrived!</h2>
-          <p class="text-gray-500 font-medium mb-8 text-lg">Waste collection point reached.</p>
+          <h2 class="text-3xl font-black text-gray-900 mb-2">{{ t('ui.arrived') }}</h2>
+          <p class="text-gray-500 font-medium mb-8 text-lg">{{ t('ui.waste_point_reached') }}</p>
           <button
             @click="showArrival = false"
             class="w-full bg-gray-900 text-white py-5 rounded-3xl font-black text-lg shadow-xl active:scale-95 transition-all"
           >
-            Dismiss
+            {{ t('ui.dismiss') }}
           </button>
         </div>
       </div>
@@ -119,7 +120,7 @@
           v-for="bin in filteredBins"
           :key="bin._id"
           @click="handleBinClick(bin)"
-          class="min-w-60 backdrop-blur-sm rounded-3xl p-3 shadow-lg border border-white group transition-all duration-300 hover:-translate-y-1"
+          class="min-w-60 backdrop-blur-sm bg-white/80 rounded-3xl p-3 shadow-lg border border-white group transition-all duration-300 hover:-translate-y-1"
         >
           <div class="flex justify-between items-start mb-3">
             <div
@@ -143,12 +144,12 @@
               "
               class="px-2.5 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider"
             >
-              {{ bin.fillLevel > 80 ? 'Urgent' : 'Available' }}
+              {{ bin.fillLevel > 80 ? t('ui.urgent') : t('ui.available') }}
             </span>
           </div>
-          <div class="mb-3 w-[220px]">
+          <div class="mb-3 w-55">
             <h3 class="text-base font-bold text-gray-900 truncate">
-              {{ bin.area }}
+              {{ translateDB(bin.area) }}
             </h3>
             <p class="text-gray-500 text-[11px] uppercase font-semibold tracking-tight">
               {{ bin.binCode }}
@@ -158,7 +159,7 @@
             <div
               class="flex justify-between text-[9px] font-bold uppercase text-gray-500 tracking-wider"
             >
-              <span>Load</span>
+              <span>{{ t('ui.load') }}</span>
               <span :class="bin.fillLevel > 80 ? 'text-red-500' : 'text-gray-800'"
                 >{{ bin.fillLevel }}%</span
               >
@@ -177,7 +178,7 @@
             @click.stop="startNavigationToBin(bin)"
             class="w-full bg-gray-900 text-white py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-md active:scale-95 transition-all"
           >
-            Directions
+            {{ t('ui.directions') }}
           </button>
         </div>
       </div>
@@ -189,11 +190,11 @@
         <div
           class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-3xl"
         >
-        <search class="w-8 h-8 text-gray-400" />
+        <Search class="w-8 h-8 text-gray-400" />
         </div>
-        <h3 class="text-xl font-bold text-gray-900 mb-1">No Results</h3>
+        <h3 class="text-xl font-bold text-gray-900 mb-1">{{ t('ui.no_results') }}</h3>
         <p class="text-gray-500 text-center text-sm font-medium">
-          No bins found for "<span class="text-[#68a357] font-semibold">{{ props.searchText }}</span
+          {{ t('ui.no_results_desc') }} "<span class="text-[#68a357] font-semibold">{{ props.searchText }}</span
           >".
         </p>
       </div>
@@ -213,30 +214,50 @@ import { storeToRefs } from 'pinia'
 import { Search } from 'lucide-vue-next'
 import BinDetailPanel from './BinDetailPanel.vue'
 
-// Receive Search Text from Parent
+// NEW: Import i18n hooks
+import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
+
 const props = defineProps<{
   searchText: string
 }>()
 
-// ==========================================
-// 🛠️ BACKEND & DATA
-// ==========================================
-const binStore = useBinStore()
+// Init Hooks
+const { t } = useI18n();
+const { translateDB } = useTranslation();
 
+const binStore = useBinStore()
 const { bins } = storeToRefs(binStore)
 const isLoading = ref(true)
 
-// FILTER ENGINE: Connects Search Bar to the UI
+// ==========================================
+// 🛠️ FIX: Robust Search Filter
+// ==========================================
 const filteredBins = computed(() => {
   const query = props.searchText.toLowerCase().trim()
   if (!query) return bins.value
-  return bins.value.filter(
-    (bin) => bin.area.toLowerCase().includes(query),
-    // bin.address.toLowerCase().includes(query)
-  )
+  
+  return bins.value.filter((bin) => {
+    // 1. Check if bin.area is an object (New Data)
+    if (typeof bin.area === 'object' && bin.area !== null) {
+      const enMatch = bin.area.en?.toLowerCase().includes(query);
+      const khMatch = bin.area.kh?.toLowerCase().includes(query);
+      return enMatch || khMatch;
+    }
+    
+    // 2. Check if bin.area is a string (Legacy Data)
+    if (typeof bin.area === 'string') {
+      return (bin.area as string).toLowerCase().includes(query);
+    }
+    
+    return false;
+  })
 })
-console.log(filteredBins)
-// AUTO-ZOOM: Glide map to first result when typing
+
+// ... (Rest of your script remains exactly the same: Watchers, Leaflet logic, etc.)
+// Just ensure you keep the existing map logic below this line.
+
+// AUTO-ZOOM
 watch(
   () => props.searchText,
   (newVal) => {
@@ -250,28 +271,11 @@ watch(
   },
 )
 
-// const fetchBins = async () => {
-//   isLoading.value = true
-//   const response = await getAllBinsPublic()
-//   bins.value = response
-//   console.log('📍 All bins fetched:', bins.value)
-//   if (bins.value.length > 0) {
-//     console.log('🗂️ First bin area:', bins.value[0].area)
-//     console.log(
-//       '🗂️ All bin areas:',
-//       bins.value.map((b: Bin) => ({ code: b.binCode, area: b.area })),
-//     )
-//   }
-//   isLoading.value = false
-// }
-
-// ==========================================
-// 📍 MAP & NAVIGATION LOGIC
-// ==========================================
+// MAP & NAVIGATION VARIABLES
 const zoom = ref(15)
 const mapCenter = ref<[number, number]>([11.5564, 104.9282])
 const leafletMap = ref<any>(null)
-const activeBinId = ref<number | null>(null)
+const activeBinId = ref<string | null>(null) // Changed from number to string to match _id type
 const selectedBin = ref<Bin | null>(null)
 const userLocation = ref<[number, number] | null>(null)
 const distanceRemaining = ref('0 m')
@@ -308,11 +312,8 @@ const trackUserLocation = () => {
 
 const startNavigationToBin = (bin: Bin) => {
   if (!userLocation.value) {
-    alert(
-      'Could not get your current location. Please ensure you have enabled location services for this site in your browser settings and try again.',
-    )
-    console.warn('Still trying to find your location. Please wait a moment and try again.')
-    trackUserLocation() // Re-trigger location tracking
+    alert('Could not get your current location.')
+    trackUserLocation()
     return
   }
 
@@ -341,10 +342,10 @@ const stopNavigation = () => {
 }
 
 const handleNavigateFromPanel = (bin: Bin) => {
-  selectedBin.value = null // Close the panel
+  selectedBin.value = null
   setTimeout(() => {
     startNavigationToBin(bin)
-  }, 300) // Delay to allow panel to close
+  }, 300)
 }
 
 const handleArrival = () => {
@@ -370,9 +371,6 @@ onUnmounted(() => {
   if (backendInterval) clearInterval(backendInterval)
 })
 
-// ==========================================
-// 🎨 CUSTOM ICONS
-// ==========================================
 const userIcon = L.divIcon({
   className: 'user-marker-container',
   html: '<div class="user-pulse"></div><div class="user-dot"></div>',
@@ -398,64 +396,15 @@ const handleBinClick = (bin: Bin) => {
 </script>
 
 <style>
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.user-marker-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.user-dot {
-  width: 14px;
-  height: 14px;
-  background: #1a73e8;
-  border: 2.5px solid white;
-  border-radius: 50%;
-  z-index: 10;
-  position: relative;
-}
-.user-pulse {
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  background: rgba(26, 115, 232, 0.25);
-  border-radius: 50%;
-  animation: pulse-anim 2s infinite;
-}
-@keyframes pulse-anim {
-  0% {
-    transform: scale(0.5);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
-}
-.leaflet-routing-container {
-  display: none !important;
-}
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.slide-down-enter-from,
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translate(-50%, -40px);
-}
-.pop-enter-active {
-  animation: pop-in 0.5s cubic-bezier(0.17, 0.88, 0.32, 1.27);
-}
-@keyframes pop-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+/* ... (Keep your existing styles) ... */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.user-marker-container { display: flex; align-items: center; justify-content: center; }
+.user-dot { width: 14px; height: 14px; background: #1a73e8; border: 2.5px solid white; border-radius: 50%; z-index: 10; position: relative; }
+.user-pulse { position: absolute; width: 44px; height: 44px; background: rgba(26, 115, 232, 0.25); border-radius: 50%; animation: pulse-anim 2s infinite; }
+@keyframes pulse-anim { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+.leaflet-routing-container { display: none !important; }
+.slide-down-enter-active, .slide-down-leave-active { transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translate(-50%, -40px); }
+.pop-enter-active { animation: pop-in 0.5s cubic-bezier(0.17, 0.88, 0.32, 1.27); }
+@keyframes pop-in { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
 </style>

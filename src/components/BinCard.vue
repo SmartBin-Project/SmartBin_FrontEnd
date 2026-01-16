@@ -1,19 +1,19 @@
 <script setup lang="ts">
+import { useTranslation } from '@/composables/useTranslation';
 import { Trash2, MapPin } from 'lucide-vue-next'
+import type { Bin } from '@/types/bin'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n';
 
-const props = defineProps({
-  binCode: String,
-  area: String,
-  fillLevel: Number,
-  selected: Boolean,
-  status: String
-})
+const { t } = useI18n();
+const { translateDB } = useTranslation();
+
+const props = defineProps<{ bin: Bin }>()
 
 const statusColor = computed(() => {
-  if (props.fillLevel === undefined) return 'gray'
-  if (props.fillLevel > 80) return 'red'
-  if (props.fillLevel > 50) return 'yellow'
+  if (props.bin.fillLevel === undefined) return 'gray'
+  if (props.bin.fillLevel > 80) return 'red'
+  if (props.bin.fillLevel > 50) return 'yellow'
   return 'green'
 })
 </script>
@@ -28,10 +28,10 @@ const statusColor = computed(() => {
         <Trash2 class="w-6 h-6 text-gray-700" />
       </div>
       <div>
-        <h3 class="font-bold text-gray-800 text-lg leading-tight">{{ binCode }}</h3>
+        <h3 class="font-bold text-gray-800 text-lg leading-tight">{{ props.bin.binCode }}</h3>
         <div class="flex items-center text-xs text-gray-400 mt-1">
           <MapPin :size="12" class="mr-1" />
-          <span class="truncate max-w-50">{{ area }}</span>
+          <span class="truncate max-w-50">{{ translateDB(props.bin.area) }}</span>
         </div>
       </div>
     </div>
@@ -40,7 +40,7 @@ const statusColor = computed(() => {
 
     <div class="space-y-3">
       <div class="flex justify-between items-center text-sm">
-        <span class="font-bold text-gray-700">Fill Level</span>
+        <span class="font-bold text-gray-700">{{ t('ui.fill_level') }}</span>
         <span
           class="px-3 py-1 rounded-full text-xs font-bold"
           :class="{
@@ -50,12 +50,12 @@ const statusColor = computed(() => {
             'bg-gray-100 text-gray-600': statusColor === 'gray'
           }"
         >
-          {{ fillLevel }}%
+          {{ props.bin.fillLevel }}%
         </span>
       </div>
 
       <div class="flex justify-between items-center text-sm">
-        <span class="font-bold text-gray-700">Status</span>
+        <span class="font-bold text-gray-700">{{ t('ui.status') }}</span>
         <div
           class="flex items-center font-medium text-xs"
           :class="{
@@ -74,7 +74,7 @@ const statusColor = computed(() => {
               'bg-gray-500': statusColor === 'gray'
             }"
           ></div>
-          {{ status }}
+          {{ props.bin.status }}
         </div>
       </div>
     </div>
