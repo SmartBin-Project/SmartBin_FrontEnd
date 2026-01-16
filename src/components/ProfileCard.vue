@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { Copy } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 const authStore = useAuthStore()
 </script>
 
 <template>
   <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center mb-6">
-    <h3 class="text-left font-bold text-lg mb-4 text-gray-800">Profile</h3>
+    <h3 class="text-left font-bold text-lg mb-4 text-gray-800">{{ t('ui.user_profile') }}</h3>
 
     <div class="relative inline-block mb-3">
-      <div
+             <div
         v-if="authStore.user?.profilePic"
         class="w-18 h-18 rounded-full border-2 border-white shadow-sm overflow-hidden"
       >
@@ -35,7 +38,7 @@ const authStore = useAuthStore()
     <button
       class="w-full mt-6 bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 rounded-lg transition-colors"
     >
-      Change Password
+      {{ t('ui.change_password') }}
     </button>
   </div>
 </template>

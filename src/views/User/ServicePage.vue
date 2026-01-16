@@ -6,19 +6,18 @@
           
           <div class="flex-1 text-left space-y-8 animate-fade-in-left">
             <h2 class="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.1] tracking-tight">
-              Efficient waste <br />
-              management with <br />
-              <span class="text-[#68a357]">smart bin technology</span>
+              {{ t('ui.service_hero_1') }} <br />
+              {{ t('ui.service_hero_2') }} <br />
+              <span class="text-[#68a357]">{{ t('ui.service_hero_highlight') }}</span>
             </h2>
             
             <p class="text-gray-500 text-lg md:text-xl font-medium max-w-xl leading-relaxed">
-              We upgrade your existing bins into smart, sensor-powered systems 
-              and provide high-quality smart bins ready for immediate deployment.
+              {{ t('ui.service_desc') }}
             </p>
 
             <div class="pt-4">
               <button class="bg-[#68a357] hover:bg-[#568a48] text-white px-10 py-5 rounded-2xl text-xl font-black shadow-[0_20px_40px_-10px_rgba(104,163,87,0.4)] transition-all transform hover:-translate-y-1 active:scale-95">
-                Booking Now
+                {{ t('ui.service_booking') }}
               </button>
             </div>
           </div>
@@ -51,6 +50,9 @@
 
 <script setup lang="ts">
   import PricingSection from '@/components/layout/PricingSection.vue';
+  import { useI18n } from 'vue-i18n';
+
+  const { t } = useI18n();
 
   // Define props to receive the searchText passed from App.vue
   defineProps<{

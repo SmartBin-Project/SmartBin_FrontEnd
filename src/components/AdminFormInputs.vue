@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { CreateAdminData } from '@/types/admin'
 import ImageUploader from './ImageUploader.vue'
+
+const { t } = useI18n()
 
 const formData = ref<CreateAdminData>({
   username: '',
@@ -60,11 +63,11 @@ defineExpose({ handleSubmit, getFormData, resetForm })
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- Username -->
       <div>
-        <label class="block text-sm font-bold text-gray-700 mb-2">Username</label>
+        <label class="block text-sm font-bold text-gray-700 mb-2">{{ t('ui.username') }}</label>
         <input
           v-model="formData.username"
           type="text"
-          placeholder="Enter username"
+          :placeholder="t('ui.username')"
           class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-green-500 focus:bg-white transition-colors"
           required
         />
@@ -72,11 +75,11 @@ defineExpose({ handleSubmit, getFormData, resetForm })
 
       <!-- Email -->
       <div>
-        <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
+        <label class="block text-sm font-bold text-gray-700 mb-2">{{ t('ui.email') }}</label>
         <input
           v-model="formData.email"
           type="email"
-          placeholder="Enter email"
+          :placeholder="t('ui.email')"
           class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-green-500 focus:bg-white transition-colors"
           required
         />
@@ -84,11 +87,11 @@ defineExpose({ handleSubmit, getFormData, resetForm })
 
       <!-- Password -->
       <div>
-        <label class="block text-sm font-bold text-gray-700 mb-2">Password</label>
+        <label class="block text-sm font-bold text-gray-700 mb-2">{{ t('ui.password') }}</label>
         <input
           v-model="formData.password"
           type="password"
-          placeholder="Enter password"
+          :placeholder="t('ui.password')"
           class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-green-500 focus:bg-white transition-colors"
           required
         />
@@ -96,7 +99,7 @@ defineExpose({ handleSubmit, getFormData, resetForm })
 
       <!-- Area -->
       <div>
-        <label class="block text-sm font-bold text-gray-700 mb-2">Area </label>
+        <label class="block text-sm font-bold text-gray-700 mb-2">{{ t('ui.area') }}</label>
         <input
           v-model="formData.area"
           type="text"
@@ -109,58 +112,58 @@ defineExpose({ handleSubmit, getFormData, resetForm })
 
     <!-- Optional Personal Information -->
     <div class="border-t border-gray-200 pt-6">
-      <h3 class="text-lg font-bold text-gray-700 mb-4">Personal Information (Optional)</h3>
+      <h3 class="text-lg font-bold text-gray-700 mb-4">{{ t('ui.user_profile') }} (Optional)</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- First Name -->
         <div>
-          <label class="block text-sm font-bold text-gray-700 mb-2">First Name</label>
+          <label class="block text-sm font-bold text-gray-700 mb-2">{{ t('ui.first_name') }}</label>
           <input
             v-model="formData.firstName"
             type="text"
-            placeholder="Enter first name"
+            :placeholder="t('ui.first_name')"
             class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-green-500 focus:bg-white transition-colors"
           />
         </div>
 
         <!-- Last Name -->
         <div>
-          <label class="block text-sm font-bold text-gray-700 mb-2">Last Name</label>
+          <label class="block text-sm font-bold text-gray-700 mb-2">{{ t('ui.last_name') }}</label>
           <input
             v-model="formData.lastName"
             type="text"
-            placeholder="Enter last name"
+            :placeholder="t('ui.last_name')"
             class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-green-500 focus:bg-white transition-colors"
           />
         </div>
 
         <!-- Gender -->
         <div>
-          <label class="block text-sm font-bold text-gray-700 mb-2">Gender</label>
+          <label class="block text-sm font-bold text-gray-700 mb-2">{{ t('ui.gender') }}</label>
           <select
             v-model="formData.gender"
             class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-green-500 focus:bg-white transition-colors"
           >
-            <option value="">Select gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
+            <option value="">{{ t('ui.gender') }}</option>
+            <option value="Male">{{ t('ui.male') }}</option>
+            <option value="Female">{{ t('ui.female') }}</option>
+            <option value="Other">{{ t('ui.other') }}</option>
           </select>
         </div>
 
         <!-- Phone -->
         <div>
-          <label class="block text-sm font-bold text-gray-700 mb-2">Phone</label>
+          <label class="block text-sm font-bold text-gray-700 mb-2">{{ t('ui.phone') }}</label>
           <input
             v-model="formData.phone"
             type="tel"
-            placeholder="Enter phone number"
+            :placeholder="t('ui.phone')"
             class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-green-500 focus:bg-white transition-colors"
           />
         </div>
 
         <!-- Date of Birth -->
         <div>
-          <label class="block text-sm font-bold text-gray-700 mb-2">Date of Birth</label>
+          <label class="block text-sm font-bold text-gray-700 mb-2">{{ t('ui.dob') }}</label>
           <input
             v-model="formData.dateOfBirth"
             type="date"
@@ -170,16 +173,16 @@ defineExpose({ handleSubmit, getFormData, resetForm })
 
         <!-- Address -->
         <div class="md:col-span-2 lg:col-span-1">
-          <label class="block text-sm font-bold text-gray-700 mb-2">Address</label>
+          <label class="block text-sm font-bold text-gray-700 mb-2">{{ t('ui.address') }}</label>
           <input
             v-model="formData.address"
             type="text"
-            placeholder="Enter address"
+            :placeholder="t('ui.address')"
             class="w-full bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-green-500 focus:bg-white transition-colors"
           />
         </div>
         <div class="md:col-span-2 lg:col-span-1">
-          <label class="block text-sm font-bold text-gray-700 mb-2">Profile Picture</label>
+          <label class="block text-sm font-bold text-gray-700 mb-2">{{ t('ui.upload_photo') }}</label>
           <ImageUploader ref="imageUploader" />
         </div>
       </div>

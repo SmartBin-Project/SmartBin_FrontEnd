@@ -2,6 +2,9 @@
 import { ref, watch } from 'vue'
 import type { Admin, UpdateAdminData } from '@/types/admin'
 import ImageUploader from './ImageUploader.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   showModal: boolean
@@ -72,12 +75,12 @@ const closeModal = () => {
 <template>
   <div v-if="showModal" class="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
     <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-      <h2 class="text-2xl font-bold mb-6 text-gray-800">Update Admin</h2>
+      <h2 class="text-2xl font-bold mb-6 text-gray-800">{{ t('ui.update_admin') }}</h2>
       <form @submit.prevent="submitUpdate">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Username -->
           <div>
-            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+            <label for="username" class="block text-sm font-medium text-gray-700">{{ t('ui.username') }}</label>
             <input
               type="text"
               id="username"
@@ -88,7 +91,7 @@ const closeModal = () => {
 
           <!-- Email -->
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <label for="email" class="block text-sm font-medium text-gray-700">{{ t('ui.email') }}</label>
             <input
               type="email"
               id="email"
@@ -99,7 +102,7 @@ const closeModal = () => {
 
           <!-- Area -->
           <div>
-            <label for="area" class="block text-sm font-medium text-gray-700">Area</label>
+            <label for="area" class="block text-sm font-medium text-gray-700">{{ t('ui.area') }}</label>
             <input
               type="text"
               id="area"
@@ -111,13 +114,13 @@ const closeModal = () => {
           <!-- Password (optional) -->
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700"
-              >Password (leave empty to keep current)</label
+              >{{ t('ui.password_optional') }}</label
             >
             <input
               type="password"
               id="password"
               v-model="formData.password"
-              placeholder="Enter new password"
+              :placeholder="t('ui.enter_new_password')"
               class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
             />
           </div>
@@ -125,7 +128,7 @@ const closeModal = () => {
           <!-- First Name -->
           <div>
             <label for="firstName" class="block text-sm font-medium text-gray-700"
-              >First Name</label
+              >{{ t('ui.first_name') }}</label
             >
             <input
               type="text"
@@ -137,7 +140,7 @@ const closeModal = () => {
 
           <!-- Last Name -->
           <div>
-            <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
+            <label for="lastName" class="block text-sm font-medium text-gray-700">{{ t('ui.last_name') }}</label>
             <input
               type="text"
               id="lastName"
@@ -148,22 +151,22 @@ const closeModal = () => {
 
           <!-- Gender -->
           <div>
-            <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
+            <label for="gender" class="block text-sm font-medium text-gray-700">{{ t('ui.gender') }}</label>
             <select
               id="gender"
               v-model="formData.gender"
               class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
             >
-              <option value="">Select gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
+              <option value="">{{ t('ui.gender') }}</option>
+              <option value="Male">{{ t('ui.male') }}</option>
+              <option value="Female">{{ t('ui.female') }}</option>
+              <option value="Other">{{ t('ui.other') }}</option>
             </select>
           </div>
 
           <!-- Phone -->
           <div>
-            <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+            <label for="phone" class="block text-sm font-medium text-gray-700">{{ t('ui.phone') }}</label>
             <input
               type="tel"
               id="phone"
@@ -175,7 +178,7 @@ const closeModal = () => {
           <!-- Date of Birth -->
           <div>
             <label for="dateOfBirth" class="block text-sm font-medium text-gray-700"
-              >Date of Birth</label
+              >{{ t('ui.dob') }}</label
             >
             <input
               type="date"
@@ -187,7 +190,7 @@ const closeModal = () => {
 
           <!-- Address -->
           <div class="md:col-span-2">
-            <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+            <label for="address" class="block text-sm font-medium text-gray-700">{{ t('ui.address') }}</label>
             <input
               type="text"
               id="address"
@@ -209,14 +212,14 @@ const closeModal = () => {
             :disabled="isSubmitting"
             class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Cancel
+            {{ t('ui.cancel') }}
           </button>
           <button
             type="submit"
             :disabled="isSubmitting"
             class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {{ isSubmitting ? 'Updating...' : 'Update Admin' }}
+            {{ isSubmitting ? t('ui.saving') : t('ui.update_admin') }}
           </button>
         </div>
       </form>

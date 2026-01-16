@@ -2,7 +2,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from 'vue-i18n';
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher.vue';
 
+const { t } = useI18n();
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -78,12 +81,14 @@ const handleRegister = async () => {
 <template>
   <div class="flex items-center justify-center min-h-screen bg-gray-100">
     <div
-      class="w-full max-w-md p-6 bg-white rounded-xl shadow-lg font-sans border-2 border-gray-400"
+      class="relative w-full max-w-md p-6 bg-white rounded-xl shadow-lg font-sans border-2 border-gray-400"
     >
-      <h1 class="text-lg font-normal">Get Started!</h1>
-      <h2 class="text-2xl font-bold mb-1">Create Account</h2>
-      <p class="text-sm text-gray-500 mb-5">Join the Smart Bin community</p>
-
+      <h1 class="text-lg font-normal">{{ t('ui.auth_get_started') }}</h1>
+      <h2 class="text-2xl font-bold mb-1">{{ t('ui.auth_create_account') }}</h2>
+      <p class="text-sm text-gray-500 mb-5">{{ t('ui.auth_join_community') }}</p>
+      <div class="absolute top-10 right-5">
+        <LanguageSwitcher/>
+      </div>
       <form @submit.prevent="handleRegister">
         <!-- Error Message -->
         <div v-if="authStore.error" class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
@@ -92,12 +97,12 @@ const handleRegister = async () => {
 
         <!-- Username -->
         <div class="mb-3">
-          <label for="username" class="block text-sm font-normal mb-1">Username</label>
+          <label for="username" class="block text-sm font-normal mb-1">{{ t('ui.auth_username_label') }}</label>
           <input
             id="username"
             type="text"
             v-model="form.username"
-            placeholder="Choose a user name"
+            :placeholder="t('ui.auth_username_placeholder')"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-black transition duration-150 text-sm"
             required
           />
@@ -105,12 +110,12 @@ const handleRegister = async () => {
 
         <!-- Email -->
         <div class="mb-3">
-          <label for="email" class="block text-sm font-normal mb-1">Email Address</label>
+          <label for="email" class="block text-sm font-normal mb-1">{{ t('ui.auth_email_addr_label') }}</label>
           <input
             id="email"
             type="email"
             v-model="form.email"
-            placeholder="Enter your email"
+            :placeholder="t('ui.auth_email_placeholder')"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-black transition duration-150 text-sm"
             required
           />
@@ -118,27 +123,27 @@ const handleRegister = async () => {
 
         <!-- Role Selection -->
         <div class="mb-3">
-          <label for="role" class="block text-sm font-normal mb-1">Account Type</label>
+          <label for="role" class="block text-sm font-normal mb-1">{{ t('ui.auth_account_type_label') }}</label>
           <select
             id="role"
             v-model="form.role"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-black transition duration-150 text-sm"
             required
           >
-            <option value="">Select a role</option>
-            <option value="ADMIN">Admin</option>
-            <option value="SUPERADMIN">Super Admin</option>
+            <option value="">{{ t('ui.auth_role_select') }}</option>
+            <option value="ADMIN">{{ t('ui.auth_role_admin') }}</option>
+            <option value="SUPERADMIN">{{ t('ui.auth_role_superadmin') }}</option>
           </select>
         </div>
 
         <!-- Area (conditional for ADMIN) -->
         <div v-if="form.role === 'ADMIN'" class="mb-3">
-          <label for="area" class="block text-sm font-normal mb-1">Area</label>
+          <label for="area" class="block text-sm font-normal mb-1">{{ t('ui.auth_area_label') }}</label>
           <input
             id="area"
             type="text"
             v-model="form.area"
-            placeholder="Enter your area"
+            :placeholder="t('ui.auth_area_placeholder')"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-black transition duration-150 text-sm"
             required
           />
@@ -146,13 +151,13 @@ const handleRegister = async () => {
 
         <!-- Password -->
         <div class="mb-3">
-          <label for="password" class="block text-sm font-normal mb-1">Password</label>
+          <label for="password" class="block text-sm font-normal mb-1">{{ t('ui.auth_password_label') }}</label>
           <div class="relative">
             <input
               id="password"
               :type="passwordFieldType"
               v-model="form.password"
-              placeholder="Create a Password (min 8 characters)"
+              :placeholder="t('ui.auth_create_password_placeholder')"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg pr-12 outline-none focus:border-black transition duration-150 text-sm"
               required
             />
@@ -192,14 +197,14 @@ const handleRegister = async () => {
         <!-- Confirm Password -->
         <div class="mb-6">
           <label for="confirmPassword" class="block text-sm font-normal mb-1"
-            >Confirm Password</label
+            >{{ t('ui.auth_confirm_password_label') }}</label
           >
           <div class="relative">
             <input
               id="confirmPassword"
               :type="confirmPasswordFieldType"
               v-model="form.confirmPassword"
-              placeholder="Confirm your Password"
+              :placeholder="t('ui.auth_confirm_password_placeholder')"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg pr-12 outline-none focus:border-black transition duration-150 text-sm"
               :class="{ 'border-red-500 focus:border-red-500': passwordMismatch }"
               required
@@ -234,7 +239,7 @@ const handleRegister = async () => {
                 </template>
               </svg>
             </span>
-            <p v-if="passwordMismatch" class="text-red-500 text-xs mt-1">Passwords do not match</p>
+            <p v-if="passwordMismatch" class="text-red-500 text-xs mt-1">{{ t('ui.auth_password_mismatch') }}</p>
           </div>
         </div>
 
@@ -244,14 +249,14 @@ const handleRegister = async () => {
           :disabled="authStore.loading"
           class="w-full py-2 bg-[#68A947] hover:bg-[#58973b] disabled:bg-gray-400 text-white text-lg font-semibold rounded-lg shadow-md transition duration-150 mb-4"
         >
-          {{ authStore.loading ? 'Signing up...' : 'Sign Up' }}
+          {{ authStore.loading ? t('ui.auth_signing_up') : t('ui.auth_signup_btn') }}
         </button>
       </form>
 
       <div class="text-center text-sm">
-        Already have an Account ?
+        {{ t('ui.auth_have_account') }}
         <RouterLink to="/signin" class="text-[#68A947] font-semibold hover:text-[#58973b]"
-          >Login</RouterLink
+          >{{ t('ui.auth_login_btn') }}</RouterLink
         >
       </div>
     </div>

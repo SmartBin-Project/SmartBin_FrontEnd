@@ -2,7 +2,9 @@
 import { Eye, EyeOff, HelpCircle } from 'lucide-vue-next'
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const authStore = useAuthStore()
 
 const showCurrent = ref(false)
@@ -20,9 +22,9 @@ const success = ref('')
 <template>
   <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="font-bold text-lg text-gray-800">Change Password</h3>
+      <h3 class="font-bold text-lg text-gray-800">{{ t('ui.change_password') }}</h3>
       <a href="#" class="text-blue-500 text-xs flex items-center hover:underline">
-        Need help <HelpCircle :size="12" class="ml-1" />
+        {{ t('ui.need_help') }} <HelpCircle :size="12" class="ml-1" />
       </a>
     </div>
 
@@ -43,19 +45,17 @@ const success = ref('')
     <div class="space-y-4">
       <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <p class="text-sm text-blue-700">
-          <strong>Security Note:</strong> Your password is protected and encrypted. For security
-          reasons, we don't display your password. To change it, please enter your current password
-          below.
+          {{ t('ui.security_note') }}
         </p>
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('ui.current_password') }}</label>
         <div class="relative">
           <input
             :type="showCurrent ? 'text' : 'password'"
             v-model="currentPassword"
-            placeholder="Enter your current password"
+            :placeholder="t('ui.enter_current_password')"
             :disabled="loading"
             class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 transition-colors disabled:opacity-50"
           />
@@ -67,17 +67,17 @@ const success = ref('')
           </button>
         </div>
         <a href="/forgot" class="text-blue-500 text-xs mt-1 inline-block hover:underline"
-          >Forgot Current Password? Click here</a
+          >{{ t('ui.forgot_password_link') }}</a
         >
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('ui.new_password') }}</label>
         <div class="relative">
           <input
             :type="showNew ? 'text' : 'password'"
             v-model="newPassword"
-            placeholder="Enter your new password"
+            :placeholder="t('ui.enter_new_password')"
             class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
           />
           <button
@@ -90,12 +90,12 @@ const success = ref('')
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('ui.confirm_new_password') }}</label>
         <div class="relative">
           <input
             :type="showConfirm ? 'text' : 'password'"
             v-model="confirmPassword"
-            placeholder="Re-enter your new password"
+            :placeholder="t('ui.re_enter_new_password')"
             class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
           />
           <button
@@ -111,7 +111,7 @@ const success = ref('')
         :disabled="loading || !currentPassword || !newPassword || !confirmPassword"
         class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {{ loading ? 'Updating...' : 'Save Change' }}
+        {{ loading ? t('ui.saving') : t('ui.save_changes') }}
       </button>
     </div>
   </div>
