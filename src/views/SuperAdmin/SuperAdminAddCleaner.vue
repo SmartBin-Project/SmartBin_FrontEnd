@@ -5,6 +5,9 @@ import ImageUploader from '@/components/ImageUploader.vue'
 import SuccessAlert from '@/components/ui/SuccessAlert.vue'
 import { useCleanerStore } from '@/stores/cleanerStore'
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const cleanerStore = useCleanerStore()
 const formRef = ref<InstanceType<typeof CleanerFormInputs>>()
@@ -43,7 +46,7 @@ const handleSubmit = async () => {
     await cleanerStore.createCleaner(cleanerData as any)
 
     // Show success alert
-    successMessage.value = `Cleaner "${formData.name}" has been added successfully!`
+    successMessage.value = t('ui.cleaner_create_success', { name: formData.name })
     showSuccessAlert.value = true
 
     // Reset form
@@ -66,7 +69,7 @@ const closeSuccessAlert = () => {
 </script>
 
 <template>
-  <SuperAdminLayout title="Add Cleaner">
+  <SuperAdminLayout :title="t('ui.create_cleaner')">
     <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
       <div class="flex flex-col gap-12">
         <div class="flex-1">
@@ -81,7 +84,7 @@ const closeSuccessAlert = () => {
             :disabled="isLoading"
             class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 rounded-xl transition-colors mt-auto shadow-sm shadow-green-200"
           >
-            {{ isLoading ? 'Saving...' : 'Save Change' }}
+            {{ isLoading ? t('ui.saving') : t('ui.save_changes') }}
           </button>
         </div>
       </div>
@@ -90,9 +93,9 @@ const closeSuccessAlert = () => {
     <!-- Success Alert -->
     <SuccessAlert
       :visible="showSuccessAlert"
-      title="Cleaner Added Successfully!"
+      :title="t('ui.success_created')"
       :message="successMessage"
-      action-text="Close"
+      :action-text="t('ui.done')"
       @close="closeSuccessAlert"
     />
   </SuperAdminLayout>

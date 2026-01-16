@@ -7,6 +7,9 @@ import { Edit, Trash2 } from 'lucide-vue-next'
 import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal.vue'
 import SuccessAlert from '@/components/ui/SuccessAlert.vue'
 import UpdateCleanerModal from '@/components/UpdateCleanerModal.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const cleanerStore = useCleanerStore()
 const { cleaners } = storeToRefs(cleanerStore)
@@ -91,7 +94,7 @@ const handleUpdateCleaner = async (id: string, cleaner: Partial<Cleaner>) => {
   isUpdating.value = true
   try {
     await cleanerStore.updateCleaner(cleaner as Cleaner, id)
-    successMessage.value = `Cleaner "${cleaner.name}" has been updated successfully!`
+    successMessage.value = t('ui.cleaner_update_success', { name: cleaner.name })
     showSuccessAlert.value = true
     closeUpdateModal()
   } catch (error: any) {
@@ -133,22 +136,22 @@ const closeDeleteModal = () => {
 
 <template>
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    <div v-if="!cleaners.length" class="p-8 text-center text-gray-600">No cleaners found</div>
+    <div v-if="!cleaners.length" class="p-8 text-center text-gray-600">{{ t('ui.no_cleaners_found') }}</div>
     <div v-else-if="!filteredCleaners.length" class="p-8 text-center text-gray-600">
-      No cleaners match your search
+      {{ t('ui.no_cleaners_found') }}
     </div>
 
     <!-- Table -->
     <table v-else class="w-full text-left border-collapse">
       <thead>
         <tr class="text-xs font-bold text-gray-400 uppercase border-b border-gray-100">
-          <th class="px-6 py-4">ID</th>
-          <th class="px-6 py-4">Name</th>
-          <th class="px-6 py-4">Telegram ID</th>
-          <th class="px-6 py-4">Area</th>
-          <th class="px-6 py-4 text-center">Accept Count</th>
-          <th class="px-6 py-4 text-center">Reject Count</th>
-          <th class="px-6 py-4 text-center">Options</th>
+          <th class="px-6 py-4">{{ t('ui.cleaner_id') }}</th>
+          <th class="px-6 py-4">{{ t('ui.name') }}</th>
+          <th class="px-6 py-4">{{ t('ui.telegram_id') }}</th>
+          <th class="px-6 py-4">{{ t('ui.area') }}</th>
+          <th class="px-6 py-4 text-center">{{ t('ui.accept_count') }}</th>
+          <th class="px-6 py-4 text-center">{{ t('ui.reject_count') }}</th>
+          <th class="px-6 py-4 text-center">{{ t('ui.options') }}</th>
         </tr>
       </thead>
 
@@ -182,8 +185,8 @@ const closeDeleteModal = () => {
       class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50"
     >
       <div class="text-sm text-gray-600">
-        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
-        {{ Math.min(currentPage * itemsPerPage, filteredCleaners.length) }} of
+        {{ t('ui.showing') }} {{ (currentPage - 1) * itemsPerPage + 1 }} {{ t('ui.to') }}
+        {{ Math.min(currentPage * itemsPerPage, filteredCleaners.length) }} {{ t('ui.of') }}
         {{ filteredCleaners.length }}
       </div>
 
@@ -193,7 +196,7 @@ const closeDeleteModal = () => {
           :disabled="currentPage === 1"
           class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          Previous
+          {{ t('ui.previous') }}
         </button>
 
         <div class="flex items-center gap-1">
@@ -217,7 +220,7 @@ const closeDeleteModal = () => {
           :disabled="currentPage === totalPages"
           class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          Next
+          {{ t('ui.next') }}
         </button>
       </div>
     </div>
@@ -233,10 +236,10 @@ const closeDeleteModal = () => {
     <!-- Delete Confirmation Modal -->
     <ConfirmDeleteModal
       :visible="showDeleteModal"
-      title="Delete Cleaner"
-      :message="`Are you sure you want to delete ${cleanerToDelete?.name}? This action cannot be undone.`"
-      confirm-text="Delete"
-      cancel-text="Cancel"
+      :title="t('ui.delete_cleaner')"
+      :message="t('ui.cleaner_delete_confirmation', { name: cleanerToDelete?.name })"
+      :confirm-text="t('ui.delete')"
+      :cancel-text="t('ui.cancel')"
       :is-loading="isDeleting"
       @confirm="confirmDelete"
       @cancel="closeDeleteModal"
@@ -245,9 +248,9 @@ const closeDeleteModal = () => {
     <!-- Success Alert -->
     <SuccessAlert
       :visible="showSuccessAlert"
-      title="Cleaner Updated Successfully!"
+      :title="t('ui.cleaner_updated_title')"
       :message="successMessage"
-      action-text="Close"
+      :action-text="t('ui.close')"
       @close="closeSuccessAlert"
     />
   </div>

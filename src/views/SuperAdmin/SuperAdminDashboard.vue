@@ -7,6 +7,9 @@ import { useSuperAdminStore } from '@/stores/superAdminStore'
 import { useCleanerStore } from '@/stores/cleanerStore'
 import { Users, Box, BarChart2, Clock, ChevronRight, ChevronLeft } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const superAdminStore = useSuperAdminStore()
 const cleanerStore = useCleanerStore()
@@ -77,19 +80,26 @@ onMounted(() => {
 const binStatusData = computed(() => {
   const statusCounts = bins.value.reduce(
     (acc, bin) => {
-      acc[bin.status] = (acc[bin.status] || 0) + 1
+      acc[bin.status] = (acc[bin.status] || 0) + 1 // Keep original keys for logic
       return acc
     },
     {} as Record<string, number>,
   )
 
+  // Translate labels for display
+  const translatedLabels = Object.keys(statusCounts).map(status => {
+    // Map status string to translation key if possible, or leave as is
+    if (status === 'FULL') return t('ui.full');
+    if (status === 'EMPTY') return t('ui.empty');
+    if (status === 'FILLING') return t('ui.half'); // Assuming FILLING maps to 'half' per existing admin.ts
+    return status;
+  })
+
   return {
     series: Object.values(statusCounts),
     chartOptions: {
       chart: { type: 'pie' },
-      labels: Object.keys(statusCounts),
-      colors: ['#ef4444', '#f97316', '#22c55e'], // FULL, FILLING, EMPTY
-      legend: { position: 'bottom' },
+      labels: translatedLabels,
     },
   }
 })
@@ -133,7 +143,7 @@ const binStatusData = computed(() => {
 //         },
 //       },
 //     },
-//   }
+//   }t('ui.times_full')
 // })
 
 const busiestBinsData = computed(() => {
@@ -180,7 +190,7 @@ const fillLevelHistogramData = computed(() => {
   })
 
   return {
-    series: [{ name: 'Number of Bins', data: Object.values(brackets) }],
+    series: [{ name: t('ui.num_bins'), data: Object.values(brackets) }],
     chartOptions: {
       chart: { type: 'bar' },
       xaxis: {
@@ -205,7 +215,7 @@ const fillLevelTrendData = computed(() => {
   return {
     series: [
       {
-        name: 'Avg. Fill Level',
+        name: t('ui.avg_fill_level'),
         data: [20, 30, 25, 45, 40, 50, 45, 60, 55, 70, 60, 65].reverse(), // Mock trend
       },
     ],
@@ -240,12 +250,12 @@ const fillLevelTrendData = computed(() => {
 </script>
 
 <template>
-  <SuperAdminLayout title="Dashboard" @search="handleSearch">
+  <SuperAdminLayout :title="t('ui.dashboard')" @search="handleSearch">
     <!-- Search Results Section -->
     <div v-if="searchQuery" class="mb-8">
       <div class="bg-white rounded-lg shadow-sm p-6">
         <h3 class="text-lg font-semibold mb-4">
-          Search Results for "{{ searchQuery }}"
+          {{ t('ui.search_results') }} "{{ searchQuery }}"
         </h3>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -253,10 +263,10 @@ const fillLevelTrendData = computed(() => {
           <div class="border rounded-lg p-4">
             <h4 class="font-medium text-gray-700 mb-3 flex items-center">
               <Box class="w-5 h-5 mr-2 text-yellow-500" />
-              Bins ({{ filteredBins.length }})
+              {{ t('ui.bins') }} ({{ filteredBins.length }})
             </h4>
             <div v-if="filteredBins.length === 0" class="text-sm text-gray-500">
-              No bins match your search
+              {{ t('ui.no_bins_match') }}
             </div>
             <div v-else class="space-y-2 max-h-60 overflow-y-auto">
               <div
@@ -268,7 +278,7 @@ const fillLevelTrendData = computed(() => {
                 <div class="text-gray-600 text-xs">{{ bin.binCode }} - {{ bin.area }}</div>
               </div>
               <div v-if="filteredBins.length > 10" class="text-xs text-gray-500 pt-1">
-                +{{ filteredBins.length - 10 }} more
+                {{ t('ui.more_results', { count: filteredBins.length - 10 }) }}
               </div>
             </div>
           </div>
@@ -277,10 +287,10 @@ const fillLevelTrendData = computed(() => {
           <div class="border rounded-lg p-4">
             <h4 class="font-medium text-gray-700 mb-3 flex items-center">
               <Clock class="w-5 h-5 mr-2 text-orange-500" />
-              Cleaners ({{ filteredCleaners.length }})
+              {{ t('ui.cleaners') }} ({{ filteredCleaners.length }})
             </h4>
             <div v-if="filteredCleaners.length === 0" class="text-sm text-gray-500">
-              No cleaners match your search
+              {{ t('ui.no_cleaners_match') }}
             </div>
             <div v-else class="space-y-2 max-h-60 overflow-y-auto">
               <div
@@ -292,7 +302,7 @@ const fillLevelTrendData = computed(() => {
                 <div class="text-gray-600 text-xs">{{ cleaner.area }}</div>
               </div>
               <div v-if="filteredCleaners.length > 10" class="text-xs text-gray-500 pt-1">
-                +{{ filteredCleaners.length - 10 }} more
+                {{ t('ui.more_results', { count: filteredCleaners.length - 10 }) }}
               </div>
             </div>
           </div>
@@ -301,10 +311,10 @@ const fillLevelTrendData = computed(() => {
           <div class="border rounded-lg p-4">
             <h4 class="font-medium text-gray-700 mb-3 flex items-center">
               <Users class="w-5 h-5 mr-2 text-purple-600" />
-              Admins ({{ filteredAdmins.length }})
+              {{ t('ui.admins') }} ({{ filteredAdmins.length }})
             </h4>
             <div v-if="filteredAdmins.length === 0" class="text-sm text-gray-500">
-              No admins match your search
+              {{ t('ui.no_admins_match') }}
             </div>
             <div v-else class="space-y-2 max-h-60 overflow-y-auto">
               <div
@@ -316,7 +326,7 @@ const fillLevelTrendData = computed(() => {
                 <div class="text-gray-600 text-xs">{{ admin.email }} - {{ admin.area }}</div>
               </div>
               <div v-if="filteredAdmins.length > 10" class="text-xs text-gray-500 pt-1">
-                +{{ filteredAdmins.length - 10 }} more
+                {{ t('ui.more_results', { count: filteredAdmins.length - 10 }) }}
               </div>
             </div>
           </div>
@@ -327,7 +337,7 @@ const fillLevelTrendData = computed(() => {
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <StatCard
-        title="Total Customer"
+        :title="t('ui.total_customer')"
         :value="filteredAdmins.length"
         :icon="Users"
         iconBg="bg-purple-100 text-purple-600"
@@ -335,7 +345,7 @@ const fillLevelTrendData = computed(() => {
         :isPositive="true"
       />
       <StatCard
-        title="Total Bin"
+        :title="t('ui.total_bin')"
         :value="filteredBins.length"
         :icon="Box"
         iconBg="bg-yellow-100 text-yellow-500"
@@ -343,7 +353,7 @@ const fillLevelTrendData = computed(() => {
         :isPositive="true"
       />
       <StatCard
-        title="Total Fill Count"
+        :title="t('ui.total_fill_count')"
         :value="totalFullCount"
         :icon="BarChart2"
         iconBg="bg-green-100 text-green-500"
@@ -351,7 +361,7 @@ const fillLevelTrendData = computed(() => {
         :isPositive="false"
       />
       <StatCard
-        title="Total Cleaners"
+        :title="t('ui.total_cleaners')"
         :value="filteredCleaners.length"
         :icon="Clock"
         iconBg="bg-orange-100 text-orange-500"
@@ -363,13 +373,13 @@ const fillLevelTrendData = computed(() => {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-5">
       <TrashGraph
         type="pie"
-        title="Bin Status Overview"
+        :title="t('ui.bin_status_overview')"
         :series="binStatusData.series"
         :chart-options="binStatusData.chartOptions"
       />
       <TrashGraph
         type="bar"
-        title="Fill Level Distribution"
+        :title="t('ui.fill_level_distribution')"
         :series="fillLevelHistogramData.series"
         :chart-options="fillLevelHistogramData.chartOptions"
       />
@@ -377,7 +387,7 @@ const fillLevelTrendData = computed(() => {
     <div class="grid grid-cols-1 gap-8 mb-5">
       <TrashGraph
         type="bar"
-        title="Top 5 Busiest Bins"
+        :title="t('ui.busiest_bins')"
         :series="busiestBinsData.series"
         :chart-options="busiestBinsData.chartOptions"
       />
@@ -385,7 +395,7 @@ const fillLevelTrendData = computed(() => {
     <div class="grid grid-cols-1 gap-8">
       <TrashGraph
         type="line"
-        title="Fill Level Trend"
+        :title="t('ui.fill_level_trend')"
         :series="fillLevelTrendData.series"
         :chart-options="fillLevelTrendData.chartOptions"
       />

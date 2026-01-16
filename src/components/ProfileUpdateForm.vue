@@ -3,6 +3,9 @@ import { Edit2, Calendar, Save, X } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import * as authService from '@/services/authService'
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const authStore = useAuthStore()
 
@@ -102,7 +105,7 @@ const saveProfile = async () => {
     // Get the updated user data from response
     const updatedUserData = response.user || response.admin || response
 
-    success.value = 'Profile updated successfully!'
+    success.value = t('ui.profile_updated_success')
 
     // Update auth store with new data
     if (authStore.user) {
@@ -126,7 +129,7 @@ const saveProfile = async () => {
     }, 3000)
   } catch (err: any) {
     console.error('Save profile error:', err)
-    error.value = err.response?.data?.message || err.message || 'Failed to update profile'
+    error.value = err.response?.data?.message || err.message || t('ui.update_profile_failed')
   } finally {
     loading.value = false
   }
@@ -141,7 +144,7 @@ const getDisplayValue = (value: string | null | undefined) => {
   <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 h-full">
     <div class="flex justify-between items-start mb-8">
       <div>
-        <h3 class="font-bold text-lg text-gray-800 mb-4">Profile Update</h3>
+        <h3 class="font-bold text-lg text-gray-800 mb-4">{{ t('ui.personal_info') }}</h3>
         <div class="flex items-center gap-4">
           <div
             v-if="formData.profilePic"
@@ -159,13 +162,13 @@ const getDisplayValue = (value: string | null | undefined) => {
             v-if="isEditing"
             class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700"
           >
-            Upload New
+            {{ t('ui.upload_photo') }}
           </button>
           <button
             v-if="isEditing"
             class="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50"
           >
-            Delete
+            {{ t('ui.delete') }}
           </button>
         </div>
       </div>
@@ -175,7 +178,7 @@ const getDisplayValue = (value: string | null | undefined) => {
           @click="toggleEdit"
           class="flex items-center gap-2 text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50"
         >
-          <Edit2 :size="14" /> Edit
+          <Edit2 :size="14" /> {{ t('ui.edit_profile') }}
         </button>
         <template v-else>
           <button
@@ -183,13 +186,13 @@ const getDisplayValue = (value: string | null | undefined) => {
             :disabled="loading"
             class="flex items-center gap-2 bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-green-700 disabled:opacity-50"
           >
-            <Save :size="14" /> {{ loading ? 'Saving...' : 'Save' }}
+            <Save :size="14" /> {{ loading ? t('ui.saving') : t('ui.save_changes') }}
           </button>
           <button
             @click="toggleEdit"
             class="flex items-center gap-2 text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50"
           >
-            <X :size="14" /> Cancel
+            <X :size="14" /> {{ t('ui.cancel_edit') }}
           </button>
         </template>
       </div>
@@ -211,12 +214,12 @@ const getDisplayValue = (value: string | null | undefined) => {
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
-        <label class="block text-sm font-medium text-gray-600 mb-1.5">First Name</label>
+        <label class="block text-sm font-medium text-gray-600 mb-1.5">{{ t('ui.first_name') }}</label>
         <input
           v-if="isEditing"
           v-model="formData.firstName"
           type="text"
-          placeholder="Enter first name"
+          :placeholder="t('ui.first_name')"
           class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 outline-none focus:border-green-500"
         />
         <div
@@ -228,12 +231,12 @@ const getDisplayValue = (value: string | null | undefined) => {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-600 mb-1.5">Last Name</label>
+        <label class="block text-sm font-medium text-gray-600 mb-1.5">{{ t('ui.last_name') }}</label>
         <input
           v-if="isEditing"
           v-model="formData.lastName"
           type="text"
-          placeholder="Enter last name"
+          :placeholder="t('ui.last_name')"
           class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 outline-none focus:border-green-500"
         />
         <div
@@ -245,16 +248,16 @@ const getDisplayValue = (value: string | null | undefined) => {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-600 mb-1.5">Gender</label>
+        <label class="block text-sm font-medium text-gray-600 mb-1.5">{{ t('ui.gender') }}</label>
         <select
           v-if="isEditing"
           v-model="formData.gender"
           class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 outline-none focus:border-green-500 appearance-none"
         >
-          <option value="">Select Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
+          <option value="">{{ t('ui.gender') }}</option>
+          <option value="Male">{{ t('ui.male') }}</option>
+          <option value="Female">{{ t('ui.female') }}</option>
+          <option value="Other">{{ t('ui.other') }}</option>
         </select>
         <div
           v-else
@@ -265,13 +268,13 @@ const getDisplayValue = (value: string | null | undefined) => {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-600 mb-1.5">Phone Number</label>
+        <label class="block text-sm font-medium text-gray-600 mb-1.5">{{ t('ui.phone') }}</label>
         <div class="relative">
           <input
             v-if="isEditing"
             v-model="formData.phone"
             type="text"
-            placeholder="Enter phone number"
+            :placeholder="t('ui.phone')"
             class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 outline-none focus:border-green-500"
           />
           <div
@@ -284,12 +287,12 @@ const getDisplayValue = (value: string | null | undefined) => {
       </div>
 
       <div class="md:col-span-1">
-        <label class="block text-sm font-medium text-gray-600 mb-1.5">E-mail</label>
+        <label class="block text-sm font-medium text-gray-600 mb-1.5">{{ t('ui.email') }}</label>
         <input
           v-if="isEditing"
           v-model="formData.email"
           type="email"
-          placeholder="Enter email"
+          :placeholder="t('ui.email')"
           class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 outline-none focus:border-green-500"
         />
         <div
@@ -301,13 +304,12 @@ const getDisplayValue = (value: string | null | undefined) => {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-600 mb-1.5">Date of Birth</label>
+        <label class="block text-sm font-medium text-gray-600 mb-1.5">{{ t('ui.dob') }}</label>
         <div class="relative">
           <input
             v-if="isEditing"
             v-model="formData.dateOfBirth"
             type="date"
-            placeholder="Select date"
             class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 outline-none focus:border-green-500"
           />
           <div
@@ -321,12 +323,12 @@ const getDisplayValue = (value: string | null | undefined) => {
       </div>
 
       <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-gray-600 mb-1.5">Address</label>
+        <label class="block text-sm font-medium text-gray-600 mb-1.5">{{ t('ui.address') }}</label>
         <input
           v-if="isEditing"
           v-model="formData.address"
           type="text"
-          placeholder="Enter address"
+          :placeholder="t('ui.address')"
           class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-800 outline-none focus:border-green-500"
         />
         <div

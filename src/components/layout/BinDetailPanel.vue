@@ -2,11 +2,11 @@
   <transition name="slide-fade">
     <div
       v-if="bin"
-      class="fixed inset-y-0 left-0 w-full max-w-sm backdrop-blur-xl shadow-2xl z-2000 border-r border-white"
+      class="fixed inset-y-0 left-0 w-full max-w-sm backdrop-blur-xl shadow-2xl z-9999999 border-r border-white"
     >
       <div class="p-6 flex flex-col h-full">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-black text-gray-800">Bin Details</h2>
+          <h2 class="text-2xl font-black text-gray-800">{{ t('ui.bin_details') }}</h2>
           <button
             @click="$emit('close')"
             class="p-2 rounded-full hover:bg-gray-200/50 transition-colors"
@@ -49,12 +49,12 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="font-bold text-lg text-gray-900">{{ bin.area }}</h3>
+                  <h3 class="font-bold text-lg text-gray-900">{{ displayArea }}</h3>
                   <p class="text-xs text-gray-500 font-semibold uppercase">{{ bin.binCode }}</p>
                 </div>
               </div>
               <p class="text-sm text-gray-600 font-medium">
-                Coordinates: {{ bin.location.lat.toFixed(4) }},
+                {{ t('ui.coordinates') }}: {{ bin.location.lat.toFixed(4) }},
                 {{ bin.location.lng.toFixed(4) }}
               </p>
             </div>
@@ -80,18 +80,18 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="font-bold text-lg text-gray-900">Fill Level</h3>
+                  <h3 class="font-bold text-lg text-gray-900">{{ t('ui.fill_level') }}</h3>
                   <p
                     :class="bin.fillLevel > 80 ? 'text-red-500' : 'text-green-600'"
                     class="text-xs font-bold uppercase"
                   >
-                    {{ bin.fillLevel > 80 ? 'Urgent' : 'Normal' }}
+                    {{ bin.fillLevel > 80 ? t('ui.urgent') : t('ui.normal') }}
                   </p>
                 </div>
               </div>
               <div class="space-y-2">
                 <div class="flex justify-between text-sm font-bold text-gray-800">
-                  <span>Load</span>
+                  <span>{{ t('ui.load') }}</span>
                   <span>{{ bin.fillLevel }}%</span>
                 </div>
                 <div class="h-2.5 w-full bg-gray-200 rounded-full overflow-hidden">
@@ -105,6 +105,14 @@
                 </div>
               </div>
             </div>
+
+            <!-- Card 3: Bin Image -->
+            <div v-if="bin.pictureBins && bin.pictureBins.length > 0" class="bg-white/80 rounded-3xl p-5">
+              <h3 class="font-bold text-lg text-gray-900 mb-3">{{ t('ui.bin_location_image') }}</h3>
+              <div class="rounded-xl overflow-hidden aspect-video border border-gray-100">
+                <img :src="getFullImageUrl" alt="Bin Image" class="w-full h-full object-cover" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -113,7 +121,7 @@
             @click="$emit('navigate', bin)"
             class="w-full bg-gray-900 text-white py-4 rounded-2xl text-base font-bold uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center justify-center space-x-2"
           >
-            <span>Directions</span>
+            <span>{{ t('ui.directions') }}</span>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
@@ -130,13 +138,42 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Bin } from '@/types/bin'
 
-defineProps<{
+const props = defineProps<{
   bin: Bin | null
 }>()
 
 defineEmits(['close', 'navigate'])
+const { t, locale } = useI18n()
+
+// Helper to safely get localized strings (handling both string and object formats)
+const getLocalizedWithFallback = (val: any) => {
+  if (!val) return ''
+  if (typeof val === 'string') return val
+  // val is LocalizedString { en: string; kh?: string }
+  // Try current locale, fallback to 'en', then empty string
+  return val[locale.value] || val.en || ''
+}
+
+const displayArea = computed(() => props.bin ? getLocalizedWithFallback(props.bin.area) : '')
+const displayAddress = computed(() => props.bin ? getLocalizedWithFallback(props.bin.addressBin) : '')
+
+const getFullImageUrl = computed(() => {
+  if (!props.bin || !props.bin.pictureBins || props.bin.pictureBins.length === 0) return ''
+  const rawUrl = props.bin.pictureBins[0]
+  // If already a full URL, return as is
+  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
+    return rawUrl
+  }
+  // Otherwise, prepend base URL (assuming an environment variable or constant)
+  const baseUrl = import.meta.env.VITE_API_URL || ''
+  return `${baseUrl}${rawUrl}`
+})
+
+console.log(props.bin?.pictureBins)
 </script>
 
 <style>

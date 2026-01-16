@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { Plus, X } from 'lucide-vue-next'
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const uploadedImages = ref<string[]>([])
 
@@ -67,7 +70,7 @@ defineExpose({ uploadedImages })
           >
             <div class="flex items-center gap-2">
               <Plus :size="16" class="text-purple-600 group-hover:text-purple-600" />
-              <span class="text-xs font-medium">Add More Images</span>
+              <span class="text-xs font-medium">{{ t('ui.add_more_images') }}</span>
             </div>
           </div>
         </label>
@@ -76,7 +79,7 @@ defineExpose({ uploadedImages })
           @click="clearAllImages"
           class="w-full py-2.5 border border-red-200 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 hover:border-red-300 transition-all text-xs font-medium"
         >
-          Clear All
+          {{ t('ui.clear_all') }}
         </button>
       </div>
     </div>
@@ -93,8 +96,8 @@ defineExpose({ uploadedImages })
           >
             <Plus :size="20" class="text-purple-600" />
           </div>
-          <span class="text-sm font-medium">Add Images</span>
-          <span class="text-xs mt-1">Click to upload multiple images</span>
+          <span class="text-sm font-medium">{{ t('ui.add_images') }}</span>
+          <span class="text-xs mt-1">{{ t('ui.click_to_upload') }}</span>
         </div>
       </label>
     </div>

@@ -62,7 +62,7 @@ onMounted(() => {
 const handleUpdateBin = async (id: string, bin: Partial<Bin>) => {
   try {
     await binStore.updateBin(id, bin)
-    successMessage.value = `SmartBin "${bin.binCode}" has been updated successfully!`
+    successMessage.value = t('ui.bin_update_success', { code: bin.binCode })
     showSuccessAlert.value = true
     isUpdateModalVisible.value = false
     selectedBin.value = null 
@@ -81,7 +81,7 @@ const deleteSelectedBin = () => {
     binToDelete.value = selectedBin.value
     showDeleteModal.value = true
   } else {
-    alert('Please select a bin to delete.')
+    alert(t('ui.select_bin_delete'))
   }
 }
 
@@ -111,7 +111,7 @@ const openUpdateModal = () => {
   if (selectedBin.value) {
     isUpdateModalVisible.value = true
   } else {
-    alert('Please select a bin to update.')
+    alert(t('ui.select_bin_to_update'))
   }
 }
 
@@ -125,7 +125,7 @@ const selectBin = (bin: Bin) => {
 </script>
 
 <template>
-  <SuperAdminLayout title="Bin Locations" @search="handleSearch">
+  <SuperAdminLayout :title="t('ui.location')" @search="handleSearch">
     <div>
       <div
         class="w-full h-125 rounded-xl mb-8 flex items-center justify-center relative overflow-hidden"
@@ -134,20 +134,20 @@ const selectBin = (bin: Bin) => {
       </div>
       
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-gray-800">{{ t('ui.bins') }} List:</h3>
+        <h3 class="text-xl font-bold text-gray-800">{{ t('ui.bins') }}</h3>
         <div class="flex gap-4">
           <button @click="openUpdateModal" class="px-8 py-2 bg-green-600 text-white rounded-lg">
-             Update
+             {{ t('ui.update') }}
           </button>
           <button @click="deleteSelectedBin" class="px-8 py-2 bg-red-600 text-white rounded-lg">
-             Delete
+             {{ t('ui.delete') }}
           </button>
         </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-if="!filteredBins.length" class="col-span-full p-8 text-center text-gray-600">
-          {{ t('ui.search_results') }} "{{ searchText }}" - No results
+          {{ t('ui.search_results') }} "{{ searchText }}" - {{ t('ui.no_bins_match') }}
         </div>
         
         <BinCard
@@ -170,10 +170,10 @@ const selectBin = (bin: Bin) => {
 
     <ConfirmDeleteModal
       :visible="showDeleteModal"
-      title="Delete SmartBin"
-      :message="`Are you sure you want to delete bin ${binToDelete?.binCode}?`"
-      confirm-text="Delete"
-      cancel-text="Cancel"
+      :title="t('ui.delete_smartbin')"
+      :message="t('ui.confirm_delete_bin', { code: binToDelete?.binCode })"
+      :confirm-text="t('ui.delete')"
+      :cancel-text="t('ui.cancel')"
       :is-loading="isDeleting"
       @confirm="confirmDeleteBin"
       @cancel="closeDeleteModal"
@@ -181,9 +181,9 @@ const selectBin = (bin: Bin) => {
 
     <SuccessAlert
       :visible="showSuccessAlert"
-      title="Success"
+      :title="t('ui.success')"
       :message="successMessage"
-      action-text="Close"
+      :action-text="t('ui.done')"
       @close="closeSuccessAlert"
     />
   </SuperAdminLayout>

@@ -2,6 +2,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher.vue'
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -60,24 +64,26 @@ if (localStorage.getItem('rememberEmail')) {
 <template>
   <div class="flex items-center justify-center min-h-screen bg-gray-100">
     <div
-      class="w-full max-w-md p-10 bg-white rounded-xl shadow-lg font-sans border-2 border-gray-400"
+      class="relative w-full max-w-md p-10 bg-white rounded-xl shadow-lg font-sans border-2 border-gray-400"
     >
-      <h1 class="text-xl font-normal mb-1">Welcome !</h1>
-      <h2 class="text-3xl font-bold mb-1">Sign in to</h2>
-      <p class="text-sm text-gray-500 mb-8">Access your Smart Bin data</p>
-
+      <h1 class="text-xl font-normal mb-1">{{ t('ui.auth_welcome') }}</h1>
+      <h2 class="text-3xl font-bold mb-1">{{ t('ui.auth_signin_title') }}</h2>
+      <p class="text-sm text-gray-500 mb-8">{{ t('ui.auth_signin_subtitle') }}</p>
+      <div class="absolute top-10 right-5">
+        <LanguageSwitcher/>
+      </div>
       <form @submit.prevent="handleSubmit">
         <div v-if="authStore.error" class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
           {{ authStore.error }}
         </div>
 
         <div class="mb-6">
-          <label for="email" class="block text-base font-normal mb-2">Email</label>
+          <label for="email" class="block text-base font-normal mb-2">{{ t('ui.auth_email_label') }}</label>
           <input
             id="email"
             v-model="email"
             type="email"
-            placeholder="Enter your email"
+            :placeholder="t('ui.auth_email_placeholder')"
             class="w-full px-4 py-3 border rounded-lg outline-none transition duration-150"
             :class="
               emailError
@@ -86,18 +92,18 @@ if (localStorage.getItem('rememberEmail')) {
             "
           />
           <p v-if="emailError" class="text-red-500 text-sm mt-2">
-            Please enter a valid email address
+            {{ t('ui.auth_email_error') }}
           </p>
         </div>
 
         <div class="mb-4">
-          <label for="password" class="block text-base font-normal mb-2">Password</label>
+          <label for="password" class="block text-base font-normal mb-2">{{ t('ui.auth_password_label') }}</label>
           <div class="relative">
             <input
               id="password"
               v-model="password"
               :type="passwordFieldType"
-              placeholder="Enter your Password"
+              :placeholder="t('ui.auth_password_placeholder')"
               class="w-full px-4 py-3 border rounded-lg pr-12 outline-none transition duration-150"
               :class="
                 passwordError
@@ -137,7 +143,7 @@ if (localStorage.getItem('rememberEmail')) {
             </span>
           </div>
           <p v-if="passwordError" class="text-red-500 text-sm mt-2">
-            Password must be 6-20 characters
+            {{ t('ui.auth_password_error') }}
           </p>
         </div>
 
@@ -148,10 +154,10 @@ if (localStorage.getItem('rememberEmail')) {
               type="checkbox"
               class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 mr-2"
             />
-            Remember me
+            {{ t('ui.auth_remember_me') }}
           </label>
           <RouterLink to="/forgot" class="text-[#68A947] font-semibold"
-            >Forgot Password?</RouterLink
+            >{{ t('ui.auth_forgot_password') }}</RouterLink
           >
         </div>
 
@@ -160,14 +166,14 @@ if (localStorage.getItem('rememberEmail')) {
           :disabled="authStore.loading"
           class="w-full py-3 bg-[#68A947] hover:bg-[#58973b] disabled:bg-gray-400 text-white text-lg font-semibold rounded-lg shadow-md transition duration-150 mb-8"
         >
-          {{ authStore.loading ? 'Logging in...' : 'Login' }}
+          {{ authStore.loading ? t('ui.auth_logging_in') : t('ui.auth_login_btn') }}
         </button>
       </form>
 
       <div class="text-center text-sm">
-        Don't have an Account?
+        {{ t('ui.auth_no_account') }}
         <RouterLink to="/signup" class="text-[#68A947] font-semibold hover:text-[#58973b]"
-          >Register</RouterLink
+          >{{ t('ui.auth_register') }}</RouterLink
         >
       </div>
     </div>

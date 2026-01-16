@@ -113,7 +113,7 @@ const isMenuItemActive = (url: any) => {
             class="flex-1 px-4 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 disabled:bg-red-400 transition-colors flex items-center justify-center gap-2"
           >
             <LogOut :size="18" />
-            {{ authStore.loading ? t('ui.logout') + '...' : t('ui.logout') }}
+            {{ authStore.loading ? t('ui.logging_out') : t('ui.logout') }}
           </button>
         </div>
       </div>

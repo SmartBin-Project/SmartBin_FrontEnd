@@ -29,7 +29,7 @@ const addBin = async () => {
     isSubmitting.value = true
 
     if (!formData.value.binCode.trim()) {
-      submitError.value = 'Bin Code is required' // You can translate errors too if needed
+      submitError.value = t('ui.admin_required_username') // Closest match or add new key
       return
     }
     
@@ -68,7 +68,7 @@ const addBin = async () => {
     }
     if (imageUploader.value) imageUploader.value.uploadedImages = []
   } catch (error) {
-    submitError.value = binStore.error || 'Failed to create bin'
+    submitError.value = binStore.error || t('ui.update_profile_failed') // Reusing for now or add generic error
     console.error(binStore.error || 'Failed to create bin')
   } finally {
     isSubmitting.value = false
@@ -174,9 +174,9 @@ const closeSuccessAlert = () => {
 
     <SuccessAlert
       :visible="showSuccessAlert"
-      title="Success"
+      :title="t('ui.success')"
       :message="successMessage"
-      action-text="Close"
+      :action-text="t('ui.close')"
       @close="closeSuccessAlert"
     />
   </div>

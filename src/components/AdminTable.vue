@@ -7,6 +7,9 @@ import { useAdminStore } from '@/stores/adminStore'
 import UpdateAdminModal from './UpdateAdminModal.vue'
 import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal.vue'
 import SuccessAlert from '@/components/ui/SuccessAlert.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // Helper function to auto-close success alert
 const autoCloseAlert = (duration = 3000) => {
@@ -96,7 +99,7 @@ const handleUpdate = async (data: UpdateAdminData, onComplete?: () => void) => {
   if (selectedAdmin.value?._id) {
     try {
       await adminStore.updateAdmin(selectedAdmin.value._id, data)
-      successMessage.value = 'Admin updated successfully.'
+      successMessage.value = t('ui.admin_update_success')
       showSuccess.value = true
       autoCloseAlert(3000) // Auto-close after 3 seconds
       if (onComplete) {
@@ -121,7 +124,7 @@ const confirmDelete = async () => {
     isDeleting.value = true
     await adminStore.deleteAdmin(deleteTarget.value._id)
     showConfirmDelete.value = false
-    successMessage.value = 'Admin deleted successfully.'
+    successMessage.value = t('ui.admin_delete_success')
     showSuccess.value = true
     autoCloseAlert(3000) // Auto-close after 3 seconds
   } catch (error: any) {
@@ -154,31 +157,31 @@ const deleteTargetName = computed(() => {
         @click="adminStore.fetchAllAdmins()"
         class="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
       >
-        Retry
+        {{ t('ui.retry') }}
       </button>
     </div>
 
     <!-- Loading State -->
-    <div v-else-if="isLoading" class="p-8 text-center text-gray-600">Loading admins...</div>
+    <div v-else-if="isLoading" class="p-8 text-center text-gray-600">{{ t('ui.loading_admins') }}</div>
 
     <!-- Empty State -->
-    <div v-else-if="!admins.length" class="p-8 text-center text-gray-600">No admins found</div>
+    <div v-else-if="!admins.length" class="p-8 text-center text-gray-600">{{ t('ui.no_admins_found') }}</div>
 
     <!-- No Search Results -->
     <div v-else-if="!filteredAdmins.length" class="p-8 text-center text-gray-600">
-      No admins match your search
+      {{ t('ui.no_admins_found') }}
     </div>
 
     <!-- Table -->
     <table v-else class="w-full text-left border-collapse">
       <thead>
         <tr class="text-xs font-bold text-gray-400 uppercase border-b border-gray-100">
-          <th class="px-6 py-4">ID</th>
-          <th class="px-6 py-4">Username</th>
-          <th class="px-6 py-4">Email</th>
-          <th class="px-6 py-4">Area</th>
-          <th class="px-6 py-4">Role</th>
-          <th class="px-6 py-4 text-center">Options</th>
+          <th class="px-6 py-4">{{ t('ui.admin_id') }}</th>
+          <th class="px-6 py-4">{{ t('ui.username') }}</th>
+          <th class="px-6 py-4">{{ t('ui.email') }}</th>
+          <th class="px-6 py-4">{{ t('ui.area') }}</th>
+          <th class="px-6 py-4">{{ t('ui.role') }}</th>
+          <th class="px-6 py-4 text-center">{{ t('ui.options') }}</th>
         </tr>
       </thead>
 
@@ -217,8 +220,8 @@ const deleteTargetName = computed(() => {
       class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50"
     >
       <div class="text-sm text-gray-600">
-        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
-        {{ Math.min(currentPage * itemsPerPage, filteredAdmins.length) }} of
+        {{ t('ui.showing') }} {{ (currentPage - 1) * itemsPerPage + 1 }} {{ t('ui.to') }}
+        {{ Math.min(currentPage * itemsPerPage, filteredAdmins.length) }} {{ t('ui.of') }}
         {{ filteredAdmins.length }}
       </div>
 
@@ -228,7 +231,7 @@ const deleteTargetName = computed(() => {
           :disabled="currentPage === 1"
           class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          Previous
+          {{ t('ui.previous') }}
         </button>
 
         <div class="flex items-center gap-1">
@@ -252,7 +255,7 @@ const deleteTargetName = computed(() => {
           :disabled="currentPage === totalPages"
           class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          Next
+          {{ t('ui.next') }}
         </button>
       </div>
     </div>
@@ -268,10 +271,10 @@ const deleteTargetName = computed(() => {
     <!-- Confirm Delete Modal -->
     <ConfirmDeleteModal
       :visible="showConfirmDelete"
-      :message="`Are you sure you want to delete ${deleteTargetName}?`"
+      :message="t('ui.confirm_delete_admin', { name: deleteTargetName })"
       :isLoading="isDeleting"
-      confirmText="Delete"
-      cancelText="Cancel"
+      :confirmText="t('ui.delete')"
+      :cancelText="t('ui.cancel')"
       @confirm="confirmDelete"
       @cancel="cancelDelete"
     />
@@ -280,7 +283,7 @@ const deleteTargetName = computed(() => {
     <SuccessAlert
       :visible="showSuccess"
       :message="successMessage"
-      actionText="Done"
+      :actionText="t('ui.done')"
       @close="showSuccess = false"
     />
   </div>

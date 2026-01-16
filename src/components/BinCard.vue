@@ -28,11 +28,11 @@ const statusColor = computed(() => {
         <Trash2 class="w-6 h-6 text-gray-700" />
       </div>
       <div>
-        <h3 class="font-bold text-gray-800 text-lg leading-tight">{{ props.bin.binCode }}</h3>
-        <div class="flex items-center text-xs text-gray-400 mt-1">
-          <MapPin :size="12" class="mr-1" />
-          <span class="truncate max-w-50">{{ translateDB(props.bin.area) }}</span>
+        <div class="flex items-center ">
+          <MapPin :size="16" class="mr-1" />
+          <h3 class="font-bold text-gray-800 text-lg leading-tight">{{ translateDB(props.bin.area) }}</h3>
         </div>
+          <span class="truncate max-w-50 text-xs text-gray-400 mt-1">{{ props.bin.binCode }}</span>
       </div>
     </div>
 

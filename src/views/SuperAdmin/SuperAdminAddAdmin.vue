@@ -4,6 +4,9 @@ import AdminFormInputs from '@/components/AdminFormInputs.vue'
 import SuccessAlert from '@/components/ui/SuccessAlert.vue'
 import { useAdminStore } from '@/stores/adminStore'
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const adminStore = useAdminStore()
 const formRef = ref<InstanceType<typeof AdminFormInputs>>()
@@ -28,38 +31,38 @@ const handleSubmit = async () => {
 
     // Validate required fields
     if (!formData.username?.trim()) {
-      errorMessage.value = 'Username is required'
+      errorMessage.value = t('ui.admin_required_username')
       isLoading.value = false
       return
     }
 
     if (!formData.email?.trim()) {
-      errorMessage.value = 'Email is required'
+      errorMessage.value = t('ui.admin_required_email')
       isLoading.value = false
       return
     }
 
     if (!formData.password?.trim()) {
-      errorMessage.value = 'Password is required (minimum 6 characters)'
+      errorMessage.value = t('ui.admin_required_password')
       isLoading.value = false
       return
     }
 
     if (formData.password.length < 6) {
-      errorMessage.value = 'Password must be at least 6 characters'
+      errorMessage.value = t('ui.admin_password_min_length')
       isLoading.value = false
       return
     }
 
     if (!formData.area?.trim()) {
-      errorMessage.value = 'Area is required'
+      errorMessage.value = t('ui.admin_required_area')
       isLoading.value = false
       return
     }
 
     // Create admin
     await adminStore.createAdmin(formData)
-    successMessage.value = 'Admin created successfully!'
+    successMessage.value = t('ui.admin_create_success')
     showSuccess.value = true
 
     // Reset form
@@ -78,7 +81,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <SuperAdminLayout title="Add Admin">
+  <SuperAdminLayout :title="t('ui.create_admin')">
     <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
       <!-- Error Message -->
       <div
@@ -101,7 +104,7 @@ const handleSubmit = async () => {
             :disabled="isLoading"
             class="px-8 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold rounded-xl transition-colors shadow-sm shadow-green-200"
           >
-            {{ isLoading ? 'Saving...' : 'Create Admin' }}
+            {{ isLoading ? t('ui.saving') : t('ui.create_admin') }}
           </button>
         </div>
       </div>
@@ -110,7 +113,7 @@ const handleSubmit = async () => {
       <SuccessAlert
         :visible="showSuccess"
         :message="successMessage"
-        actionText="Done"
+        :actionText="t('ui.done')"
         @close="showSuccess = false"
       />
     </div>
