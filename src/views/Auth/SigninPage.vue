@@ -170,12 +170,12 @@ if (localStorage.getItem('rememberEmail')) {
         </button>
       </form>
 
-      <div class="text-center text-sm">
+      <!-- <div class="text-center text-sm">
         {{ t('ui.auth_no_account') }}
         <RouterLink to="/signup" class="text-[#68A947] font-semibold hover:text-[#58973b]"
           >{{ t('ui.auth_register') }}</RouterLink
         >
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

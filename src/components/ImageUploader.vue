@@ -15,17 +15,32 @@ const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   const files = target.files
   if (files) {
-    Array.from(files).forEach((file) => {
+    const fileCount = files.length
+    console.log(`[ImageUploader] Selected ${fileCount} file(s)`)
+
+    let loadedCount = 0
+    const newImages: string[] = []
+
+    Array.from(files).forEach((file, index) => {
       const reader = new FileReader()
       reader.onload = (e) => {
         const imageData = e.target?.result as string
-        uploadedImages.value.push(imageData)
-        emit('imagesSelected', uploadedImages.value)
+        newImages[index] = imageData
+        loadedCount++
+
+        if (loadedCount === fileCount) {
+          uploadedImages.value = [...uploadedImages.value, ...newImages]
+          emit('imagesSelected', uploadedImages.value)
+        }
+      }
+      reader.onerror = (error) => {
+        console.error(`[ImageUploader] Error reading file ${index}:`, error)
+        loadedCount++
       }
       reader.readAsDataURL(file)
     })
   }
-  // Reset input
+
   target.value = ''
 }
 
@@ -44,7 +59,6 @@ defineExpose({ uploadedImages })
 
 <template>
   <div class="flex flex-col items-center">
-    <!-- Image Grid -->
     <div v-if="uploadedImages.length > 0" class="w-full">
       <div class="grid grid-cols-2 gap-3 mb-4">
         <div v-for="(image, index) in uploadedImages" :key="index" class="relative group">
@@ -84,7 +98,6 @@ defineExpose({ uploadedImages })
       </div>
     </div>
 
-    <!-- Initial Upload -->
     <div v-else class="w-full">
       <label class="w-full cursor-pointer group">
         <input type="file" class="hidden" accept="image/*" multiple @change="handleFileChange" />

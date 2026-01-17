@@ -4,19 +4,18 @@ import type { SuperAdmin } from '@/types/superadmin'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(sessionStorage.getItem('user') || 'null') as SuperAdmin | null,
-    accessToken: sessionStorage.getItem('access_token') || null,
+    user: JSON.parse(localStorage.getItem('user') || 'null') as SuperAdmin | null,
     loading: false,
     error: null as string | null,
   }),
 
   getters: {
     isAuthenticated(): boolean {
-      return !!this.accessToken && !!this.user
+      return !!this.user
     },
-    getAccessToken(): string | null {
-      return this.accessToken
-    },
+    // getAccessToken(): string | null {
+    //   return this.accessToken
+    // },
     getUser(): SuperAdmin | null {
       return this.user
     },
@@ -27,10 +26,9 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = null
       try {
-        3
         const response = await authService.login(email, password)
         this.user = response.user
-        this.accessToken = response.access_token
+        localStorage.setItem('user', JSON.stringify(response.user))
         return response
       } catch (err: any) {
         this.error = err.message || 'Login failed'
@@ -91,7 +89,8 @@ export const useAuthStore = defineStore('auth', {
         this.error = err.message || 'Logout failed'
       } finally {
         this.user = null
-        this.accessToken = null
+        localStorage.removeItem('user')
+        localStorage.removeItem('access_token')
         this.loading = false
       }
     },
@@ -112,7 +111,6 @@ export const useAuthStore = defineStore('auth', {
 
     loadUserFromStorage() {
       this.user = authService.getCurrentUser()
-      this.accessToken = authService.getAccessToken()
     },
 
     clearError() {

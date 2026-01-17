@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Edit2, Calendar, Save, X } from 'lucide-vue-next'
+import { Edit2, Calendar, Save, X, Upload } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import * as authService from '@/services/authService'
-import { useI18n } from 'vue-i18n';
+import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n();
+const { t } = useI18n()
 
 const authStore = useAuthStore()
 
@@ -13,6 +13,8 @@ const isEditing = ref(false)
 const loading = ref(false)
 const error = ref('')
 const success = ref('')
+const uploadedImage = ref<string>('')
+const fileInput = ref<HTMLInputElement>()
 
 const formData = ref({
   firstName: '',
@@ -31,7 +33,6 @@ onMounted(() => {
 
 const loadProfile = async () => {
   try {
-    // Try to load from backend first
     const profileData = await authService.getUserProfile()
 
     formData.value = {
@@ -45,7 +46,6 @@ const loadProfile = async () => {
       profilePic: profileData.profilePic || '',
     }
 
-    // Update auth store with the full profile data
     if (authStore.user) {
       authStore.user.firstName = profileData.firstName
       authStore.user.lastName = profileData.lastName
@@ -57,7 +57,7 @@ const loadProfile = async () => {
     }
   } catch (err) {
     console.error('Error loading profile:', err)
-    // Fallback to auth store if backend fails
+
     if (authStore.user) {
       formData.value = {
         firstName: authStore.user.firstName || authStore.user.username?.split(' ')[0] || '',
@@ -79,6 +79,7 @@ const toggleEdit = () => {
     // Reset form if canceling
     error.value = ''
     success.value = ''
+    uploadedImage.value = ''
   }
 }
 
@@ -88,26 +89,29 @@ const saveProfile = async () => {
   success.value = ''
 
   try {
-    // Prepare only the profile fields (not email which shouldn't be editable)
-    const updateData = {
+    const updateData: any = {
       firstName: formData.value.firstName,
       lastName: formData.value.lastName,
       gender: formData.value.gender,
       phone: formData.value.phone,
       dateOfBirth: formData.value.dateOfBirth,
       address: formData.value.address,
-      profilePic: formData.value.profilePic,
     }
 
-    // Call API to update profile
+    // Handle profile picture upload
+    if (uploadedImage.value) {
+      updateData.profilePic = uploadedImage.value
+    } else if (formData.value.profilePic) {
+      // Keep existing profile picture if not uploading new one
+      updateData.profilePic = formData.value.profilePic
+    }
+
     const response = await authService.updateUserProfile(updateData)
 
-    // Get the updated user data from response
     const updatedUserData = response.user || response.admin || response
 
     success.value = t('ui.profile_updated_success')
 
-    // Update auth store with new data
     if (authStore.user) {
       authStore.user.firstName = updatedUserData.firstName || formData.value.firstName
       authStore.user.lastName = updatedUserData.lastName || formData.value.lastName
@@ -115,15 +119,16 @@ const saveProfile = async () => {
       authStore.user.phone = updatedUserData.phone || formData.value.phone
       authStore.user.dateOfBirth = updatedUserData.dateOfBirth || formData.value.dateOfBirth
       authStore.user.address = updatedUserData.address || formData.value.address
-      authStore.user.profilePic = updatedUserData.profilePic || formData.value.profilePic
+      authStore.user.profilePic =
+        updatedUserData.profilePic || updateData.profilePic || formData.value.profilePic || ''
 
-      // Update localStorage
       localStorage.setItem('user', JSON.stringify(authStore.user))
+      formData.value.profilePic = authStore.user.profilePic || ''
     }
 
     isEditing.value = false
+    uploadedImage.value = ''
 
-    // Clear success message after 3 seconds
     setTimeout(() => {
       success.value = ''
     }, 3000)
@@ -132,6 +137,18 @@ const saveProfile = async () => {
     error.value = err.response?.data?.message || err.message || t('ui.update_profile_failed')
   } finally {
     loading.value = false
+  }
+}
+
+const handleImageUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      uploadedImage.value = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
   }
 }
 
@@ -147,29 +164,37 @@ const getDisplayValue = (value: string | null | undefined) => {
         <h3 class="font-bold text-lg text-gray-800 mb-4">{{ t('ui.personal_info') }}</h3>
         <div class="flex items-center gap-4">
           <div
-            v-if="formData.profilePic"
-            class="w-18 h-18 rounded-full border-2 border-white shadow-sm overflow-hidden"
+            v-if="formData.profilePic || uploadedImage"
+            class="w-18 h-18 rounded-full border-2 border-white shadow-sm overflow-hidden shrink-0"
           >
-            <img :src="formData.profilePic" alt="Profile" class="w-full h-full object-cover" />
+            <img
+              :src="uploadedImage || formData.profilePic"
+              alt="Profile"
+              class="w-full h-full object-cover"
+            />
           </div>
           <div
             v-else
-            class="w-18 h-18 rounded-full border-2 border-white shadow-sm bg-green-500 flex items-center justify-center text-white font-bold text-lg"
+            class="w-18 h-18 rounded-full border-2 border-white shadow-sm bg-green-500 flex items-center justify-center text-white font-bold text-lg shrink-0"
           >
             {{ (authStore.user?.username?.[0] || 'U').toUpperCase() }}
           </div>
-          <button
-            v-if="isEditing"
-            class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700"
-          >
-            {{ t('ui.upload_photo') }}
-          </button>
-          <button
-            v-if="isEditing"
-            class="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50"
-          >
-            {{ t('ui.delete') }}
-          </button>
+          <div v-if="isEditing" class="flex flex-col gap-2">
+            <button
+              type="button"
+              @click="fileInput?.click()"
+              class="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+            >
+              <Upload :size="16" /> {{ t('ui.upload_photo') }}
+            </button>
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              class="hidden"
+              @change="handleImageUpload"
+            />
+          </div>
         </div>
       </div>
       <div class="flex gap-2">
@@ -214,7 +239,9 @@ const getDisplayValue = (value: string | null | undefined) => {
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
-        <label class="block text-sm font-medium text-gray-600 mb-1.5">{{ t('ui.first_name') }}</label>
+        <label class="block text-sm font-medium text-gray-600 mb-1.5">{{
+          t('ui.first_name')
+        }}</label>
         <input
           v-if="isEditing"
           v-model="formData.firstName"
@@ -231,7 +258,9 @@ const getDisplayValue = (value: string | null | undefined) => {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-600 mb-1.5">{{ t('ui.last_name') }}</label>
+        <label class="block text-sm font-medium text-gray-600 mb-1.5">{{
+          t('ui.last_name')
+        }}</label>
         <input
           v-if="isEditing"
           v-model="formData.lastName"

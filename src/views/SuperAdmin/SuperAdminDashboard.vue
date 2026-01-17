@@ -5,11 +5,22 @@ import SuperAdminLayout from '@/components/layout/SuperAdminLayout.vue'
 import { useBinStore } from '@/stores/binStore'
 import { useSuperAdminStore } from '@/stores/superAdminStore'
 import { useCleanerStore } from '@/stores/cleanerStore'
-import { Users, Box, BarChart2, Clock, ChevronRight, ChevronLeft } from 'lucide-vue-next'
+import {
+  Users,
+  Box,
+  BarChart2,
+  Clock,
+  ChevronRight,
+  ChevronLeft,
+  Trash2,
+  Trash,
+  UserCheck2,
+  User2,
+} from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
-import { useI18n } from 'vue-i18n';
+import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n();
+const { t } = useI18n()
 
 const superAdminStore = useSuperAdminStore()
 const cleanerStore = useCleanerStore()
@@ -87,12 +98,12 @@ const binStatusData = computed(() => {
   )
 
   // Translate labels for display
-  const translatedLabels = Object.keys(statusCounts).map(status => {
+  const translatedLabels = Object.keys(statusCounts).map((status) => {
     // Map status string to translation key if possible, or leave as is
-    if (status === 'FULL') return t('ui.full');
-    if (status === 'EMPTY') return t('ui.empty');
-    if (status === 'FILLING') return t('ui.half'); // Assuming FILLING maps to 'half' per existing admin.ts
-    return status;
+    if (status === 'FULL') return t('ui.full')
+    if (status === 'EMPTY') return t('ui.empty')
+    if (status === 'FILLING') return t('ui.half') // Assuming FILLING maps to 'half' per existing admin.ts
+    return status
   })
 
   return {
@@ -254,10 +265,8 @@ const fillLevelTrendData = computed(() => {
     <!-- Search Results Section -->
     <div v-if="searchQuery" class="mb-8">
       <div class="bg-white rounded-lg shadow-sm p-6">
-        <h3 class="text-lg font-semibold mb-4">
-          {{ t('ui.search_results') }} "{{ searchQuery }}"
-        </h3>
-        
+        <h3 class="text-lg font-semibold mb-4">{{ t('ui.search_results') }} "{{ searchQuery }}"</h3>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- Bins Results -->
           <div class="border rounded-lg p-4">
@@ -347,7 +356,7 @@ const fillLevelTrendData = computed(() => {
       <StatCard
         :title="t('ui.total_bin')"
         :value="filteredBins.length"
-        :icon="Box"
+        :icon="Trash2"
         iconBg="bg-yellow-100 text-yellow-500"
         trend="1.3%"
         :isPositive="true"
@@ -363,7 +372,7 @@ const fillLevelTrendData = computed(() => {
       <StatCard
         :title="t('ui.total_cleaners')"
         :value="filteredCleaners.length"
-        :icon="Clock"
+        :icon="UserCheck2"
         iconBg="bg-orange-100 text-orange-500"
         trend="1.8%"
         :isPositive="true"

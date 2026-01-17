@@ -43,7 +43,7 @@ export const useAdminStore = defineStore('admin', () => {
     isLoading.value = true
     error.value = null
     try {
-      const newAdmin = await adminService.createAdmin(data)
+      const newAdmin = await adminService.createAdmin(data as Admin)
       admins.value.push(newAdmin)
       return newAdmin
     } catch (err: any) {

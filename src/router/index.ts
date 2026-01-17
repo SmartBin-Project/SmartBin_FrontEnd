@@ -21,8 +21,8 @@ const router = createRouter({
       name: 'home',
       component: () => import('../views/User/HomePage.vue'),
       // --- ADD THIS LINE ---
-      props: true ,
-      meta: { hideFooter: true}
+      props: true,
+      meta: { hideFooter: true },
     },
     {
       path: '/aboutus',
@@ -92,19 +92,19 @@ const router = createRouter({
       path: '/signin',
       name: 'Signin',
       component: () => import('../views/Auth/SigninPage.vue'),
-      meta: { hideNav: true, hideFooter: true, requiresAuth: false }
+      meta: { hideNav: true, hideFooter: true, requiresAuth: false },
     },
-    {
-      path: '/signup',
-      name: 'Signup',
-      component: () => import('../views/Auth/SignupPage.vue'),
-      meta: { hideNav: true, hideFooter: true, requiresAuth: false }
-    },
+    // {
+    //   path: '/signup',
+    //   name: 'Signup',
+    //   component: () => import('../views/Auth/SignupPage.vue'),
+    //   meta: { hideNav: true, hideFooter: true, requiresAuth: false }
+    // },
     {
       path: '/forgot',
       name: 'Forgot',
       component: () => import('../views/Auth/ForgotPage.vue'),
-      meta: { hideNav: true, hideFooter: true, requiresAuth: false }
+      meta: { hideNav: true, hideFooter: true, requiresAuth: false },
     },
     // admin views
   ],

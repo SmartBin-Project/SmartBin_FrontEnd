@@ -5,9 +5,9 @@ import ImageUploader from '@/components/ImageUploader.vue'
 import SuccessAlert from '@/components/ui/SuccessAlert.vue'
 import { useCleanerStore } from '@/stores/cleanerStore'
 import { ref } from 'vue'
-import { useI18n } from 'vue-i18n';
+import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n();
+const { t } = useI18n()
 
 const cleanerStore = useCleanerStore()
 const formRef = ref<InstanceType<typeof CleanerFormInputs>>()
@@ -40,7 +40,7 @@ const handleSubmit = async () => {
       name: formData.name,
       telegramChatId: formData.telegramChatId,
       area: formData.area,
-      pictureCleaner: imageUploaderRef.value?.uploadedImages.values || [],
+      pictureCleaner: imageUploaderRef.value?.uploadedImages || [],
     }
 
     await cleanerStore.createCleaner(cleanerData as any)

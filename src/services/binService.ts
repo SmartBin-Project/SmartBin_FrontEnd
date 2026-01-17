@@ -5,11 +5,12 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
 })
 
 // Add token to headers
 api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('access_token')
+  const token = localStorage.getItem('access_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

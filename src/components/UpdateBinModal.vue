@@ -2,9 +2,10 @@
 import { ref, watch } from 'vue'
 import type { Bin } from '@/types/bin'
 import ImageUploader from './ImageUploader.vue'
-import { useI18n } from 'vue-i18n'; // 1. Import i18n
+import LoadingComponent from '@/components/layout/LoadingComponent.vue'
+import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n(); // 2. Init hook
+const { t } = useI18n() // 2. Init hook
 const props = defineProps<{
   bin: Bin | null
   visible: boolean
@@ -12,48 +13,46 @@ const props = defineProps<{
 
 const emit = defineEmits(['close', 'update'])
 const imageUploader = ref<InstanceType<typeof ImageUploader> | null>(null)
+const isSubmitting = ref(false)
 
-// 3. Create a specific form state (don't reuse Partial<Bin> directly to avoid type conflicts)
 const formState = ref({
   binCode: '',
-  area: '',        // String for input
+  area: '',
   fillLevel: 0,
   location: { lat: 0, lng: 0 },
-  addressBin: '',  // String for input
-  status: ''
+  addressBin: '',
+  status: '',
 })
 
 watch(
   () => props.bin,
   (newBin) => {
     if (newBin) {
-      // 4. DATA EXTRACTION: Extract 'en' string from the object
-      let areaStr = '';
+      let areaStr = ''
       if (typeof newBin.area === 'object' && newBin.area !== null) {
-        areaStr = newBin.area.en || ''; 
+        areaStr = newBin.area.en || ''
       } else if (typeof newBin.area === 'string') {
-        areaStr = newBin.area;
+        areaStr = newBin.area
       }
 
-      let addressStr = '';
+      let addressStr = ''
       if (typeof newBin.addressBin === 'object' && newBin.addressBin !== null) {
-        addressStr = newBin.addressBin.en || '';
+        addressStr = newBin.addressBin.en || ''
       } else if (typeof newBin.addressBin === 'string') {
-        addressStr = newBin.addressBin;
+        addressStr = newBin.addressBin
       }
 
-      // Populate form
       formState.value = {
         binCode: newBin.binCode,
-        area: areaStr, 
+        area: areaStr,
         fillLevel: newBin.fillLevel,
         location: { ...newBin.location },
         addressBin: addressStr,
-        status: newBin.status
+        status: newBin.status,
       }
 
       if (imageUploader.value) {
-        imageUploader.value.uploadedImages = newBin.pictureBins || []
+        imageUploader.value.uploadedImages = []
       }
     }
   },
@@ -65,22 +64,27 @@ const closeModal = () => {
 }
 
 const submitUpdate = () => {
-  if (props.bin) {
-    // 5. DATA PREPARATION: Wrap strings back into objects
-    const updateData = {
-      binCode: formState.value.binCode,
-      location: formState.value.location,
-      fillLevel: formState.value.fillLevel,
-      status: formState.value.status,
-      pictureBins: imageUploader.value?.uploadedImages || [],
-      
-      // CRITICAL: Send as Object { en: ... } so backend auto-translates
-      area: { en: formState.value.area },
-      addressBin: { en: formState.value.addressBin }
-    }
-    
+  isSubmitting.value = true
+
+  const updateData = {
+    binCode: formState.value.binCode,
+    location: formState.value.location,
+    fillLevel: formState.value.fillLevel,
+    status: formState.value.status,
+
+    ...(imageUploader.value?.uploadedImages &&
+      imageUploader.value.uploadedImages.length > 0 && {
+        pictureBins: imageUploader.value.uploadedImages,
+      }),
+
+    area: { en: formState.value.area },
+    addressBin: { en: formState.value.addressBin },
+  }
+
+  if (props.bin != null) {
     emit('update', props.bin._id, updateData)
   }
+  isSubmitting.value = false
 }
 </script>
 
@@ -97,7 +101,7 @@ const submitUpdate = () => {
             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
         </div>
-        
+
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700">{{ t('ui.area') }}</label>
           <input
@@ -125,7 +129,7 @@ const submitUpdate = () => {
             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
           />
         </div>
-        
+
         <div class="mb-6" v-if="formState.location">
           <label class="block text-sm font-medium text-gray-700">{{ t('ui.longitude') }}</label>
           <input
@@ -147,6 +151,9 @@ const submitUpdate = () => {
 
         <div class="mb-6">
           <ImageUploader ref="imageUploader" />
+          <p class="text-xs text-gray-500 mt-2 italic">
+            {{ t('ui.tip') }}: {{ t('ui.add_new_images_to_replace_old_ones') }}
+          </p>
         </div>
 
         <div class="flex justify-end gap-4">
@@ -164,6 +171,8 @@ const submitUpdate = () => {
             {{ t('ui.save_changes') }}
           </button>
         </div>
+
+        <LoadingComponent v-if="isSubmitting" />
       </form>
     </div>
   </div>
