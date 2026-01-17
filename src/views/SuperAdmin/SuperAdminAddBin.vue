@@ -1,7 +1,13 @@
+<script setup>
+import SuperAdminLayout from '@/components/layout/SuperAdminLayout.vue'
+import SmartBinForm from '@/components/SmartBinForm.vue'
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+</script>
+
 <template>
-  <div>
-    <h1 class="text-4xl text-center mt-10 font-bold underline text-green-300 nunito-sans">
-      Super Admin Add Bin
-    </h1>
-  </div>
+  <SuperAdminLayout :title="t('ui.add_smartbin')">
+    <SmartBinForm />
+  </SuperAdminLayout>
 </template>

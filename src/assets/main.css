@@ -1,4 +1,13 @@
 @import 'tailwindcss';
+
 .nunito-san {
   font-family: 'Nunito Sans', sans-serif;
+}
+/* src/assets/main.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #F3F4F6;
 }
