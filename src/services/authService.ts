@@ -4,10 +4,11 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
 })
 
 api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('access_token')
+  const token = localStorage.getItem('access_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -17,9 +18,11 @@ api.interceptors.request.use((config) => {
 export const login = async (email: string, password: string) => {
   try {
     const response = await api.post('/auth/login', { email, password })
-    const { access_token, user } = response.data
-    sessionStorage.setItem('access_token', access_token)
-    sessionStorage.setItem('user', JSON.stringify(user))
+    const { user, access_token } = response.data
+    localStorage.setItem('user', JSON.stringify(user))
+    if (access_token) {
+      localStorage.setItem('access_token', access_token)
+    }
     return response.data
   } catch (err) {
     throw err
@@ -72,27 +75,27 @@ export const verifyOtp = async (email: string, otp: string, password: string) =>
 export const logout = async () => {
   try {
     const response = await api.post('/auth/logout')
-    sessionStorage.removeItem('access_token')
-    sessionStorage.removeItem('user')
+    localStorage.removeItem('user')
+    localStorage.removeItem('access_token')
     return response.data
   } catch (err) {
-    sessionStorage.removeItem('access_token')
-    sessionStorage.removeItem('user')
+    localStorage.removeItem('user')
+    localStorage.removeItem('access_token')
     throw err
   }
 }
 
 export const getCurrentUser = () => {
-  const user = sessionStorage.getItem('user')
+  const user = localStorage.getItem('user')
   return user ? JSON.parse(user) : null
 }
 
 export const getAccessToken = () => {
-  return sessionStorage.getItem('access_token')
+  return localStorage.getItem('access_token')
 }
 
 export const isAuthenticated = (): boolean => {
-  return !!sessionStorage.getItem('access_token')
+  return !!localStorage.getItem('user')
 }
 
 export const getUserProfile = async () => {

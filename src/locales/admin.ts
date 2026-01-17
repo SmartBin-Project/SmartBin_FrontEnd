@@ -36,7 +36,7 @@ export const adminEn = {
   fill_level_distribution: 'Fill Level Distribution',
   busiest_bins: 'Top 5 Busiest Bins',
   search_results: 'Search Results for',
-  
+
   // Dashboard Extra
   total_fill_count: 'Total Fill Count',
   fill_level_trend: 'Fill Level Trend',
@@ -49,7 +49,7 @@ export const adminEn = {
   more_results: '+{count} more',
   admins: 'Admins',
   cleaners: 'Cleaners',
-  
+
   // Add Admin/Cleaner
   admin_required_username: 'Username is required',
   admin_required_email: 'Email is required',
@@ -63,11 +63,12 @@ export const adminEn = {
   confirm_delete_bin: 'Are you sure you want to delete bin {code}?',
   success: 'Success',
   logging_out: 'Logging out...',
-  
+
   // Profile
   change_password: 'Change Password',
   need_help: 'Need help',
-  security_note: 'Security Note: Your password is protected and encrypted. For security reasons, we do not display your password. To change it, please enter your current password below.',
+  security_note:
+    'Security Note: Your password is protected and encrypted. For security reasons, we do not display your password. To change it, please enter your current password below.',
   current_password: 'Current Password',
   new_password: 'New Password',
   confirm_new_password: 'Confirm New Password',
@@ -80,7 +81,7 @@ export const adminEn = {
   cancel_edit: 'Cancel Edit',
   personal_info: 'Personal Information',
   profile_updated_success: 'Profile updated successfully!',
-  
+
   // Tables
   admin_list: 'Admin Users',
   cleaner_list: 'Cleaners List',
@@ -94,12 +95,12 @@ export const adminEn = {
   confirm_delete_cleaner: 'Are you sure you want to delete cleaner {name}?',
   admin_update_success: 'Admin updated successfully!',
   cleaner_update_success: 'Cleaner "{name}" has been updated successfully!',
-  
+
   // Update Modals
   update_admin: 'Update Admin User',
   update_cleaner: 'Update Cleaner',
   telegram_chat_id: 'Telegram Chat ID',
-  
+
   // Bin/Common
   bin_update_success: 'SmartBin "{code}" has been updated successfully!',
   select_bin_delete: 'Please select a bin to delete.',
@@ -138,7 +139,8 @@ export const adminEn = {
   next: 'Next',
   retry: 'Retry',
   options: 'Options',
-  cleaner_delete_confirmation: 'Are you sure you want to delete {name}? This action cannot be undone.',
+  cleaner_delete_confirmation:
+    'Are you sure you want to delete {name}? This action cannot be undone.',
   cleaner_updated_title: 'Cleaner Updated Successfully!',
   close: 'Close',
   add_more_images: 'Add More Images',
@@ -146,7 +148,9 @@ export const adminEn = {
   add_images: 'Add Images',
   click_to_upload: 'Click to upload multiple images',
   password_optional: 'Password (leave empty to keep current)',
-};
+  add_new_images_to_replace_old_ones: 'Add new images to replace old ones',
+  image: 'Image',
+}
 
 export const adminKh = {
   dashboard: 'ផ្ទាំងគ្រប់គ្រង',
@@ -199,7 +203,7 @@ export const adminKh = {
   more_results: '+{count} ទៀត',
   admins: 'អ្នកគ្រប់គ្រង',
   cleaners: 'អ្នកសម្អាត',
-  
+
   // Add Admin/Cleaner
   admin_required_username: 'ឈ្មោះអ្នកប្រើប្រាស់ត្រូវបានទាមទារ',
   admin_required_email: 'អ៊ីមែលត្រូវបានទាមទារ',
@@ -217,7 +221,8 @@ export const adminKh = {
   // Profile
   change_password: 'ផ្លាស់ប្តូរពាក្យសម្ងាត់',
   need_help: 'ត្រូវការជំនួយ',
-  security_note: 'ចំណាំសុវត្ថិភាព៖ ពាក្យសម្ងាត់របស់អ្នកត្រូវបានការពារនិងអ៊ិនគ្រីប។ សម្រាប់ហេតុផលសុវត្ថិភាព យើងមិនបង្ហាញពាក្យសម្ងាត់របស់អ្នកទេ។ ដើម្បីផ្លាស់ប្តូរវា សូមបញ្ចូលពាក្យសម្ងាត់បច្ចុប្បន្នរបស់អ្នកនៅខាងក្រោម។',
+  security_note:
+    'ចំណាំសុវត្ថិភាព៖ ពាក្យសម្ងាត់របស់អ្នកត្រូវបានការពារនិងអ៊ិនគ្រីប។ សម្រាប់ហេតុផលសុវត្ថិភាព យើងមិនបង្ហាញពាក្យសម្ងាត់របស់អ្នកទេ។ ដើម្បីផ្លាស់ប្តូរវា សូមបញ្ចូលពាក្យសម្ងាត់បច្ចុប្បន្នរបស់អ្នកនៅខាងក្រោម។',
   current_password: 'ពាក្យសម្ងាត់បច្ចុប្បន្ន',
   new_password: 'ពាក្យសម្ងាត់ថ្មី',
   confirm_new_password: 'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី',
@@ -289,7 +294,8 @@ export const adminKh = {
   create_admin: 'បង្កើតអ្នកគ្រប់គ្រង',
   create_cleaner: 'បង្កើតអ្នកសម្អាត',
   done: 'រួចរាល់',
-  cleaner_delete_confirmation: 'តើអ្នកប្រាកដថាចង់លុប {name} ដែរឬទេ? សកម្មភាពនេះមិនអាចផ្លាស់ប្តូរវិញបានទេ។',
+  cleaner_delete_confirmation:
+    'តើអ្នកប្រាកដថាចង់លុប {name} ដែរឬទេ? សកម្មភាពនេះមិនអាចផ្លាស់ប្តូរវិញបានទេ។',
   cleaner_updated_title: 'អ្នកសម្អាតត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ!',
   close: 'បិទ',
   add_more_images: 'បន្ថែមរូបភាពទៀត',
@@ -297,4 +303,6 @@ export const adminKh = {
   add_images: 'បន្ថែមរូបភាព',
   click_to_upload: 'ចុចដើម្បីបង្ហោះរូបភាពច្រើន',
   password_optional: 'ពាក្យសម្ងាត់ (ទុកវាទទេដើម្បីរក្សាទុកបច្ចុប្បន្ន)',
-};
+  add_new_images_to_replace_old_ones: 'បន្ថែមរូបភាពថ្មីដើម្បីជំនួសរូបភាពចាស់',
+  image: 'រូបភាព',
+}

@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Cleaner } from '@/types/cleaner'
 import ImageUploader from './ImageUploader.vue'
+import LoadingComponent from '@/components/layout/LoadingComponent.vue'
 
 const props = defineProps<{
   cleaner: Cleaner | null
@@ -13,13 +14,14 @@ const emit = defineEmits(['close', 'update'])
 const { t } = useI18n()
 const imageUploader = ref<InstanceType<typeof ImageUploader> | null>(null)
 const formData = ref<Partial<Cleaner>>({})
+const isSubmitting = ref(false)
 
 watch(
   () => props.cleaner,
   (newCleaner) => {
     if (newCleaner) {
       formData.value = { ...newCleaner }
-      // Reset image uploader with existing images
+
       if (imageUploader.value) {
         imageUploader.value.uploadedImages = newCleaner.pictureCleaner || []
       }
@@ -34,6 +36,7 @@ const closeModal = () => {
 
 const submitUpdate = () => {
   if (props.cleaner) {
+    isSubmitting.value = true
     const updateData = {
       name: formData.value.name,
       telegramChatId: formData.value.telegramChatId,
@@ -41,6 +44,7 @@ const submitUpdate = () => {
       pictureCleaner: imageUploader.value?.uploadedImages || [],
     }
     emit('update', props.cleaner._id, updateData)
+    isSubmitting.value = false
   }
 }
 </script>
@@ -51,7 +55,9 @@ const submitUpdate = () => {
       <h2 class="text-2xl font-bold mb-6 text-gray-800">{{ t('ui.update_cleaner') }}</h2>
       <form @submit.prevent="submitUpdate">
         <div class="mb-4">
-          <label for="name" class="block text-sm font-medium text-gray-700">{{ t('ui.name') }}</label>
+          <label for="name" class="block text-sm font-medium text-gray-700">{{
+            t('ui.name')
+          }}</label>
           <input
             type="text"
             id="name"
@@ -61,9 +67,9 @@ const submitUpdate = () => {
         </div>
 
         <div class="mb-4">
-          <label for="telegramChatId" class="block text-sm font-medium text-gray-700"
-            >{{ t('ui.telegram_chat_id') }}</label
-          >
+          <label for="telegramChatId" class="block text-sm font-medium text-gray-700">{{
+            t('ui.telegram_chat_id')
+          }}</label>
           <input
             type="text"
             id="telegramChatId"
@@ -73,7 +79,9 @@ const submitUpdate = () => {
         </div>
 
         <div class="mb-6">
-          <label for="area" class="block text-sm font-medium text-gray-700">{{ t('ui.area') }}</label>
+          <label for="area" class="block text-sm font-medium text-gray-700">{{
+            t('ui.area')
+          }}</label>
           <input
             type="text"
             id="area"
@@ -101,6 +109,8 @@ const submitUpdate = () => {
             {{ t('ui.update_cleaner') }}
           </button>
         </div>
+
+        <LoadingComponent v-if="isSubmitting" />
       </form>
     </div>
   </div>

@@ -1,3 +1,48 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import type { Bin } from '@/types/bin'
+
+const props = defineProps<{
+  bin: Bin | null
+}>()
+
+defineEmits(['close', 'navigate'])
+const { t, locale } = useI18n()
+
+// Helper to safely get localized strings (handling both string and object formats)
+const getLocalizedWithFallback = (val: any) => {
+  if (!val) return ''
+  if (typeof val === 'string') return val
+  // val is LocalizedString { en: string; kh?: string }
+  // Try current locale, fallback to 'en', then empty string
+  return val[locale.value] || val.en || ''
+}
+
+const displayArea = computed(() => (props.bin ? getLocalizedWithFallback(props.bin.area) : ''))
+const displayAddress = computed(() =>
+  props.bin ? getLocalizedWithFallback(props.bin.addressBin) : '',
+)
+
+const getFullImageUrls = computed(() => {
+  if (!props.bin || !props.bin.pictureBins || props.bin.pictureBins.length === 0) {
+    return []
+  }
+  const baseUrl = import.meta.env.VITE_API_URL || ''
+
+  return props.bin.pictureBins.map((rawUrl) => {
+    // If already a full URL, return as is
+    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
+      return rawUrl
+    }
+    // Otherwise, prepend base URL
+    return `${baseUrl}${rawUrl}`
+  })
+})
+
+console.log(props.bin?.pictureBins)
+</script>
+
 <template>
   <transition name="slide-fade">
     <div
@@ -11,7 +56,12 @@
             @click="$emit('close')"
             class="p-2 rounded-full hover:bg-gray-200/50 transition-colors"
           >
-            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              class="w-6 h-6 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -22,7 +72,7 @@
           </button>
         </div>
 
-        <div class="flex-grow overflow-y-auto pr-2">
+        <div class="grow overflow-y-auto pr-2">
           <div class="space-y-5">
             <!-- Card 1: Location -->
             <div class="bg-white/80 rounded-3xl p-5">
@@ -64,9 +114,7 @@
               <div class="flex items-center space-x-4 mb-4">
                 <div
                   :class="
-                    bin.fillLevel > 80
-                      ? 'bg-red-100 text-red-600'
-                      : 'bg-green-100 text-green-600'
+                    bin.fillLevel > 80 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
                   "
                   class="p-3 rounded-xl"
                 >
@@ -99,18 +147,72 @@
                     class="h-full transition-all duration-1000"
                     :style="{
                       width: bin.fillLevel + '%',
-                      backgroundColor: bin.fillLevel > 80 ? '#ef4444' : '#10b981'
+                      backgroundColor: bin.fillLevel > 80 ? '#ef4444' : '#10b981',
                     }"
                   ></div>
                 </div>
               </div>
             </div>
 
-            <!-- Card 3: Bin Image -->
-            <div v-if="bin.pictureBins && bin.pictureBins.length > 0" class="bg-white/80 rounded-3xl p-5">
-              <h3 class="font-bold text-lg text-gray-900 mb-3">{{ t('ui.bin_location_image') }}</h3>
-              <div class="rounded-xl overflow-hidden aspect-video border border-gray-100">
-                <img :src="getFullImageUrl" alt="Bin Image" class="w-full h-full object-cover" />
+            <div class="bg-white/80 rounded-3xl p-5">
+              <h3 class="font-bold text-lg text-gray-900 mb-3">{{ t('ui.bin_address') }}</h3>
+              <p class="text-sm text-gray-600 font-medium">{{ displayAddress }}</p>
+            </div>
+
+            <!-- Card 3: Bin Images (All) -->
+            <div
+              v-if="bin.pictureBins && bin.pictureBins.length > 0"
+              class="bg-white/80 rounded-3xl p-5"
+            >
+              <div class="flex items-center justify-between mb-5">
+                <h3 class="font-bold text-lg text-gray-900">
+                  {{ t('ui.bin_location_image') }}
+                </h3>
+                <span
+                  class="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold"
+                >
+                  {{ bin.pictureBins.length }}
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                    />
+                  </svg>
+                </span>
+              </div>
+
+              <!-- Grid of Images - 2 Columns -->
+              <div class="grid grid-cols-2 gap-3">
+                <div
+                  v-for="(imageUrl, index) in getFullImageUrls"
+                  :key="index"
+                  class="group relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 shadow-sm hover:shadow-lg transition-all duration-300"
+                >
+                  <!-- Image Container -->
+                  <div class="aspect-square bg-gray-100 overflow-hidden">
+                    <img
+                      :src="imageUrl"
+                      :alt="`Bin Image ${index + 1}`"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <!-- Overlay Badge -->
+                  <div
+                    class="absolute top-2 right-2 bg-black/50 backdrop-blur-sm text-white px-2.5 py-1 rounded-lg text-xs font-semibold group-hover:bg-black/70 transition-colors"
+                  >
+                    {{ index + 1 }}/{{ bin.pictureBins.length }}
+                  </div>
+
+                  <!-- Bottom Label on Hover -->
+                  <div
+                    class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent px-3 py-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"
+                  >
+                    <p class="text-white text-xs font-medium">
+                      {{ t('ui.image') }} {{ index + 1 }}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -136,45 +238,6 @@
     </div>
   </transition>
 </template>
-
-<script setup lang="ts">
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import type { Bin } from '@/types/bin'
-
-const props = defineProps<{
-  bin: Bin | null
-}>()
-
-defineEmits(['close', 'navigate'])
-const { t, locale } = useI18n()
-
-// Helper to safely get localized strings (handling both string and object formats)
-const getLocalizedWithFallback = (val: any) => {
-  if (!val) return ''
-  if (typeof val === 'string') return val
-  // val is LocalizedString { en: string; kh?: string }
-  // Try current locale, fallback to 'en', then empty string
-  return val[locale.value] || val.en || ''
-}
-
-const displayArea = computed(() => props.bin ? getLocalizedWithFallback(props.bin.area) : '')
-const displayAddress = computed(() => props.bin ? getLocalizedWithFallback(props.bin.addressBin) : '')
-
-const getFullImageUrl = computed(() => {
-  if (!props.bin || !props.bin.pictureBins || props.bin.pictureBins.length === 0) return ''
-  const rawUrl = props.bin.pictureBins[0]
-  // If already a full URL, return as is
-  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
-    return rawUrl
-  }
-  // Otherwise, prepend base URL (assuming an environment variable or constant)
-  const baseUrl = import.meta.env.VITE_API_URL || ''
-  return `${baseUrl}${rawUrl}`
-})
-
-console.log(props.bin?.pictureBins)
-</script>
 
 <style>
 .slide-fade-enter-active,

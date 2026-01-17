@@ -15,20 +15,28 @@ export const clientEn = {
   available: 'Available',
   urgent: 'Urgent',
   welcome: 'Welcome',
+  ui_language: 'Language',
+  bin_address: 'Bin Address',
 
   // Service Page
   service_hero_1: 'Efficient waste',
   service_hero_2: 'management with',
   service_hero_highlight: 'smart bin technology',
-  service_desc: 'We upgrade your existing bins into smart, sensor-powered systems and provide high-quality smart bins ready for immediate deployment.',
+  service_desc:
+    'We upgrade your existing bins into smart, sensor-powered systems and provide high-quality smart bins ready for immediate deployment.',
   service_booking: 'Booking Now',
+  service_title: 'Ready to optimize your waste management?',
+  service_desc_2:
+    'Join the smart city revolution today. Get a demo of our dashboard or request a quote for your zone.',
+  service_contact: 'Contact Sales',
 
   // About Us Page
   about_title: 'About Smart Bin',
   about_subtitle: 'Learn about our smart waste management system',
   about_what_title: 'What is Smart Bin?',
   about_what_subtitle: 'IoT-enabled waste management solution',
-  about_what_desc: 'Smart Bins are equipped with sensors that monitor fill levels, detect odors, and track cleanliness in real-time. This technology helps optimize waste collection routes and ensures bins are emptied before they overflow.',
+  about_what_desc:
+    'Smart Bins are equipped with sensors that monitor fill levels, detect odors, and track cleanliness in real-time. This technology helps optimize waste collection routes and ensures bins are emptied before they overflow.',
   about_special_title: 'What Special about us?',
   about_team_title: 'Meet Our Team',
   about_message_btn: 'Message',
@@ -38,22 +46,36 @@ export const clientEn = {
   about_spec_4: 'Automatic Alerts & Notifications',
   about_spec_5: 'GPS that show location of the bins',
 
+  about_mission: 'Our Mission',
+  about_mission_subtitle: 'Cleaner cities, smarter future',
+  about_mission_title: 'Revolutionizing waste management through technology.',
+  about_mission_desc:
+    "We aren't just selling bins; we are building an ecosystem for sustainable urban living. By combining IoT sensors with AI analytics, we help municipalities reduce their carbon footprint while keeping streets cleaner than ever before.",
+  about_trusted_title: 'Trusted by municipalities & companies',
+
   // Pricing Section
   pricing_title: 'Our Service',
   pricing_monthly_charge: 'Monthly Charge',
   pricing_purchase: 'Purchase Now',
   pricing_plan_monthly: 'Monthly',
+  pricing_plan_half_yearly: 'Half Yearly',
   pricing_plan_yearly: 'Yearly',
   pricing_feat_setup: 'Free Setup',
   pricing_feat_monitoring: 'Real-time monitoring',
   pricing_feat_alerts: 'Alerts & notifications',
   pricing_feat_analytics: 'Basic analytics',
   pricing_feat_manage: 'Manage up to 20 bins',
-  pricing_feat_replacement: 'Free replacement on faulty sensors',
+  pricing_feat_replacement: 'Discount on replacement on faulty sensors 20%',
   pricing_feat_months_free: '2 months free',
+  pricing_feat_monitoring_half_year: 'Real-time monitoring plus AI sorting',
+  pricing_feat_analytics_half_year: 'Advanced analytics',
+  pricing_feat_manage_half_year: 'Manage up to 40 bins',
+  pricing_feat_replacement_half_year: 'Discount on replacement on faulty sensors 40%',
+  pricing_feat_half_year_free: '6 months free',
 
   // Footer
-  footer_desc: 'Empowering Cambodians to create cleaner communities through smart waste management, education, and collective action. Together, we can build a sustainable future.',
+  footer_desc:
+    'Empowering Cambodians to create cleaner communities through smart waste management, education, and collective action. Together, we can build a sustainable future.',
   footer_quick_links: 'Quick Links',
   footer_features: 'App Features',
   footer_report: 'Report Issue',
@@ -119,7 +141,7 @@ export const clientEn = {
   bin_location_image: 'Bin Location Image',
   name: 'Name',
   update_bin: 'Update SmartBin',
-};
+}
 
 export const clientKh = {
   nav_map: 'ផែនទី',
@@ -133,7 +155,8 @@ export const clientKh = {
   dismiss: 'បិទ',
   directions: 'ទិសដៅ',
   no_results: 'រកមិនឃើញ',
-  no_results_desc: 'រកមិនឃើញធុងសម្រាប់',
+  ui_language: 'ភាសា',
+  no_results_desc: 'រកមិនឃើញធុងសម្រាម',
 
   // Auth Pages
   auth_welcome: 'សូមស្វាគមន៍!',
@@ -192,18 +215,24 @@ export const clientKh = {
   service_hero_1: 'ការគ្រប់គ្រងសំណល់ប្រកបដោយប្រសិទ្ធភាព',
   service_hero_2: 'ជាមួយនឹង',
   service_hero_highlight: 'បច្ចេកវិទ្យាធុងសំរាមឆ្លាតវៃ',
-  service_desc: 'យើងកែប្រែធុងសំរាមដែលមានស្រាប់របស់អ្នកឱ្យទៅជាប្រព័ន្ធឆ្លាតវៃដើរដោយសិនស័រ និងផ្តល់ជូនធុងសំរាមឆ្លាតវៃដែលមានគុណភាពខ្ពស់សម្រាប់ការប្រើប្រាស់ភ្លាមៗ។',
+  service_desc:
+    'យើងកែប្រែធុងសំរាមដែលមានស្រាប់របស់អ្នកឱ្យទៅជាប្រព័ន្ធឆ្លាតវៃដើរដោយសិនស័រ និងផ្តល់ជូនធុងសំរាមឆ្លាតវៃដែលមានគុណភាពខ្ពស់សម្រាប់ការប្រើប្រាស់ភ្លាមៗ។',
   service_booking: 'កក់ឥឡូវនេះ',
+  service_title: 'ត្រៀមខ្លួនរួចរាល់ហើយឬនៅ ដើម្បីធ្វើការគ្រប់គ្រងកាកសំណល់របស់អ្នកឲ្យមានប្រសិទ្ធភាព?',
+  service_desc_2:
+    'ចូលរួមបដិវត្តន៍ទីក្រុងឆ្លាតវៃនៅថ្ងៃនេះ។ ទទួលបានការបង្ហាញពីផ្ទាំងគ្រប់គ្រងរបស់យើង ឬស្នើសុំសម្រង់តម្លៃសម្រាប់តំបន់របស់អ្នក។',
+  service_contact: 'ទំនាក់ទំនងផ្នែកលក់',
 
   // Bin Detail Panel
-  bin_details: 'ព័ត៌មានលម្អិតអំពីធុង',
+  bin_details: 'ព័ត៌មានលម្អិតអំពីធុងសម្រាម',
   coordinates: 'កូអរដោនេ',
   normal: 'ធម្មតា',
   load_level: 'កម្រិតចំណុះ',
-  bin_image: 'រូបភាពធុង',
+  bin_image: 'រូបភាពធុងសម្រាម',
   bin_location_image: 'រូបភាពទីតាំងធុង',
   name: 'ឈ្មោះ',
   update_bin: 'កែប្រែ SmartBin',
+  bin_address: 'ទីតាំងធុងសម្រាម',
 
   // Pricing Section
   pricing_title: 'សេវាកម្មរបស់យើង',
@@ -211,19 +240,26 @@ export const clientKh = {
   pricing_purchase: 'ទិញឥឡូវនេះ',
   pricing_plan_monthly: 'ប្រចាំខែ',
   pricing_plan_yearly: 'ប្រចាំឆ្នាំ',
+  pricing_plan_half_yearly: 'ពាក់កណ្តាលឆ្នាំ',
   pricing_feat_setup: 'ការដំឡើងដោយឥតគិតថ្លៃ',
   pricing_feat_monitoring: 'ការតាមដានផ្ទាល់',
   pricing_feat_alerts: 'ការជូនដំណឹង & ការដាស់តឿន',
   pricing_feat_analytics: 'ការវិភាគមូលដ្ឋាន',
   pricing_feat_manage: 'គ្រប់គ្រងបានរហូតដល់ ២០ ធុង',
-  pricing_feat_replacement: 'ប្តូរសិនស័រខូចដោយឥតគិតថ្លៃ',
+  pricing_feat_replacement: 'បញ្ចុះតម្លៃសិនស័រនៅពេលខូច ២០​​ ភាគរយ',
   pricing_feat_months_free: 'ឥតគិតថ្លៃ ២ ខែ',
+  pricing_feat_monitoring_half_year: 'ការតាមដានផ្ទាល់ និងការវិភាគសម្រាមតាម AI',
+  pricing_feat_analytics_half_year: 'វិភាគកម្រិតខ្ពស់',
+  pricing_feat_manage_half_year: 'គ្រប់គ្រងបានរហូតដល់ ៤០ ធុង',
+  pricing_feat_replacement_half_year: 'បញ្ចុះតម្លៃសិនស័រនៅពេលខូច ៤០ ភាគរយ',
+  pricing_feat_half_year_free: 'ឥតគិតថ្លៃ ៦ ខែ',
   // About Us Page
   about_title: 'អំពី Smart Bin',
   about_subtitle: 'ស្វែងយល់អំពីប្រព័ន្ធគ្រប់គ្រងសំណល់ឆ្លាតវៃរបស់យើង',
   about_what_title: 'តើអ្វីទៅជា Smart Bin?',
   about_what_subtitle: 'ដំណោះស្រាយគ្រប់គ្រងសំណល់តាមរយៈបច្ចេកវិទ្យា IoT',
-  about_what_desc: 'Smart Bins ត្រូវបានបំពាក់ដោយសិនស័រដែលអាចតាមដានកម្រិតចំណុះ រកឃើញក្លិន និងតាមដានភាពស្អាតក្នុងពេលជាក់ស្តែង។ បច្ចេកវិទ្យានេះជួយសម្រួលផ្លូវប្រមូលសំរាម និងធានាថាធុងត្រូវបានសម្អាតមុនពេលវាពេញហៀរ។',
+  about_what_desc:
+    'Smart Bins ត្រូវបានបំពាក់ដោយសិនស័រដែលអាចតាមដានកម្រិតចំណុះ រកឃើញក្លិន និងតាមដានភាពស្អាតក្នុងពេលជាក់ស្តែង។ បច្ចេកវិទ្យានេះជួយសម្រួលផ្លូវប្រមូលសំរាម និងធានាថាធុងត្រូវបានសម្អាតមុនពេលវាពេញហៀរ។',
   about_special_title: 'តើមានអ្វីពិសេសអំពីយើង?',
   about_team_title: 'ជួបជាមួយក្រុមការងាររបស់យើង',
   about_message_btn: 'ផ្ញើសារ',
@@ -233,12 +269,20 @@ export const clientKh = {
   about_spec_4: 'ការជូនដំណឹងដោយស្វ័យប្រវត្តិ',
   about_spec_5: 'ប្រព័ន្ធ GPS ដែលបង្ហាញទីតាំងធុងសំរាម',
 
+  about_mission: 'បេសកកម្មរបស់យើង',
+  about_mission_subtitle: 'ទីក្រុងស្អាតជាងមុន អនាគតកាន់តែឆ្លាតវៃ',
+  about_mission_title: 'បដិវត្តន៍ការគ្រប់គ្រងកាកសំណល់តាមរយៈបច្ចេកវិទ្យា',
+  about_mission_desc:
+    'យើងមិនត្រឹមតែលក់ធុងសំរាមប៉ុណ្ណោះទេ យើងកំពុងកសាងប្រព័ន្ធអេកូឡូស៊ីសម្រាប់ការរស់នៅប្រកបដោយចីរភាពក្នុងទីក្រុង។ តាមរយៈការរួមបញ្ចូលឧបករណ៍ចាប់សញ្ញា IoT ជាមួយនឹងការវិភាគ AI យើងជួយក្រុងនានាកាត់បន្ថយការបញ្ចេញកាបូនរបស់ពួកគេ ខណៈពេលដែលរក្សាផ្លូវថ្នល់ឱ្យស្អាតជាងពេលណាៗទាំងអស់។',
+  about_trusted_title: 'ទទួលបានការទុកចិត្តពីអាជ្ញាធរ និងក្រុមហ៊ុន',
+
   // Footer
-  footer_desc: 'ពង្រឹងសហគមន៍កម្ពុជាដើម្បីបង្កើតសហគមន៍ស្អាតតាមរយៈការគ្រប់គ្រងកាកសំណល់ឆ្លាតវៃ ការអប់រំ និងសកម្មភាពរួម។ រួមគ្នា យើងអាចកសាងអនាគតដ៏មានចីរភាព។',
+  footer_desc:
+    'ពង្រឹងសហគមន៍កម្ពុជាដើម្បីបង្កើតសហគមន៍ស្អាតតាមរយៈការគ្រប់គ្រងកាកសំណល់ឆ្លាតវៃ ការអប់រំ និងសកម្មភាពរួម។ រួមគ្នា យើងអាចកសាងអនាគតដ៏មានចីរភាព។',
   footer_quick_links: 'តំណភ្ជាប់រហ័ស',
   footer_features: 'លក្ខណៈពិសេសកម្មវិធី',
   footer_report: 'រាយការណ៍បញ្ហា',
   footer_contact: 'ទាក់ទងមកយើង',
   footer_location: 'ភ្នំពេញ, កម្ពុជា',
   footer_rights: '© ២០២៥ GreenProfit រក្សាសិទ្ធិគ្រប់យ៉ាង។',
-};
+}

@@ -5,6 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL
 
 const adminAPI = axios.create({
   baseURL: `${API_BASE_URL}`,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -12,7 +13,7 @@ const adminAPI = axios.create({
 
 // Add token to requests
 adminAPI.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('access_token')
+  const token = localStorage.getItem('access_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

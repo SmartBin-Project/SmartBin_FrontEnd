@@ -1,8 +1,10 @@
 <template>
-  <section class="py-20 bg-[#f8fafc]">
+  <section class="py-10 bg-[#f8fafc]">
     <div class="max-w-7xl mx-auto px-6">
       <div class="text-center mb-16">
-        <h2 class="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">{{ t('ui.pricing_title') }}</h2>
+        <h2 class="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+          {{ t('ui.pricing_title') }}
+        </h2>
       </div>
 
       <div class="flex flex-col md:flex-row justify-center items-stretch gap-8 lg:gap-12">
@@ -25,7 +27,7 @@
 
           <hr class="border-gray-100 mb-8" />
 
-          <ul class="relative z-10 space-y-6 mb-10 flex-grow">
+          <ul class="relative z-10 space-y-6 mb-10 grow">
             <li
               v-for="(feature, fIndex) in plan.features"
               :key="fIndex"
@@ -44,14 +46,34 @@
         </div>
       </div>
     </div>
+
+    <div class="w-full py-24 border-t border-gray-100">
+      <div class="max-w-4xl mx-auto px-6 text-center">
+        <h2 class="text-3xl md:text-4xl font-black text-gray-900 mb-6">
+          {{ t('ui.service_title') }}
+        </h2>
+        <p class="text-gray-500 mb-10">
+          {{ t('ui.service_desc_2') }}
+        </p>
+
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+          <button
+            class="bg-white text-gray-900 border border-gray-200 hover:text-white hover:border-[#68a357] duration-300 px-8 py-4 rounded-2xl font-bold hover:bg-[#68a357] transition-colors"
+          >
+            <PhoneCallIcon class="w-6 h-6 mr-2 inline-block" /> {{ t('ui.service_contact') }}
+          </button>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { PhoneCallIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n';
+import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n();
+const { t } = useI18n()
 
 const plans = computed(() => [
   {
@@ -68,7 +90,7 @@ const plans = computed(() => [
     ],
   },
   {
-    name: t('ui.pricing_plan_yearly'),
+    name: t('ui.pricing_plan_half_yearly'),
     price: '49.99',
     features: [
       { text: t('ui.pricing_feat_setup'), included: true },
@@ -78,6 +100,19 @@ const plans = computed(() => [
       { text: t('ui.pricing_feat_manage'), included: true },
       { text: t('ui.pricing_feat_replacement'), included: true },
       { text: t('ui.pricing_feat_months_free'), included: true },
+    ],
+  },
+  {
+    name: t('ui.pricing_plan_yearly'),
+    price: '89.99',
+    features: [
+      { text: t('ui.pricing_feat_setup'), included: true },
+      { text: t('ui.pricing_feat_monitoring_half_year'), included: true },
+      { text: t('ui.pricing_feat_alerts'), included: true },
+      { text: t('ui.pricing_feat_analytics_half_year'), included: true },
+      { text: t('ui.pricing_feat_manage_half_year'), included: true },
+      { text: t('ui.pricing_feat_replacement_half_year'), included: true },
+      { text: t('ui.pricing_feat_half_year_free'), included: true },
     ],
   },
 ])

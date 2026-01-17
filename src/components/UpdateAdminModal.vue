@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import type { Admin, UpdateAdminData } from '@/types/admin'
 import ImageUploader from './ImageUploader.vue'
+import LoadingComponent from '@/components/layout/LoadingComponent.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -50,14 +51,13 @@ const submitUpdate = async () => {
     if (!data.password || !data.password.trim()) {
       delete data.password
     }
-    // Include images from the uploader only if there are images
+
     if (imageUploader.value && imageUploader.value.uploadedImages.length > 0) {
       data.profilePic = imageUploader.value.uploadedImages
     } else {
-      // Make profilePic optional - don't send it if empty
       delete data.profilePic
     }
-    // Emit with a callback that will be called when update is complete
+
     emit('update', data, () => {
       closeModal()
     })
@@ -78,9 +78,10 @@ const closeModal = () => {
       <h2 class="text-2xl font-bold mb-6 text-gray-800">{{ t('ui.update_admin') }}</h2>
       <form @submit.prevent="submitUpdate">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Username -->
           <div>
-            <label for="username" class="block text-sm font-medium text-gray-700">{{ t('ui.username') }}</label>
+            <label for="username" class="block text-sm font-medium text-gray-700">{{
+              t('ui.username')
+            }}</label>
             <input
               type="text"
               id="username"
@@ -89,9 +90,10 @@ const closeModal = () => {
             />
           </div>
 
-          <!-- Email -->
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">{{ t('ui.email') }}</label>
+            <label for="email" class="block text-sm font-medium text-gray-700">{{
+              t('ui.email')
+            }}</label>
             <input
               type="email"
               id="email"
@@ -100,9 +102,10 @@ const closeModal = () => {
             />
           </div>
 
-          <!-- Area -->
           <div>
-            <label for="area" class="block text-sm font-medium text-gray-700">{{ t('ui.area') }}</label>
+            <label for="area" class="block text-sm font-medium text-gray-700">{{
+              t('ui.area')
+            }}</label>
             <input
               type="text"
               id="area"
@@ -111,11 +114,10 @@ const closeModal = () => {
             />
           </div>
 
-          <!-- Password (optional) -->
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700"
-              >{{ t('ui.password_optional') }}</label
-            >
+            <label for="password" class="block text-sm font-medium text-gray-700">{{
+              t('ui.password_optional')
+            }}</label>
             <input
               type="password"
               id="password"
@@ -125,11 +127,10 @@ const closeModal = () => {
             />
           </div>
 
-          <!-- First Name -->
           <div>
-            <label for="firstName" class="block text-sm font-medium text-gray-700"
-              >{{ t('ui.first_name') }}</label
-            >
+            <label for="firstName" class="block text-sm font-medium text-gray-700">{{
+              t('ui.first_name')
+            }}</label>
             <input
               type="text"
               id="firstName"
@@ -138,9 +139,10 @@ const closeModal = () => {
             />
           </div>
 
-          <!-- Last Name -->
           <div>
-            <label for="lastName" class="block text-sm font-medium text-gray-700">{{ t('ui.last_name') }}</label>
+            <label for="lastName" class="block text-sm font-medium text-gray-700">{{
+              t('ui.last_name')
+            }}</label>
             <input
               type="text"
               id="lastName"
@@ -149,9 +151,10 @@ const closeModal = () => {
             />
           </div>
 
-          <!-- Gender -->
           <div>
-            <label for="gender" class="block text-sm font-medium text-gray-700">{{ t('ui.gender') }}</label>
+            <label for="gender" class="block text-sm font-medium text-gray-700">{{
+              t('ui.gender')
+            }}</label>
             <select
               id="gender"
               v-model="formData.gender"
@@ -164,9 +167,10 @@ const closeModal = () => {
             </select>
           </div>
 
-          <!-- Phone -->
           <div>
-            <label for="phone" class="block text-sm font-medium text-gray-700">{{ t('ui.phone') }}</label>
+            <label for="phone" class="block text-sm font-medium text-gray-700">{{
+              t('ui.phone')
+            }}</label>
             <input
               type="tel"
               id="phone"
@@ -175,11 +179,10 @@ const closeModal = () => {
             />
           </div>
 
-          <!-- Date of Birth -->
           <div>
-            <label for="dateOfBirth" class="block text-sm font-medium text-gray-700"
-              >{{ t('ui.dob') }}</label
-            >
+            <label for="dateOfBirth" class="block text-sm font-medium text-gray-700">{{
+              t('ui.dob')
+            }}</label>
             <input
               type="date"
               id="dateOfBirth"
@@ -190,7 +193,9 @@ const closeModal = () => {
 
           <!-- Address -->
           <div class="md:col-span-2">
-            <label for="address" class="block text-sm font-medium text-gray-700">{{ t('ui.address') }}</label>
+            <label for="address" class="block text-sm font-medium text-gray-700">{{
+              t('ui.address')
+            }}</label>
             <input
               type="text"
               id="address"
@@ -204,7 +209,6 @@ const closeModal = () => {
           <ImageUploader ref="imageUploader" />
         </div>
 
-        <!-- Buttons -->
         <div class="flex justify-end gap-3 mt-6">
           <button
             type="button"
@@ -224,5 +228,7 @@ const closeModal = () => {
         </div>
       </form>
     </div>
+
+    <LoadingComponent v-if="isSubmitting" />
   </div>
 </template>
