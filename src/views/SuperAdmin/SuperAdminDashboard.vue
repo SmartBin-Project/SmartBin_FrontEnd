@@ -5,18 +5,7 @@ import SuperAdminLayout from '@/components/layout/SuperAdminLayout.vue'
 import { useBinStore } from '@/stores/binStore'
 import { useSuperAdminStore } from '@/stores/superAdminStore'
 import { useCleanerStore } from '@/stores/cleanerStore'
-import {
-  Users,
-  Box,
-  BarChart2,
-  Clock,
-  ChevronRight,
-  ChevronLeft,
-  Trash2,
-  Trash,
-  UserCheck2,
-  User2,
-} from 'lucide-vue-next'
+import { Users, Box, BarChart2, Clock, Trash2, UserCheck2 } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -26,23 +15,30 @@ const superAdminStore = useSuperAdminStore()
 const cleanerStore = useCleanerStore()
 const binStore = useBinStore()
 
-// Search functionality
 const searchQuery = ref('')
 
 const handleSearch = (query: string) => {
   searchQuery.value = query.toLowerCase()
 }
 
-// Filtered data based on search
 const filteredBins = computed(() => {
   if (!searchQuery.value) return binStore.allBins
   return binStore.allBins.filter((bin) => {
     const query = searchQuery.value
-    return (
-      bin.binCode?.toLowerCase().includes(query) ||
-      bin.binName?.toLowerCase().includes(query) ||
-      bin.area?.toLowerCase().includes(query)
-    )
+    if (typeof bin.area === 'object' && bin.area !== null) {
+      const enMatch = bin.area.en?.toLowerCase().includes(query)
+      const khMatch = bin.area.kh?.toLowerCase().includes(query)
+      return bin.binCode?.toLowerCase().includes(query) || enMatch || khMatch
+    }
+
+    if (typeof bin.area === 'string') {
+      return (
+        bin.binCode?.toLowerCase().includes(query) ||
+        (bin.area as string).toLowerCase().includes(query)
+      )
+    }
+
+    return false
   })
 })
 
@@ -50,7 +46,7 @@ const filteredCleaners = computed(() => {
   if (!searchQuery.value) return cleanerStore.getCleaners || []
   return (cleanerStore.getCleaners || []).filter((cleaner) => {
     const query = searchQuery.value
-    const fullName = `${cleaner.firstName} ${cleaner.lastName}`.toLowerCase()
+    const fullName = `${cleaner.name} `.toLowerCase()
     return (
       fullName.includes(query) ||
       cleaner.telegramChatId?.toLowerCase().includes(query) ||
@@ -87,22 +83,19 @@ onMounted(() => {
   binStore.getAllBins()
 })
 
-// 1. Bin Status Pie Chart
 const binStatusData = computed(() => {
   const statusCounts = bins.value.reduce(
     (acc, bin) => {
-      acc[bin.status] = (acc[bin.status] || 0) + 1 // Keep original keys for logic
+      acc[bin.status] = (acc[bin.status] || 0) + 1
       return acc
     },
     {} as Record<string, number>,
   )
 
-  // Translate labels for display
   const translatedLabels = Object.keys(statusCounts).map((status) => {
-    // Map status string to translation key if possible, or leave as is
     if (status === 'FULL') return t('ui.full')
     if (status === 'EMPTY') return t('ui.empty')
-    if (status === 'FILLING') return t('ui.half') // Assuming FILLING maps to 'half' per existing admin.ts
+    if (status === 'FILLING') return t('ui.half')
     return status
   })
 
@@ -114,48 +107,6 @@ const binStatusData = computed(() => {
     },
   }
 })
-
-// 2. Busiest Bins Bar Chart
-// const busiestBinsData = computed(() => {
-//   const sortedBins = [...bins.value].sort((a, b) => b.fullCount - a.fullCount).slice(0, 5)
-
-//   return {
-//     series: [
-//       {
-//         name: 'Times Full',
-//         data: sortedBins.map((b) => ({
-//           x: b.binCode,
-//           y: b.fullCount,
-//         })),
-//       },
-//     ],
-//     chartOptions: {
-//       chart: { type: 'bar' },
-//       xaxis: {
-//         type: 'category',
-//         categories: sortedBins.map((b) => b.binCode),
-//       },
-//       colors: ['#34a853'],
-//       plotOptions: {
-//         bar: {
-//           horizontal: true,
-//           dataLabels: {
-//             position: 'right',
-//           },
-//         },
-//       },
-//       dataLabels: {
-//         enabled: true,
-//         formatter: (val: number) => `${val}`,
-//       },
-//       tooltip: {
-//         y: {
-//           formatter: (val: number) => `${val} times`,
-//         },
-//       },
-//     },
-//   }t('ui.times_full')
-// })
 
 const busiestBinsData = computed(() => {
   const sortedBins = [...bins.value].sort((a, b) => b.fullCount - a.fullCount).slice(0, 5)
@@ -283,7 +234,6 @@ const fillLevelTrendData = computed(() => {
                 :key="bin._id"
                 class="text-sm p-2 bg-gray-50 rounded hover:bg-gray-100"
               >
-                <div class="font-medium">{{ bin.binName }}</div>
                 <div class="text-gray-600 text-xs">{{ bin.binCode }} - {{ bin.area }}</div>
               </div>
               <div v-if="filteredBins.length > 10" class="text-xs text-gray-500 pt-1">
@@ -307,7 +257,7 @@ const fillLevelTrendData = computed(() => {
                 :key="cleaner._id"
                 class="text-sm p-2 bg-gray-50 rounded hover:bg-gray-100"
               >
-                <div class="font-medium">{{ cleaner.firstName }} {{ cleaner.lastName }}</div>
+                <div class="font-medium">{{ cleaner.name }}</div>
                 <div class="text-gray-600 text-xs">{{ cleaner.area }}</div>
               </div>
               <div v-if="filteredCleaners.length > 10" class="text-xs text-gray-500 pt-1">

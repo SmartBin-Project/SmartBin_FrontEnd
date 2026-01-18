@@ -9,13 +9,13 @@ import { onMounted, ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import UpdateBinModal from '@/components/UpdateBinModal.vue'
 import type { Bin } from '@/types/bin'
-import { useI18n } from 'vue-i18n' // Import i18n
+import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const searchText = ref('')
 const binStore = useBinStore()
 const { bins } = storeToRefs(binStore)
-const selectedBin = ref<Bin | null>(null) // Fixed type
+const selectedBin = ref<Bin | null>(null)
 const isUpdateModalVisible = ref(false)
 const showDeleteModal = ref(false)
 const showSuccessAlert = ref(false)
@@ -44,8 +44,8 @@ const filteredBins = computed(() => {
     let areaMatch = false
     if (typeof bin.area === 'object' && bin.area !== null) {
       areaMatch =
-        bin.area.en?.toLowerCase().includes(query) || 
-        bin.area.kh?.toLowerCase().includes(query) || 
+        bin.area.en?.toLowerCase().includes(query) ||
+        bin.area.kh?.toLowerCase().includes(query) ||
         false
     } else if (typeof bin.area === 'string') {
       areaMatch = (bin.area as string).toLowerCase().includes(query)
@@ -65,8 +65,8 @@ const handleUpdateBin = async (id: string, bin: Partial<Bin>) => {
     successMessage.value = t('ui.bin_update_success', { code: bin.binCode })
     showSuccessAlert.value = true
     isUpdateModalVisible.value = false
-    selectedBin.value = null 
-    await binStore.getAllBins() 
+    selectedBin.value = null
+    await binStore.getAllBins()
   } catch (error: any) {
     console.error(error.message || 'Failed to update bin')
   }
@@ -117,7 +117,7 @@ const openUpdateModal = () => {
 
 const selectBin = (bin: Bin) => {
   if (selectedBin.value && selectedBin.value._id === bin._id) {
-    selectedBin.value = null 
+    selectedBin.value = null
   } else {
     selectedBin.value = bin
   }
@@ -132,15 +132,15 @@ const selectBin = (bin: Bin) => {
       >
         <SuperAdminBinLocation :search-text="searchText" />
       </div>
-      
+
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-xl font-bold text-gray-800">{{ t('ui.bins') }}</h3>
         <div class="flex gap-4">
           <button @click="openUpdateModal" class="px-8 py-2 bg-green-600 text-white rounded-lg">
-             {{ t('ui.update') }}
+            {{ t('ui.update') }}
           </button>
           <button @click="deleteSelectedBin" class="px-8 py-2 bg-red-600 text-white rounded-lg">
-             {{ t('ui.delete') }}
+            {{ t('ui.delete') }}
           </button>
         </div>
       </div>
@@ -149,12 +149,12 @@ const selectBin = (bin: Bin) => {
         <div v-if="!filteredBins.length" class="col-span-full p-8 text-center text-gray-600">
           {{ t('ui.search_results') }} "{{ searchText }}" - {{ t('ui.no_bins_match') }}
         </div>
-        
+
         <BinCard
           v-for="bin in filteredBins"
           :key="bin._id"
           :bin="bin"
-          :class="{ 'ring-2 ring-green-500 border-green-500': selectedBin && selectedBin._id === bin._id }"
+          :selected="!!(selectedBin && selectedBin._id === bin._id)"
           @click="selectBin(bin)"
           class="cursor-pointer"
         />

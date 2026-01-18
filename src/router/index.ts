@@ -19,8 +19,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/User/HomePage.vue'),
-      // --- ADD THIS LINE ---
+      component: () => import('../views/User/HomePage.vue' as any),
       props: true,
       meta: { hideFooter: true },
     },
@@ -45,7 +44,7 @@ const router = createRouter({
     {
       path: '/superadmin/add-bin',
       name: 'superadmin-add-bin',
-      component: () => import('../views/SuperAdmin/SuperAdminAddBin.vue'),
+      component: () => import('../views/SuperAdmin/SuperAdminAddBin.vue' as any),
       meta: { requiresAuth: true, roles: ['SUPERADMIN'] },
     },
     {
@@ -83,7 +82,7 @@ const router = createRouter({
     {
       path: '/superadmin/account',
       name: 'superadmin-account',
-      component: () => import('../views/SuperAdmin/SuperAdminAccount.vue'),
+      component: () => import('../views/SuperAdmin/SuperAdminAccount.vue' as any),
       meta: { requiresAuth: true, roles: ['SUPERADMIN'] },
     },
 
