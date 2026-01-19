@@ -25,8 +25,9 @@ const router = createRouter({
     },
     {
       path: '/aboutus',
-      name: 'aboutus',
+      name: 'Aboutus',
       component: () => import('../views/User/AboutusPage.vue'),
+      meta: { hideNav: true, hideFooter: true, requiresAuth: false },
     },
     {
       path: '/service',
@@ -89,7 +90,7 @@ const router = createRouter({
     // auth routes
     {
       path: '/signin',
-      name: 'Signin',
+      name: 'signin',
       component: () => import('../views/Auth/SigninPage.vue'),
       meta: { hideNav: true, hideFooter: true, requiresAuth: false },
     },
