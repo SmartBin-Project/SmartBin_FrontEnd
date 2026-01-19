@@ -1,7 +1,5 @@
 {
   "name": "smartbin",
   "compatibility_date": "2026-01-18",
-  "assets": {
-    "directory": "./dist",
-  },
+  "main": "src/index.ts",
 }
