@@ -27,7 +27,6 @@ const router = createRouter({
       path: '/aboutus',
       name: 'Aboutus',
       component: () => import('../views/User/AboutusPage.vue'),
-      meta: { hideNav: true, hideFooter: true, requiresAuth: false },
     },
     {
       path: '/service',
