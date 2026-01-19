@@ -45,7 +45,7 @@
               <img src="https://ric.itc.edu.kh/sd14/images/itc_logo.png" alt="RIC Logo" />
             </div>
             <div>
-              <p class="text-gray-900 font-bold text-sm">GIC-STUDENT TEAM 26</p>
+              <p class="text-gray-900 font-bold text-sm">GIC-STUDENT 26</p>
               <p class="text-gray-400 text-xs">Institute of Technology of Cambodia</p>
             </div>
           </div>
