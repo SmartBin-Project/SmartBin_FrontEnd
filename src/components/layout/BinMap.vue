@@ -106,7 +106,7 @@
       <l-marker v-if="userLocation" :lat-lng="userLocation" :icon="userIcon as any" />
       <l-marker
         v-for="bin in filteredBins"
-        :key="bin._id"
+        :key="`${bin._id}-${bin.fillLevel}`"
         :lat-lng="[bin.location.lat, bin.location.lng]"
         :icon="createBinIcon(bin) as any"
         @click="handleBinClick(bin)"
@@ -367,12 +367,15 @@ onMounted(async () => {
     document.head.appendChild(link)
   }
   binStore.getAllBinsPublic()
+  binStore.initRealTimeUpdates();
   backendInterval = setInterval(() => binStore.getAllBinsPublic(), 30000)
+
 })
 
 onUnmounted(() => {
   if (watchId) navigator.geolocation.clearWatch(watchId)
   if (backendInterval) clearInterval(backendInterval)
+  binStore.stopRealTimeUpdates();
 })
 
 const userIcon = L.divIcon({
