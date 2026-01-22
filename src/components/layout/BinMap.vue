@@ -7,7 +7,7 @@
       @close="selectedBin = null"
       @navigate="handleNavigateFromPanel"
     />
-    
+
     <transition name="slide-down">
       <div
         v-if="activeBinId"
@@ -34,7 +34,9 @@
               <p
                 class="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] leading-none mb-1"
               >
-                {{ navigationColor === '#ef4444' ? t('ui.urgent_collection') : t('ui.live_tracking') }}
+                {{
+                  navigationColor === '#ef4444' ? t('ui.urgent_collection') : t('ui.live_tracking')
+                }}
               </p>
               <p class="text-2xl font-black text-gray-900 tabular-nums leading-none">
                 {{ distanceRemaining }}
@@ -101,12 +103,12 @@
       <l-tile-layer
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
-      <l-marker v-if="userLocation" :lat-lng="userLocation" :icon="userIcon" />
+      <l-marker v-if="userLocation" :lat-lng="userLocation" :icon="userIcon as any" />
       <l-marker
         v-for="bin in filteredBins"
-        :key="bin._id"
+        :key="`${bin._id}-${bin.fillLevel}`"
         :lat-lng="[bin.location.lat, bin.location.lng]"
-        :icon="createBinIcon(bin)"
+        :icon="createBinIcon(bin) as any"
         @click="handleBinClick(bin)"
       />
     </l-map>
@@ -190,11 +192,13 @@
         <div
           class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-3xl"
         >
-        <Search class="w-8 h-8 text-gray-400" />
+          <Search class="w-8 h-8 text-gray-400" />
         </div>
         <h3 class="text-xl font-bold text-gray-900 mb-1">{{ t('ui.no_results') }}</h3>
         <p class="text-gray-500 text-center text-sm font-medium">
-          {{ t('ui.no_results_desc') }} "<span class="text-[#68a357] font-semibold">{{ props.searchText }}</span
+          {{ t('ui.no_results_desc') }} "<span class="text-[#68a357] font-semibold">{{
+            props.searchText
+          }}</span
           >".
         </p>
       </div>
@@ -215,16 +219,16 @@ import { Search } from 'lucide-vue-next'
 import BinDetailPanel from './BinDetailPanel.vue'
 
 // NEW: Import i18n hooks
-import { useI18n } from 'vue-i18n';
-import { useTranslation } from '@/composables/useTranslation';
+import { useI18n } from 'vue-i18n'
+import { useTranslation } from '@/composables/useTranslation'
 
 const props = defineProps<{
   searchText: string
 }>()
 
 // Init Hooks
-const { t } = useI18n();
-const { translateDB } = useTranslation();
+const { t } = useI18n()
+const { translateDB } = useTranslation()
 
 const binStore = useBinStore()
 const { bins } = storeToRefs(binStore)
@@ -236,21 +240,21 @@ const isLoading = ref(true)
 const filteredBins = computed(() => {
   const query = props.searchText.toLowerCase().trim()
   if (!query) return bins.value
-  
+
   return bins.value.filter((bin) => {
     // 1. Check if bin.area is an object (New Data)
     if (typeof bin.area === 'object' && bin.area !== null) {
-      const enMatch = bin.area.en?.toLowerCase().includes(query);
-      const khMatch = bin.area.kh?.toLowerCase().includes(query);
-      return enMatch || khMatch;
+      const enMatch = bin.area.en?.toLowerCase().includes(query)
+      const khMatch = bin.area.kh?.toLowerCase().includes(query)
+      return enMatch || khMatch
     }
-    
+
     // 2. Check if bin.area is a string (Legacy Data)
     if (typeof bin.area === 'string') {
-      return (bin.area as string).toLowerCase().includes(query);
+      return (bin.area as string).toLowerCase().includes(query)
     }
-    
-    return false;
+
+    return false
   })
 })
 
@@ -363,12 +367,15 @@ onMounted(async () => {
     document.head.appendChild(link)
   }
   binStore.getAllBinsPublic()
+  binStore.initRealTimeUpdates();
   backendInterval = setInterval(() => binStore.getAllBinsPublic(), 30000)
+
 })
 
 onUnmounted(() => {
   if (watchId) navigator.geolocation.clearWatch(watchId)
   if (backendInterval) clearInterval(backendInterval)
+  binStore.stopRealTimeUpdates();
 })
 
 const userIcon = L.divIcon({
@@ -397,14 +404,64 @@ const handleBinClick = (bin: Bin) => {
 
 <style>
 /* ... (Keep your existing styles) ... */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.user-marker-container { display: flex; align-items: center; justify-content: center; }
-.user-dot { width: 14px; height: 14px; background: #1a73e8; border: 2.5px solid white; border-radius: 50%; z-index: 10; position: relative; }
-.user-pulse { position: absolute; width: 44px; height: 44px; background: rgba(26, 115, 232, 0.25); border-radius: 50%; animation: pulse-anim 2s infinite; }
-@keyframes pulse-anim { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
-.leaflet-routing-container { display: none !important; }
-.slide-down-enter-active, .slide-down-leave-active { transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-.slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translate(-50%, -40px); }
-.pop-enter-active { animation: pop-in 0.5s cubic-bezier(0.17, 0.88, 0.32, 1.27); }
-@keyframes pop-in { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.user-marker-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.user-dot {
+  width: 14px;
+  height: 14px;
+  background: #1a73e8;
+  border: 2.5px solid white;
+  border-radius: 50%;
+  z-index: 10;
+  position: relative;
+}
+.user-pulse {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  background: rgba(26, 115, 232, 0.25);
+  border-radius: 50%;
+  animation: pulse-anim 2s infinite;
+}
+@keyframes pulse-anim {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+.leaflet-routing-container {
+  display: none !important;
+}
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -40px);
+}
+.pop-enter-active {
+  animation: pop-in 0.5s cubic-bezier(0.17, 0.88, 0.32, 1.27);
+}
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 </style>

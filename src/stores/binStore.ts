@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { Bin } from '@/types/bin'
 import * as binService from '@/services/binService'
+import { socketService } from '@/services/socket'
 
 export const useBinStore = defineStore('binStore', {
   state: () => ({
@@ -93,6 +94,43 @@ export const useBinStore = defineStore('binStore', {
       } finally {
         this.loading = false
       }
+    },
+
+    initRealTimeUpdates() {
+      // Debug: Check if 'this' is working
+      console.log('🔌 Initializing WebSocket. Store bins count:', this.bins.length)
+
+      socketService.connect()
+
+      // ✅ FIX 2: Arrow function inside is CORRECT (it keeps 'this' from the outer function)
+      socketService.on('bin-updated', (updatedData: Partial<Bin>) => {
+        console.log('⚡ Real-time update received:', updatedData)
+
+        // Debug: Ensure this.bins exists
+        if (!this.bins) {
+          console.error('❌ Error: this.bins is undefined. Check store initialization.')
+          return
+        }
+
+        // ✅ FIX 3: Use .find() for safety
+        const bin = this.bins.find((b) => b.binCode === updatedData.binCode)
+
+        if (bin) {
+          console.log(`✅ Found bin ${bin.binCode}. Updating fill level to ${updatedData.fillLevel}`)
+          
+          // Update values safely
+          if (updatedData.fillLevel !== undefined) bin.fillLevel = updatedData.fillLevel
+          if (updatedData.status !== undefined) bin.status = updatedData.status
+          if (updatedData.location) bin.location = updatedData.location
+        } else {
+          console.warn(`⚠️ Bin with code ${updatedData.binCode} not found in local store.`)
+        }
+      })
+    },
+
+    stopRealTimeUpdates() {
+      socketService.off('bin-updated')
+      socketService.disconnect()
     },
   },
 })

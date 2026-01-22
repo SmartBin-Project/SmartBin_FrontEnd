@@ -1,6 +1,6 @@
 export interface LocalizedString {
-  en: string;
-  kh?: string; // Optional because the backend might auto-generate it
+  en: string
+  kh?: string
 }
 
 interface Location {
@@ -10,14 +10,13 @@ interface Location {
 }
 
 export interface Bin {
-  _id: string;
-  binCode: string;
-  // Notice these are objects now, not strings
-  area: LocalizedString; 
-  addressBin: LocalizedString;
-  location: Location;
-  status: 'EMPTY' | 'HALF' | 'FULL';
-  fillLevel: number;
-  fullCount: number;
-  pictureBins?: string[];
+  _id: string
+  binCode: string
+  area: LocalizedString
+  addressBin: LocalizedString
+  location: Location
+  status: 'EMPTY' | 'HALF' | 'FULL'
+  fillLevel: number
+  fullCount: number
+  pictureBins?: string[]
 }

@@ -1,0 +1,8 @@
+{
+  "name": "smartbin",
+  "compatibility_date": "2026-01-18",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application", // Add this line
+  },
+}

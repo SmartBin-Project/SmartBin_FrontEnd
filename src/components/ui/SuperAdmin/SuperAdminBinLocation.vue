@@ -6,28 +6,19 @@ import 'leaflet/dist/leaflet.css'
 import { getAllBins } from '@/services/binService'
 import type { Bin } from '@/types/bin'
 
-// Receive Search Text from Parent
 const props = defineProps<{
   searchText: string
 }>()
 
-// ==========================================
-// 🛠️ BACKEND & DATA
-// ==========================================
 const bins = ref<Bin[]>([])
 const isLoading = ref(true)
 
-// FILTER ENGINE: Connects Search Bar to the UI
 const filteredBins = computed(() => {
   const query = props.searchText.toLowerCase().trim()
   if (!query) return bins.value
-  return bins.value.filter(
-    (bin) => bin.binCode.toLowerCase().includes(query),
-    // bin.address.toLowerCase().includes(query)
-  )
+  return bins.value.filter((bin) => bin.binCode.toLowerCase().includes(query))
 })
 
-// AUTO-ZOOM: Glide map to first result when typing
 watch(
   () => props.searchText,
   (newVal) => {
@@ -107,7 +98,7 @@ const trackUserLocation = () => {
       }
 
       if (activeBinId.value) {
-        const bin = bins.value.find((b) => b._id === activeBinId.value)
+        const bin = bins.value.find((b) => b._id === String(activeBinId.value))
         if (bin) {
           const dist = L.latLng(latitude, longitude).distanceTo(
             L.latLng(bin.location.lat, bin.location.lng),
@@ -121,32 +112,6 @@ const trackUserLocation = () => {
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
   )
 }
-
-// const startNavigationToBin = (bin: Bin) => {
-//   if (!userLocation.value) {
-//     alert(
-//       'Could not get your current location. Please ensure you have enabled location services for this site in your browser settings and try again.',
-//     )
-//     console.warn('Still trying to find your location. Please wait a moment and try again.')
-//     trackUserLocation() // Re-trigger location tracking
-//     return
-//   }
-
-//   activeBinId.value = bin._id
-//   isFollowingUser.value = true
-//   navigationColor.value = bin.fillLevel > 80 ? '#ef4444' : '#10b981'
-
-//   import('leaflet-routing-machine').then(() => {
-//     const map = leafletMap.value.leafletObject
-//     if (routingControl) map.removeControl(routingControl)
-//     routingControl = (L as any).Routing.control({
-//       waypoints: [L.latLng(userLocation.value!), L.latLng(bin.location.lat, bin.location.lng)],
-//       createMarker: () => null,
-//       show: false,
-//       lineOptions: { styles: [{ color: navigationColor.value, weight: 10, opacity: 0.7 }] },
-//     }).addTo(map)
-//   })
-// }
 
 const stopNavigation = () => {
   activeBinId.value = null
@@ -302,12 +267,12 @@ const handleBinClick = (bin: Bin) => {
       <l-tile-layer
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
-      <l-marker v-if="userLocation" :lat-lng="userLocation" :icon="userIcon" />
+      <l-marker v-if="userLocation" :lat-lng="userLocation" :icon="userIcon as any" />
       <l-marker
         v-for="bin in filteredBins"
         :key="bin._id"
         :lat-lng="[bin.location.lat, bin.location.lng]"
-        :icon="createBinIcon(bin)"
+        :icon="createBinIcon(bin) as any"
         @click="handleBinClick(bin)"
       />
     </l-map>
