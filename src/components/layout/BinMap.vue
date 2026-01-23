@@ -229,6 +229,9 @@ const props = defineProps<{
 // Init Hooks
 const { t } = useI18n()
 const { translateDB } = useTranslation()
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
+const ORS_TOKEN = import.meta.env.VITE_ORS_TOKEN
+const ORS_PROFILE = import.meta.env.VITE_ORS_PROFILE || 'driving-car'
 
 const binStore = useBinStore()
 const { bins } = storeToRefs(binStore)
@@ -257,6 +260,137 @@ const filteredBins = computed(() => {
     return false
   })
 })
+
+const createOpenRouteServiceRouter = () => {
+  if (!ORS_TOKEN) return null
+
+  return {
+    options: {},
+    _pendingRequest: null as AbortController | null,
+    route(waypoints: any[], cb: any, context?: any) {
+      if (this._pendingRequest) this._pendingRequest.abort()
+
+      const coords = waypoints.map((wp) => [wp.latLng.lng, wp.latLng.lat])
+      const controller = new AbortController()
+      this._pendingRequest = controller
+
+      // Calculate straight-line distance for comparison
+      const start = L.latLng(coords[0][1], coords[0][0])
+      const end = L.latLng(coords[1][1], coords[1][0])
+      const straightDistance = start.distanceTo(end)
+
+      fetch(`https://api.openrouteservice.org/v2/directions/${ORS_PROFILE}/geojson`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: ORS_TOKEN,
+        },
+        body: JSON.stringify({
+          coordinates: coords,
+          preference: 'shortest',
+          geometry_simplify: false,
+          continue_straight: false,
+          elevation: false,
+          instructions: false,
+        }),
+        signal: controller.signal,
+      })
+        .then((res) => {
+          if (!res.ok) {
+            console.warn('ORS routing failed, using direct line')
+            throw new Error(`ORS API error: ${res.status}`)
+          }
+          return res.json()
+        })
+        .then((data) => {
+          this._pendingRequest = null
+          const features = Array.isArray(data?.features) ? data.features : []
+          
+          if (!features.length) {
+            console.warn('ORS returned no routes, using direct line')
+            return this.createDirectRoute(waypoints, straightDistance, cb, context)
+          }
+
+          const routes = features.map((feat: any) => {
+            const geometryCoords = feat.geometry?.coordinates || []
+            const summary = feat.properties?.summary || { distance: 0, duration: 0 }
+            const latLngs = geometryCoords.map(([lng, lat]: [number, number]) =>
+              L.latLng(lat, lng),
+            )
+            return {
+              name: 'Route',
+              coordinates: latLngs,
+              summary: {
+                totalDistance: summary.distance,
+                totalTime: summary.duration,
+              },
+              waypoints,
+              inputWaypoints: waypoints,
+              instructions: [],
+            }
+          })
+
+          // Sort by distance and pick shortest
+          routes.sort((a: any, b: any) => a.summary.totalDistance - b.summary.totalDistance)
+          const bestRoute = routes[0]
+
+          // Only fall back to straight line if route is extremely long (>3x straight distance)
+          // This ensures we use actual roads whenever possible
+          if (bestRoute.summary.totalDistance > straightDistance * 3) {
+            console.warn(`ORS route too long (${Math.round(bestRoute.summary.totalDistance)}m vs ${Math.round(straightDistance)}m direct), using direct line`)
+            return this.createDirectRoute(waypoints, straightDistance, cb, context)
+          }
+
+          console.log(`Using ORS route: ${Math.round(bestRoute.summary.totalDistance)}m (direct would be ${Math.round(straightDistance)}m)`)
+          cb.call(context || this, null, [bestRoute])
+        })
+        .catch((err) => {
+          this._pendingRequest = null
+          console.warn('ORS error, falling back to direct line:', err.message)
+          this.createDirectRoute(waypoints, straightDistance, cb, context)
+        })
+    },
+    createDirectRoute(waypoints: any[], distance: number, cb: any, context: any) {
+      // Create a simple straight line route
+      const latLngs = [waypoints[0].latLng, waypoints[1].latLng]
+      cb.call(context || this, null, [
+        {
+          name: 'Direct Route',
+          coordinates: latLngs,
+          summary: {
+            totalDistance: distance,
+            totalTime: Math.round(distance / 1.4), // ~5 km/h walking speed
+          },
+          waypoints,
+          inputWaypoints: waypoints,
+          instructions: [],
+        },
+      ])
+    },
+  }
+}
+
+const createRouter = () => {
+  if (MAPBOX_TOKEN) {
+    return (L as any).Routing.mapbox(MAPBOX_TOKEN, {
+      profile: 'mapbox/driving',
+      alternatives: false,
+      continue_straight: false,
+      language: 'en',
+    })
+  }
+
+  const orsRouter = createOpenRouteServiceRouter()
+  if (orsRouter) return orsRouter
+
+  return (L as any).Routing.osrmv1({
+    serviceUrl: 'https://router.project-osrm.org/route/v1',
+    profile: 'driving',
+    useHints: false,
+    suppressDemoServerWarning: true,
+    alternatives: false,
+  })
+}
 
 // ... (Rest of your script remains exactly the same: Watchers, Leaflet logic, etc.)
 // Just ensure you keep the existing map logic below this line.
@@ -289,6 +423,8 @@ const navigationColor = ref('#10b981')
 let routingControl: any = null
 let watchId: number | null = null
 let backendInterval: any = null
+const lastReroutePos = ref<[number, number] | null>(null)
+let rerouteTimer: number | null = null
 
 const trackUserLocation = () => {
   if (!navigator.geolocation) return
@@ -306,6 +442,25 @@ const trackUserLocation = () => {
           )
           distanceRemaining.value = Math.round(dist) + ' m'
           if (dist < 15) handleArrival()
+
+          // Adaptive reroute: if user deviates >25m from last routed point, rerun routing (debounced)
+          if (lastReroutePos.value) {
+            const moved = L.latLng(latitude, longitude).distanceTo(
+              L.latLng(lastReroutePos.value[0], lastReroutePos.value[1]),
+            )
+            if (moved > 25) {
+              if (rerouteTimer) window.clearTimeout(rerouteTimer)
+              rerouteTimer = window.setTimeout(() => {
+                const targetBin = bins.value.find((b) => b._id === activeBinId.value)
+                if (targetBin && userLocation.value) {
+                  lastReroutePos.value = userLocation.value
+                  startNavigationToBin(targetBin)
+                }
+              }, 1500) // debounce reroute to avoid spamming requests
+            }
+          } else {
+            lastReroutePos.value = [latitude, longitude]
+          }
         }
       }
     },
@@ -324,6 +479,7 @@ const startNavigationToBin = (bin: Bin) => {
   activeBinId.value = bin._id
   isFollowingUser.value = true
   navigationColor.value = bin.fillLevel > 80 ? '#ef4444' : '#10b981'
+  lastReroutePos.value = userLocation.value
 
   import('leaflet-routing-machine').then(() => {
     const map = leafletMap.value.leafletObject
@@ -332,7 +488,13 @@ const startNavigationToBin = (bin: Bin) => {
       waypoints: [L.latLng(userLocation.value!), L.latLng(bin.location.lat, bin.location.lng)],
       createMarker: () => null,
       show: false,
-      lineOptions: { styles: [{ color: navigationColor.value, weight: 10, opacity: 0.7 }] },
+      routeWhileDragging: false,
+      router: createRouter(),
+      lineOptions: {
+        styles: [{ color: navigationColor.value, weight: 10, opacity: 0.7 }],
+        extendToWaypoints: true,
+        missingRouteTolerance: 0,
+      },
     }).addTo(map)
   })
 }
