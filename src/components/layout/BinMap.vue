@@ -270,9 +270,28 @@ const createOpenRouteServiceRouter = () => {
     route(waypoints: any[], cb: any, context?: any) {
       if (this._pendingRequest) this._pendingRequest.abort()
 
-      const coords = waypoints.map((wp) => [wp.latLng.lng, wp.latLng.lat])
+      const coords = waypoints.map((wp) => [wp?.latLng?.lng, wp?.latLng?.lat])
       const controller = new AbortController()
       this._pendingRequest = controller
+
+      // Validate inputs before computing distances to avoid undefined crashes
+      const hasValidCoords =
+        coords.length >= 2 &&
+        coords.every((pair) =>
+          Array.isArray(pair) &&
+          typeof pair[0] === 'number' &&
+          typeof pair[1] === 'number' &&
+          Number.isFinite(pair[0]) &&
+          Number.isFinite(pair[1]),
+        )
+
+      if (!hasValidCoords) {
+        console.warn('Invalid waypoints provided to ORS; falling back to direct line')
+        const straightDistanceFallback = L.latLng(waypoints[0].latLng).distanceTo(
+          L.latLng(waypoints[1].latLng),
+        )
+        return this.createDirectRoute(waypoints, straightDistanceFallback, cb, context)
+      }
 
       // Calculate straight-line distance for comparison
       const start = L.latLng(coords[0][1], coords[0][0])
