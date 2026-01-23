@@ -451,6 +451,7 @@ let watchId: number | null = null
 let backendInterval: any = null
 const lastReroutePos = ref<[number, number] | null>(null)
 let rerouteTimer: number | null = null
+let updateRouteTimer: number | null = null
 
 const trackUserLocation = () => {
   if (!navigator.geolocation) return
@@ -469,12 +470,26 @@ const trackUserLocation = () => {
           distanceRemaining.value = Math.round(dist) + ' m'
           if (dist < 15) handleArrival()
 
-          // Adaptive reroute: if user deviates >25m from last routed point, rerun routing (debounced)
+          // Continuously update route to show remaining path (dynamic reduction)
           if (lastReroutePos.value) {
             const moved = L.latLng(latitude, longitude).distanceTo(
               L.latLng(lastReroutePos.value[0], lastReroutePos.value[1]),
             )
-            if (moved > 25) {
+            
+            // Update route every 5m of movement for smooth visual reduction
+            if (moved > 5) {
+              if (updateRouteTimer) window.clearTimeout(updateRouteTimer)
+              updateRouteTimer = window.setTimeout(() => {
+                const targetBin = bins.value.find((b) => b._id === activeBinId.value)
+                if (targetBin && userLocation.value) {
+                  lastReroutePos.value = userLocation.value
+                  updateRouteFromCurrentPosition(targetBin)
+                }
+              }, 500) // Quick update for smooth visual feedback
+            }
+            
+            // Full reroute if user deviates significantly (>30m off route)
+            if (moved > 30) {
               if (rerouteTimer) window.clearTimeout(rerouteTimer)
               rerouteTimer = window.setTimeout(() => {
                 const targetBin = bins.value.find((b) => b._id === activeBinId.value)
@@ -482,7 +497,7 @@ const trackUserLocation = () => {
                   lastReroutePos.value = userLocation.value
                   startNavigationToBin(targetBin)
                 }
-              }, 1500) // debounce reroute to avoid spamming requests
+              }, 1500)
             }
           } else {
             lastReroutePos.value = [latitude, longitude]
@@ -493,6 +508,16 @@ const trackUserLocation = () => {
     null,
     { enableHighAccuracy: true },
   )
+}
+
+const updateRouteFromCurrentPosition = (bin: Bin) => {
+  if (!userLocation.value || !routingControl) return
+  
+  // Update the route to start from current position (reducing the polyline dynamically)
+  routingControl.setWaypoints([
+    L.latLng(userLocation.value[0], userLocation.value[1]),
+    L.latLng(bin.location.lat, bin.location.lng),
+  ])
 }
 
 const startNavigationToBin = (bin: Bin) => {
@@ -527,6 +552,8 @@ const startNavigationToBin = (bin: Bin) => {
 
 const stopNavigation = () => {
   activeBinId.value = null
+  if (updateRouteTimer) window.clearTimeout(updateRouteTimer)
+  if (rerouteTimer) window.clearTimeout(rerouteTimer)
   if (routingControl) {
     leafletMap.value.leafletObject.removeControl(routingControl)
     routingControl = null
