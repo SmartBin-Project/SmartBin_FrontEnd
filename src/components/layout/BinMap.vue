@@ -277,12 +277,13 @@ const createOpenRouteServiceRouter = () => {
       // Validate inputs before computing distances to avoid undefined crashes
       const hasValidCoords =
         coords.length >= 2 &&
-        coords.every((pair) =>
-          Array.isArray(pair) &&
-          typeof pair[0] === 'number' &&
-          typeof pair[1] === 'number' &&
-          Number.isFinite(pair[0]) &&
-          Number.isFinite(pair[1]),
+        coords.every(
+          (pair) =>
+            Array.isArray(pair) &&
+            typeof pair[0] === 'number' &&
+            typeof pair[1] === 'number' &&
+            Number.isFinite(pair[0]) &&
+            Number.isFinite(pair[1]),
         )
 
       if (!hasValidCoords) {
@@ -294,6 +295,10 @@ const createOpenRouteServiceRouter = () => {
       }
 
       // Calculate straight-line distance for comparison
+      if (!coords[0] || !coords[1]) {
+        console.warn('Invalid coordinates for straight-line distance, skipping route calculation')
+        return this.createDirectRoute(waypoints, 0, cb, context)
+      }
       const start = L.latLng(coords[0][1], coords[0][0])
       const end = L.latLng(coords[1][1], coords[1][0])
       const straightDistance = start.distanceTo(end)
@@ -324,7 +329,7 @@ const createOpenRouteServiceRouter = () => {
         .then((data) => {
           this._pendingRequest = null
           const features = Array.isArray(data?.features) ? data.features : []
-          
+
           if (!features.length) {
             console.warn('ORS returned no routes, using direct line')
             return this.createDirectRoute(waypoints, straightDistance, cb, context)
@@ -333,9 +338,7 @@ const createOpenRouteServiceRouter = () => {
           const routes = features.map((feat: any) => {
             const geometryCoords = feat.geometry?.coordinates || []
             const summary = feat.properties?.summary || { distance: 0, duration: 0 }
-            const latLngs = geometryCoords.map(([lng, lat]: [number, number]) =>
-              L.latLng(lat, lng),
-            )
+            const latLngs = geometryCoords.map(([lng, lat]: [number, number]) => L.latLng(lat, lng))
             return {
               name: 'Route',
               coordinates: latLngs,
@@ -356,11 +359,15 @@ const createOpenRouteServiceRouter = () => {
           // Only fall back to straight line if route is extremely long (>3x straight distance)
           // This ensures we use actual roads whenever possible
           if (bestRoute.summary.totalDistance > straightDistance * 3) {
-            console.warn(`ORS route too long (${Math.round(bestRoute.summary.totalDistance)}m vs ${Math.round(straightDistance)}m direct), using direct line`)
+            console.warn(
+              `ORS route too long (${Math.round(bestRoute.summary.totalDistance)}m vs ${Math.round(straightDistance)}m direct), using direct line`,
+            )
             return this.createDirectRoute(waypoints, straightDistance, cb, context)
           }
 
-          console.log(`Using ORS route: ${Math.round(bestRoute.summary.totalDistance)}m (direct would be ${Math.round(straightDistance)}m)`)
+          console.log(
+            `Using ORS route: ${Math.round(bestRoute.summary.totalDistance)}m (direct would be ${Math.round(straightDistance)}m)`,
+          )
           cb.call(context || this, null, [bestRoute])
         })
         .catch((err) => {
@@ -548,15 +555,14 @@ onMounted(async () => {
     document.head.appendChild(link)
   }
   binStore.getAllBinsPublic()
-  binStore.initRealTimeUpdates();
+  binStore.initRealTimeUpdates()
   backendInterval = setInterval(() => binStore.getAllBinsPublic(), 30000)
-
 })
 
 onUnmounted(() => {
   if (watchId) navigator.geolocation.clearWatch(watchId)
   if (backendInterval) clearInterval(backendInterval)
-  binStore.stopRealTimeUpdates();
+  binStore.stopRealTimeUpdates()
 })
 
 const userIcon = L.divIcon({
