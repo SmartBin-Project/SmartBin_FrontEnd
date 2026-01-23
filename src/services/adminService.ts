@@ -11,7 +11,6 @@ const adminAPI = axios.create({
   },
 })
 
-// Add token to requests
 adminAPI.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token')
   if (token) {

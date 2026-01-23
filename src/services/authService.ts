@@ -103,7 +103,6 @@ export const getUserProfile = async () => {
     const response = await api.get(`/superadmin/profile`)
     return response.data
   } catch (err) {
-    // If endpoint doesn't exist, return current user from storage
     const user = getCurrentUser()
     if (user) return user
     throw err

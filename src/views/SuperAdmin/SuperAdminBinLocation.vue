@@ -5,7 +5,7 @@ import SuperAdminBinLocation from '@/components/ui/SuperAdmin/SuperAdminBinLocat
 import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal.vue'
 import SuccessAlert from '@/components/ui/SuccessAlert.vue'
 import { useBinStore } from '@/stores/binStore'
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import UpdateBinModal from '@/components/UpdateBinModal.vue'
 import type { Bin } from '@/types/bin'
@@ -57,6 +57,11 @@ const filteredBins = computed(() => {
 
 onMounted(() => {
   binStore.getAllBins()
+  binStore.initRealTimeUpdates()
+})
+
+onUnmounted(() => {
+  binStore.stopRealTimeUpdates()
 })
 
 const handleUpdateBin = async (id: string, bin: Partial<Bin>) => {
