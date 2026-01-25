@@ -185,6 +185,10 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import Lyhor from '@/assets/images/Lyhor.jpg'
+import Kity from '@/assets/images/Kity.jpg'
+import Seyha from '@/assets/images/Seyha.jpg'
+import Phath from '@/assets/images/Phath.jpg'
 
 const { t } = useI18n()
 
@@ -247,31 +251,27 @@ onMounted(() => {
 const team = [
   {
     id: 1,
-    name: 'Jason Price',
-    email: 'kuhlman.jeremy@yahoo.com',
-    image:
-      'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=400',
+    name: 'Luy Lyhor',
+    email: 'luylyhor28@gmail.com',
+    image: Lyhor,
   },
   {
     id: 2,
-    name: 'Duane Dean',
-    email: 'duane.dean@yahoo.com',
-    image:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400',
+    name: 'Lim Kity',
+    email: 'kitylim123@gmail.com',
+    image: Kity,
   },
   {
     id: 3,
-    name: 'Sarah Smith',
-    email: 'sarah.smith@yahoo.com',
-    image:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400',
+    name: 'Cheang Seyha',
+    email: 'cheangseyha2208@gmail.com',
+    image: Seyha,
   },
   {
     id: 4,
-    name: 'James L.',
-    email: 'james.l@yahoo.com',
-    image:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400',
+    name: 'Phorn Sophath',
+    email: 'sophathphorn04gmail.com',
+    image: Phath,
   },
 ]
 </script>
