@@ -12,15 +12,15 @@
             class="relative rounded-[40px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] h-100 group"
           >
             <img
-              src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80"
+              :src="SmartBin_Banner"
               alt="Clean City"
               class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
             />
-            <div
+            <!-- <div
               class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent flex items-end p-8"
             >
               <p class="text-white font-bold text-lg">{{ t('ui.about_mission_subtitle') }}</p>
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -189,6 +189,7 @@ import Lyhor from '@/assets/images/Lyhor.jpg'
 import Kity from '@/assets/images/Kity.jpg'
 import Seyha from '@/assets/images/Seyha.jpg'
 import Phath from '@/assets/images/Phath.jpg'
+import SmartBin_Banner from '@/assets/images/SmartBin_Banner.png'
 
 const { t } = useI18n()
 
