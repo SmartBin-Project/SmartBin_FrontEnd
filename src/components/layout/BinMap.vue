@@ -127,7 +127,11 @@
           <div class="flex justify-between items-start mb-3">
             <div
               :class="
-                bin.fillLevel > 80 ? 'bg-red-500 shadow-red-200' : 'bg-green-500 shadow-green-200'
+                bin.fillLevel >= 75
+                  ? 'bg-red-500 shadow-red-200'
+                  : bin.fillLevel >= 50
+                    ? 'bg-yellow-500 shadow-yellow-200'
+                    : 'bg-green-500 shadow-green-200'
               "
               class="p-2.5 rounded-lg text-white shadow-md"
             >
@@ -142,11 +146,15 @@
             </div>
             <span
               :class="
-                bin.fillLevel > 80 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
+                bin.fillLevel >= 75
+                  ? 'bg-red-100 text-red-600'
+                  : bin.fillLevel >= 50
+                    ? 'bg-yellow-100 text-yellow-600'
+                    : 'bg-green-100 text-green-600'
               "
               class="px-2.5 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider"
             >
-              {{ bin.fillLevel > 80 ? t('ui.urgent') : t('ui.available') }}
+              {{ bin.fillLevel >= 75 ? t('ui.urgent') : t('ui.available') }}
             </span>
           </div>
           <div class="mb-3 w-55">
@@ -171,7 +179,8 @@
                 class="h-full transition-all duration-1000"
                 :style="{
                   width: bin.fillLevel + '%',
-                  backgroundColor: bin.fillLevel > 80 ? '#ef4444' : '#10b981',
+                  backgroundColor:
+                    bin.fillLevel >= 75 ? '#ef4444' : bin.fillLevel >= 50 ? '#fbbf24' : '#10b981',
                 }"
               ></div>
             </div>
@@ -475,7 +484,7 @@ const trackUserLocation = () => {
             const moved = L.latLng(latitude, longitude).distanceTo(
               L.latLng(lastReroutePos.value[0], lastReroutePos.value[1]),
             )
-            
+
             // Update route every 5m of movement for smooth visual reduction
             if (moved > 5) {
               if (updateRouteTimer) window.clearTimeout(updateRouteTimer)
@@ -487,7 +496,7 @@ const trackUserLocation = () => {
                 }
               }, 500) // Quick update for smooth visual feedback
             }
-            
+
             // Full reroute if user deviates significantly (>30m off route)
             if (moved > 30) {
               if (rerouteTimer) window.clearTimeout(rerouteTimer)
@@ -512,7 +521,7 @@ const trackUserLocation = () => {
 
 const updateRouteFromCurrentPosition = (bin: Bin) => {
   if (!userLocation.value || !routingControl) return
-  
+
   // Update the route to start from current position (reducing the polyline dynamically)
   routingControl.setWaypoints([
     L.latLng(userLocation.value[0], userLocation.value[1]),
@@ -599,7 +608,7 @@ const userIcon = L.divIcon({
 })
 
 const createBinIcon = (bin: Bin) => {
-  const color = bin.fillLevel > 80 ? '#ef4444' : '#10b981'
+  const color = bin.fillLevel >= 75 ? '#ef4444' : bin.fillLevel >= 50 ? '#fbbf24' : '#10b981'
   return L.divIcon({
     html: `<div style="border: 3px solid ${color};" class="bg-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-xl">
             <svg class="w-5 h-5" style="color: ${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>

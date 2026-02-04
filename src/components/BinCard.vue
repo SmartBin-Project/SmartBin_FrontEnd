@@ -12,8 +12,8 @@ const props = defineProps<{ bin: Bin; selected: boolean }>()
 
 const statusColor = computed(() => {
   if (props.bin.fillLevel === undefined) return 'gray'
-  if (props.bin.fillLevel > 80) return 'red'
-  if (props.bin.fillLevel > 50) return 'yellow'
+  if (props.bin.fillLevel >= 75) return 'red'
+  if (props.bin.fillLevel >= 50) return 'yellow'
   return 'green'
 })
 </script>

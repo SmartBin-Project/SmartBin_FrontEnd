@@ -154,7 +154,7 @@ const userIcon = L.divIcon({
 })
 
 const createBinIcon = (bin: Bin) => {
-  const color = bin.fillLevel > 80 ? '#ef4444' : '#10b981'
+  const color = bin.fillLevel >= 75 ? '#ef4444' : bin.fillLevel >= 50 ? '#fbbf24' : '#10b981'
   return L.divIcon({
     html: `<div style="border: 3px solid ${color};" class="bg-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-xl">
             <svg class="w-5 h-5" style="color: ${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>

@@ -114,7 +114,11 @@ console.log(props.bin?.pictureBins)
               <div class="flex items-center space-x-4 mb-4">
                 <div
                   :class="
-                    bin.fillLevel > 80 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
+                    bin.fillLevel >= 75
+                      ? 'bg-red-100 text-red-600'
+                      : bin.fillLevel >= 50
+                        ? 'bg-yellow-100 text-yellow-600'
+                        : 'bg-green-100 text-green-600'
                   "
                   class="p-3 rounded-xl"
                 >
@@ -130,10 +134,16 @@ console.log(props.bin?.pictureBins)
                 <div>
                   <h3 class="font-bold text-lg text-gray-900">{{ t('ui.fill_level') }}</h3>
                   <p
-                    :class="bin.fillLevel > 80 ? 'text-red-500' : 'text-green-600'"
+                    :class="
+                      bin.fillLevel >= 75
+                        ? 'text-red-600'
+                        : bin.fillLevel >= 50
+                          ? 'text-yellow-500'
+                          : 'text-green-600'
+                    "
                     class="text-xs font-bold uppercase"
                   >
-                    {{ bin.fillLevel > 80 ? t('ui.urgent') : t('ui.normal') }}
+                    {{ bin.fillLevel >= 75 ? t('ui.urgent') : t('ui.normal') }}
                   </p>
                 </div>
               </div>
@@ -147,7 +157,12 @@ console.log(props.bin?.pictureBins)
                     class="h-full transition-all duration-1000"
                     :style="{
                       width: bin.fillLevel + '%',
-                      backgroundColor: bin.fillLevel > 80 ? '#ef4444' : '#10b981',
+                      backgroundColor:
+                        bin.fillLevel >= 75
+                          ? '#ef4444'
+                          : bin.fillLevel >= 50
+                            ? '#fbbf24'
+                            : '#10b981',
                     }"
                   ></div>
                 </div>
@@ -185,7 +200,7 @@ console.log(props.bin?.pictureBins)
                 <div
                   v-for="(imageUrl, index) in getFullImageUrls"
                   :key="index"
-                  class="group relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 shadow-sm hover:shadow-lg transition-all duration-300"
+                  class="group relative rounded-2xl overflow-hidden bg-linear-to-br from-gray-100 to-gray-50 shadow-sm hover:shadow-lg transition-all duration-300"
                 >
                   <!-- Image Container -->
                   <div class="aspect-square bg-gray-100 overflow-hidden">

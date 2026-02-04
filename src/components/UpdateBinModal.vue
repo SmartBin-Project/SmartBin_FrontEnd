@@ -89,10 +89,12 @@ const submitUpdate = () => {
 </script>
 
 <template>
-  <div v-if="visible" class="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-      <h2 class="text-2xl font-bold mb-6 text-gray-800">Update Bin</h2>
-      <form @submit.prevent="submitUpdate">
+  <div v-if="visible" class="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
+      <div class="p-6 border-b border-gray-200 flex-shrink-0">
+        <h2 class="text-2xl font-bold text-gray-800">Update Bin</h2>
+      </div>
+      <form @submit.prevent="submitUpdate" class="flex-1 overflow-y-auto p-6">
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700">{{ t('ui.bin_id') }}</label>
           <input
@@ -156,17 +158,17 @@ const submitUpdate = () => {
           </p>
         </div>
 
-        <div class="flex justify-end gap-4">
+        <div class="flex justify-end gap-4 mt-6">
           <button
             type="button"
             @click="closeModal"
-            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
           >
             {{ t('ui.cancel') }}
           </button>
           <button
             type="submit"
-            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
             {{ t('ui.save_changes') }}
           </button>

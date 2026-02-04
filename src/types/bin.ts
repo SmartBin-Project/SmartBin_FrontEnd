@@ -15,7 +15,7 @@ export interface Bin {
   area: LocalizedString
   addressBin: LocalizedString
   location: Location
-  status: 'EMPTY' | 'HALF' | 'FULL'
+  status: 'EMPTY' | 'HALF' | 'NEARLY FULL' | 'FULL'
   fillLevel: number
   fullCount: number
   pictureBins?: string[]
