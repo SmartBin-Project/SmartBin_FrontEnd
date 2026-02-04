@@ -41,7 +41,9 @@
           <button
             class="relative z-10 w-full py-4 rounded-full border-2 border-[#68a357] text-[#68a357] font-black text-sm uppercase tracking-widest transition-all duration-300 hover:bg-[#68a357] hover:text-white active:scale-95"
           >
-            {{ t('ui.pricing_purchase') }}
+            <a href="https://t.me/Bonjourhorhor" target="_blank" rel="noopener noreferrer">
+              {{ t('ui.pricing_purchase') }}
+            </a>
           </button>
         </div>
       </div>
@@ -60,7 +62,10 @@
           <button
             class="bg-white text-gray-900 border border-gray-200 hover:text-white hover:border-[#68a357] duration-300 px-8 py-4 rounded-2xl font-bold hover:bg-[#68a357] transition-colors"
           >
-            <PhoneCallIcon class="w-6 h-6 mr-2 inline-block" /> {{ t('ui.service_contact') }}
+            <PhoneCallIcon class="w-6 h-6 mr-2 inline-block" />
+            <a href="https://t.me/Bonjourhorhor" target="_blank" rel="noopener noreferrer">
+              {{ t('ui.service_contact') }}
+            </a>
           </button>
         </div>
       </div>

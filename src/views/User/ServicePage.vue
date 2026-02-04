@@ -20,7 +20,9 @@
               <button
                 class="bg-[#68a357] hover:bg-[#568a48] text-white px-10 py-4 rounded-2xl text-xl font-black shadow-[0_20px_40px_-10px_rgba(104,163,87,0.4)] transition-all transform hover:-translate-y-1 active:scale-95"
               >
-                {{ t('ui.service_booking') }}
+                <a href="https://t.me/Bonjourhorhor" target="_blank" rel="noopener noreferrer">
+                  {{ t('ui.service_booking') }}
+                </a>
               </button>
             </div>
           </div>

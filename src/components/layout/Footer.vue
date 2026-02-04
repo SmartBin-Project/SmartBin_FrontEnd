@@ -35,7 +35,7 @@
               }}</router-link>
             </li>
             <li>
-              <a href="#" class="hover:text-[#68a357] transition-colors">{{
+              <a href="https://t.me/Bonjourhorhor" class="hover:text-[#68a357] transition-colors">{{
                 t('ui.footer_report')
               }}</a>
             </li>
@@ -53,7 +53,7 @@
             </li>
             <li class="flex items-center space-x-4 group">
               <span class="w-6 text-[#68a357]"><phone /> </span>
-              <span class="group-hover:text-[#68a357] transition-colors">+855 12 345 678</span>
+              <span class="group-hover:text-[#68a357] transition-colors">+855 67 466 006</span>
             </li>
             <li class="flex items-center space-x-4 group">
               <span class="w-6 text-[#68a357]"><map-pinned /> </span>

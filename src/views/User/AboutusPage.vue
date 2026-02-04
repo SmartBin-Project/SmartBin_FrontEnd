@@ -172,7 +172,9 @@
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
-                <span>{{ t('ui.about_message_btn') }}</span>
+                <a :href="member.telegram" target="_blank" rel="noopener noreferrer">
+                  <span>{{ t('ui.about_message_btn') }}</span>
+                </a>
               </button>
             </div>
           </div>
@@ -255,24 +257,28 @@ const team = [
     name: 'Luy Lyhor',
     email: 'luylyhor28@gmail.com',
     image: Lyhor,
+    telegram: 'https://t.me/Bonjourhorhor',
   },
   {
     id: 2,
     name: 'Lim Kity',
     email: 'kitylim123@gmail.com',
     image: Kity,
+    telegram: 'https://t.me/Je_suis_Tyy',
   },
   {
     id: 3,
     name: 'Cheang Seyha',
     email: 'cheangseyha2208@gmail.com',
     image: Seyha,
+    telegram: 'https://t.me/AxgusTC',
   },
   {
     id: 4,
     name: 'Phorn Sophath',
     email: 'sophathphorn04gmail.com',
     image: Phath,
+    telegram: 'https://t.me/P_phath',
   },
 ]
 </script>
