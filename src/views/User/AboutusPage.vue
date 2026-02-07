@@ -6,10 +6,10 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-6 mb-24">
-      <div class="flex flex-col lg:flex-row items-center gap-12">
+      <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
         <div class="w-full lg:w-1/2">
           <div
-            class="relative rounded-[40px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] h-100 group"
+            class="relative rounded-[20px] sm:rounded-[30px] lg:rounded-[40px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.1)] sm:shadow-[0_20px_50px_rgba(0,0,0,0.1)] h-64 sm:h-80 md:h-96 lg:h-100 group"
           >
             <img
               :src="SmartBin_Banner"
@@ -192,6 +192,8 @@ import Kity from '@/assets/images/Kity.jpg'
 import Seyha from '@/assets/images/Seyha.jpg'
 import Phath from '@/assets/images/Phath.jpg'
 import SmartBin_Banner from '@/assets/images/SmartBin_Banner.png'
+import type { Bin } from '@/types/bin'
+import { getAllBinsPublic } from '@/services/binService'
 
 const { t } = useI18n()
 
@@ -203,16 +205,28 @@ const specialties = computed(() => [
   t('ui.about_spec_5'),
 ])
 
+const smartbin = ref(0)
+
+onMounted(async () => {
+  try {
+    const bins: Bin[] = await getAllBinsPublic()
+    smartbin.value = bins.length
+  } catch (error) {
+    console.error('Failed to fetch bins:', error)
+    smartbin.value = 0
+  }
+})
+
 const statsSection = ref(null)
 const currentStats = ref([0, 0, 0, 0])
-const statsData = [
+const statsData = computed(() => [
   { target: 50, suffix: '+', label: 'Cities Covered' },
-  { target: 10, suffix: '+', label: 'Smart Bins' },
+  { target: smartbin.value, suffix: '+', label: 'Smart Bins' },
   { target: 30, suffix: '%', label: 'Cost Reduced' },
   { target: 24, suffix: '/7', label: 'Monitoring' },
-]
+])
 
-onMounted(() => {
+const setupStatsAnimation = () => {
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -221,7 +235,7 @@ onMounted(() => {
           const frameDuration = 1000 / 60
           const totalFrames = Math.round(duration / frameDuration)
 
-          statsData.forEach((stat, index) => {
+          statsData.value.forEach((stat, index) => {
             let frame = 0
             const counter = setInterval(() => {
               frame++
@@ -248,6 +262,19 @@ onMounted(() => {
   if (statsSection.value) {
     observer.observe(statsSection.value)
   }
+}
+
+onMounted(async () => {
+  try {
+    const bins: Bin[] = await getAllBinsPublic()
+    smartbin.value = bins.length
+  } catch (error) {
+    console.error('Failed to fetch bins:', error)
+    smartbin.value = 0
+  }
+
+  // Setup stats animation after data is loaded
+  setupStatsAnimation()
 })
 
 // Team Logic
