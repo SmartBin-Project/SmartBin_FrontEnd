@@ -187,6 +187,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import Khun from '@/assets/images/khun.jpg'
 import Lyhor from '@/assets/images/Lyhor.jpg'
 import Kity from '@/assets/images/Kity.jpg'
 import Seyha from '@/assets/images/Seyha.jpg'
@@ -306,6 +307,13 @@ const team = [
     email: 'sophathphorn04gmail.com',
     image: Phath,
     telegram: 'https://t.me/P_phath',
+  },
+  {
+    id: 5,
+    name: 'Lim Heangkhun',
+    email: 'lhveng@gmail.com',
+    image: Khun,
+    telegram: 'https://t.me/heangkhunnnnn',
   },
 ]
 </script>
