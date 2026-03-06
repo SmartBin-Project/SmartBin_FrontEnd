@@ -130,13 +130,27 @@
 
     <div class="border-t border-gray-100 pt-16 pb-24">
       <div class="max-w-7xl mx-auto px-6 text-center">
-        <p class="text-gray-400 text-sm font-bold uppercase tracking-[0.2em] mb-10">
+        <p class="text-gray-400 text-xs md:text-sm font-bold uppercase tracking-[0.2em] mb-10">
           {{ t('ui.about_trusted_title') }}
         </p>
         <div
-          class="flex flex-wrap justify-center items-center gap-8 md:gap-16 transition-all duration-500"
+          class="flex flex-wrap justify-center items-center gap-4 sm:gap-6 lg:gap-10 transition-all duration-500"
         >
-          <img src="https://moe.gov.kh/wp-content/uploads/2019/05/cropped-ic-moe-logo.png" alt="" />
+          <img
+            class="h-14 md:h-22 w-auto object-contain"
+            src="https://moe.gov.kh/wp-content/uploads/2019/05/cropped-ic-moe-logo.png"
+            alt="MOE logo"
+          />
+          <img
+            class="h-16 lg:h-25 w-auto max-w-45 sm:max-w-60 md:max-w-[320px] object-contain"
+            src="https://fundit.fr/sites/default/files/actors/3602-ministere-leducation-jeunesse-et-sport-cambodge-moeys.png"
+            alt="MOEYS logo"
+          />
+          <img
+            class="h-14 md:h-22 w-auto max-w-35 sm:max-w-45 md:max-w-55 object-contain"
+            :src="Egen"
+            alt="Egen logo"
+          />
         </div>
       </div>
     </div>
@@ -192,6 +206,7 @@ import Lyhor from '@/assets/images/Lyhor.jpg'
 import Kity from '@/assets/images/Kity.jpg'
 import Seyha from '@/assets/images/Seyha.jpg'
 import Phath from '@/assets/images/Phath.jpg'
+import Egen from '@/assets/images/Egen.jpg'
 import SmartBin_Banner from '@/assets/images/SmartBin_Banner.png'
 import type { Bin } from '@/types/bin'
 import { getAllBinsPublic } from '@/services/binService'
